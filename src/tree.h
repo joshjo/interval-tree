@@ -1,6 +1,7 @@
 #ifndef TREE_H
 #define TREE_H
 #include <iostream>
+#include <utility>
 
 #include "node.h"
 
@@ -11,12 +12,13 @@ template <class T>
 class Tree {
 public:
     typedef Node<T> Tnode;
+    typedef pair<T, T> Interval;
 
     Tree() {
         this->root = NULL;
     }
 
-    Tnode ** search(T value) {
+    Tnode ** search(Interval value) {
         Tnode ** visitor = &(this->root);
         while ((*visitor) != NULL) {
             if (value == (*visitor)->value) {
@@ -30,7 +32,7 @@ public:
         return visitor;
     }
 
-    bool insert(T value) {
+    bool insert(Interval value) {
         Tnode ** searchNode = this->search(value);
         if ((*searchNode) != NULL) {
             return false;
