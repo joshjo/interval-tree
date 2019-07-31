@@ -30,6 +30,7 @@ public:
                 visitor = &((*visitor)->right);
             }
         }
+
         return visitor;
     }
 
@@ -41,18 +42,27 @@ public:
         }
         (*searchNode) = new Tnode(value);
         (*searchNode)->parent = parent;
-        update_weights(searchNode);
+        (*searchNode)->update_weights();
+
         return true;
     }
 
-    void update_weights(Tnode ** visitor) {
-        Tnode * parent = (*visitor)->parent;
-        if (parent != NULL) {
-            if ((*visitor)->max > parent->max) {
-                parent->max = (*visitor)->max;
-                update_weights(&parent);
+    bool insert_element(T elem) {
+        Interval interval = make_pair(elem, elem);
+        Tnode * parent = NULL;
+        Tnode ** searchNode = this->search(interval, parent);
+        if ((*searchNode) == NULL) {
+            if (parent != NULL && ( ! parent->is_interval())) {
+                parent->make_interval(elem);
+                parent->update_weights();
+            } else {
+                (*searchNode) = new Tnode(interval);
+                (*searchNode)->parent = parent;
+                (*searchNode)->update_weights();
             }
         }
+
+        return true;
     }
 
     void print() {

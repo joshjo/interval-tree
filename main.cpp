@@ -10,12 +10,11 @@ using namespace std;
 int main() {
     Tree <int> tree;
 
-    tree.insert(make_pair(15, 20));
-    tree.insert(make_pair(10, 30));
-    tree.insert(make_pair(5, 20));
-    tree.insert(make_pair(17, 19));
-    tree.insert(make_pair(12, 15));
-    tree.insert(make_pair(30, 40));
+    tree.insert_element(15);
+    tree.insert_element(10);
+    tree.insert_element(3);
+    tree.insert_element(20);
+    tree.insert_element(14);
 
     tree.print();
     return 0;
