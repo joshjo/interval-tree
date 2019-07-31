@@ -9,25 +9,29 @@ using namespace std;
 template <class T>
 class Node {
 public:
+    typedef Node<T> Tnode;
+    typedef pair<T, T> Interval;
+
     Node() {
         left = NULL;
         right = NULL;
-        value = {0, 0};
     }
 
-    Node(pair<T, T> value) {
+    Node(Interval value) {
         this->value = value;
+        max = value.second;
         left = NULL;
         right = NULL;
     }
 
     void print() {
-        printf("[%d, %d]", value.first, value.second);
+        printf("[%d, %d](%d)", value.first, value.second, max);
     }
 
-    Node <T> * left;
-    Node <T> * right;
-    pair<T, T> value;
+    Tnode * left;
+    Tnode * right;
+    Tnode * parent;
+    Interval value;
     T max;
 };
 

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <iostream>
+#include <utility>
 
 #include "src/tree.h"
 
@@ -7,13 +8,15 @@ using namespace std;
 
 
 int main() {
-    // printf("Hello World\n");
     Tree <int> tree;
-    tree.insert(pair<int, int> (2, 5));
-    // tree.insert(3);
-    // tree.insert(5);
-    // tree.insert(10);
+
+    tree.insert(make_pair(15, 20));
+    tree.insert(make_pair(10, 30));
+    tree.insert(make_pair(5, 20));
+    tree.insert(make_pair(17, 19));
+    tree.insert(make_pair(12, 15));
+    tree.insert(make_pair(30, 40));
+
     tree.print();
-    // printf("root value: %d", tree.root->value);
     return 0;
 }
