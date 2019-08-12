@@ -28,7 +28,7 @@ public:
         return (value.first != value.second);
     }
 
-    void make_interval(T elem) {
+    void update_interval(T elem) {
         if (elem > value.first) {
             value.second = elem;
             max = elem;

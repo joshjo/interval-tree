@@ -34,7 +34,7 @@ public:
         return visitor;
     }
 
-    bool insert(Interval value) {
+    bool insert_interval(Interval value) {
         Tnode * parent = NULL;
         Tnode ** searchNode = this->search(value, parent);
         if ((*searchNode) != NULL) {
@@ -53,7 +53,7 @@ public:
         Tnode ** searchNode = this->search(interval, parent);
         if ((*searchNode) == NULL) {
             if (parent != NULL && ( ! parent->is_interval())) {
-                parent->make_interval(elem);
+                parent->update_interval(elem);
                 parent->update_weights();
             } else {
                 (*searchNode) = new Tnode(interval);
