@@ -12,13 +12,18 @@ template <class T>
 class Tree {
 public:
     typedef Node<T> Tnode;
-    typedef pair<T, T> Interval;
+    typedef Interval<T> Tinvertal;
 
     Tree() {
         this->root = NULL;
     }
 
-    Tnode ** search(Interval value, Tnode * & parent = NULL) {
+    void print() {
+        print(this->root);
+        printf("\n");
+    }
+
+    Tnode ** search_interval(Tinterval value, Tnode * & parent = NULL) {
         Tnode ** visitor = &(this->root);
         while ((*visitor) != NULL) {
             parent = *visitor;
@@ -34,40 +39,18 @@ public:
         return visitor;
     }
 
-    bool insert_interval(Interval value) {
+    void insert_interval(Tinvertal interval) {
         Tnode * parent = NULL;
-        Tnode ** searchNode = this->search(value, parent);
-        if ((*searchNode) != NULL) {
-            return false;
+        Tnode ** search_node = search_interval(interval, parent);
+        if (parent != NULL) {
+            parent->interval.distance(interval);
         }
         (*searchNode) = new Tnode(value);
         (*searchNode)->parent = parent;
         (*searchNode)->update_weights();
+        // if ((*search_node) != NULL) {
 
-        return true;
-    }
-
-    bool insert_element(T elem) {
-        Interval interval = make_pair(elem, elem);
-        Tnode * parent = NULL;
-        Tnode ** searchNode = this->search(interval, parent);
-        if ((*searchNode) == NULL) {
-            if (parent != NULL && ( ! parent->is_interval())) {
-                parent->update_interval(elem);
-                parent->update_weights();
-            } else {
-                (*searchNode) = new Tnode(interval);
-                (*searchNode)->parent = parent;
-                (*searchNode)->update_weights();
-            }
-        }
-
-        return true;
-    }
-
-    void print() {
-        print(this->root);
-        printf("\n");
+        // }
     }
 
     void print(Tnode * visitor) {

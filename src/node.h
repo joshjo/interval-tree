@@ -1,7 +1,6 @@
 #ifndef NODE_H
 #define NODE_H
-#include <iostream>
-#include <utility>
+#include "interval.h"
 
 using namespace std;
 
@@ -10,50 +9,50 @@ template <class T>
 class Node {
 public:
     typedef Node<T> Tnode;
-    typedef pair<T, T> Interval;
+    typedef Interval<T> Range;
 
     Node() {
         left = NULL;
         right = NULL;
     }
 
-    Node(Interval value) {
-        this->value = value;
-        max = value.second;
+    Node(Range interval) {
+        this->interval = interval;
+        top = interval.right;
         left = NULL;
         right = NULL;
     }
 
     bool is_interval() {
-        return (value.first != value.second);
+        return (interval.left != interval.right);
     }
 
     void update_interval(T elem) {
-        if (elem > value.first) {
-            value.second = elem;
-            max = elem;
+        if (elem > interval.left) {
+            interval.right = elem;
+            top = elem;
         } else {
-            value.first = elem;
-            max = value.first;
+            interval.left = elem;
+            top = interval.left;
         }
     }
 
     void update_weights() {
-        if (this->parent != NULL && this->max > parent->max) {
-            parent->max = this->max;
+        if (this->parent != NULL && this->top > parent->top) {
+            parent->top = this->top;
             parent->update_weights();
         }
     }
 
     void print() {
-        printf("[%d, %d](%d)", value.first, value.second, max);
+        printf("[%d, %d](%d)", interval.left, interval.right, top);
     }
 
     Tnode * left;
     Tnode * right;
     Tnode * parent;
-    Interval value;
-    T max;
+    Range interval;
+    T top;
 };
 
 
