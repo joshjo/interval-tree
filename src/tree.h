@@ -7,15 +7,15 @@
 
 using namespace std;
 
-
 template <class T>
 class Tree {
 public:
     typedef Node<T> Tnode;
-    typedef Interval<T> Tinvertal;
+    typedef Interval<T> Tinterval;
 
     Tree() {
         this->root = NULL;
+        threshold = 100;
     }
 
     void print() {
@@ -23,31 +23,38 @@ public:
         printf("\n");
     }
 
-    Tnode ** search_interval(Tinterval value, Tnode * & parent = NULL) {
+    Tnode ** search_interval(Tinterval interval, Tnode * & parent = NULL) {
         Tnode ** visitor = &(this->root);
-        while ((*visitor) != NULL) {
+        // while ((*visitor) != NULL) {
+        if ((*visitor) != NULL) {
             parent = *visitor;
-            if (value == (*visitor)->value) {
-                break;
-            } else if (value < (*visitor)->value) {
-                visitor = &((*visitor)->left);
-            } else {
-                visitor = &((*visitor)->right);
-            }
+
+            // if (interval == (*visitor)->interval) {
+            //     break;
+            // } else if (interval < (*visitor)->interval) {
+            //     visitor = &((*visitor)->left);
+            // } else {
+            //     visitor = &((*visitor)->right);
+            // }
         }
 
         return visitor;
     }
 
-    void insert_interval(Tinvertal interval) {
+    void insert_interval(Tinterval interval) {
         Tnode * parent = NULL;
         Tnode ** search_node = search_interval(interval, parent);
         if (parent != NULL) {
-            parent->interval.distance(interval);
+            T distance = parent->interval.distance(interval);
+            if (distance <= threshold) {
+                parent->expand(interval);
+            }
+
+            return;
         }
-        (*searchNode) = new Tnode(value);
-        (*searchNode)->parent = parent;
-        (*searchNode)->update_weights();
+        (*search_node) = new Tnode(interval);
+        (*search_node)->parent = parent;
+        (*search_node)->update_weights();
         // if ((*search_node) != NULL) {
 
         // }
@@ -65,6 +72,7 @@ public:
     }
 
     Tnode * root;
+    T threshold;
 };
 
 

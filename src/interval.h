@@ -51,6 +51,35 @@ public:
         return MIDDLE;
     }
 
+    void expand(const Interval & other) {
+        if (other.left < left) {
+            left = other.left;
+        }
+        if (right < other.right) {
+            right = other.right;
+        }
+    }
+
+    bool operator < (const Interval & other) {
+        return (left < other.left);
+    }
+
+    bool operator <= (const Interval & other) {
+        return (left <= other.left);
+    }
+
+    bool operator > (const Interval & other) {
+        return (left > other.left);
+    }
+
+    bool operator >= (const Interval & other) {
+        return (left >= other.left);
+    }
+
+    bool operator == (const Interval & other) {
+        return (left == other.left) && (right == other.right);
+    }
+
     friend ostream & operator << (ostream &out, const Interval & i) {
         out << '(' << i.left << ',' << i.right << ')';
         return out;

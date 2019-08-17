@@ -9,14 +9,14 @@ template <class T>
 class Node {
 public:
     typedef Node<T> Tnode;
-    typedef Interval<T> Range;
+    typedef Interval<T> Tinterval;
 
     Node() {
         left = NULL;
         right = NULL;
     }
 
-    Node(Range interval) {
+    Node(Tinterval interval) {
         this->interval = interval;
         top = interval.right;
         left = NULL;
@@ -44,14 +44,20 @@ public:
         }
     }
 
+    void expand(Tinterval & other_interval) {
+        this->interval.expand(other_interval);
+        this->top = this->interval.right;
+    }
+
     void print() {
-        printf("[%d, %d](%d)", interval.left, interval.right, top);
+        // printf("[%d, %d](%d)", interval.left, interval.right, top);
+        std::cout << interval << '[' << top << ']';
     }
 
     Tnode * left;
     Tnode * right;
     Tnode * parent;
-    Range interval;
+    Tinterval interval;
     T top;
 };
 
