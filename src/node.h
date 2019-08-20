@@ -37,6 +37,10 @@ public:
         }
     }
 
+    void split_node() {
+
+    }
+
     void update_weights() {
         if (this->parent != NULL && this->top > parent->top) {
             parent->top = this->top;

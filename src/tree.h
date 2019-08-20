@@ -23,41 +23,50 @@ public:
         printf("\n");
     }
 
-    Tnode ** search_interval(Tinterval interval, Tnode * & parent = NULL) {
+    Tnode ** search_interval(Tinterval interval, Tnode * & parent = NULL, Tnode ** from_node = NULL) {
         Tnode ** visitor = &(this->root);
-        // while ((*visitor) != NULL) {
-        if ((*visitor) != NULL) {
+        // if (from_node != NULL) {
+        //     visitor = from_node;
+        // }
+        while ((*visitor) != NULL) {
             parent = *visitor;
-
-            // if (interval == (*visitor)->interval) {
-            //     break;
-            // } else if (interval < (*visitor)->interval) {
-            //     visitor = &((*visitor)->left);
-            // } else {
-            //     visitor = &((*visitor)->right);
-            // }
+            if (interval == (*visitor)->interval) {
+                break;
+            } else if (interval <= (*visitor)->interval) {
+                visitor = &((*visitor)->left);
+            } else {
+                visitor = &((*visitor)->right);
+            }
         }
 
         return visitor;
     }
 
     void insert_interval(Tinterval interval) {
+        cout << "Inserting: " << interval << " ";
         Tnode * parent = NULL;
-        Tnode ** search_node = search_interval(interval, parent);
+        Tnode ** search_node = search_interval(interval, parent, &root);
         if (parent != NULL) {
             T distance = parent->interval.distance(interval);
             if (distance <= threshold) {
                 parent->expand(interval);
+                cout << "Expanding ";
+                cout << endl;
+                return;
             }
-
-            return;
+            if (parent->interval.intersects(interval)) {
+                parent->expand(interval);
+                cout << "Expanding ";
+                if (parent->interval.distance() > threshold) {
+                    cout << "Split ";
+                }
+            }
+            // if (parent->interval <= interval && parent->interval < interval)
         }
+        cout << endl;
         (*search_node) = new Tnode(interval);
         (*search_node)->parent = parent;
-        (*search_node)->update_weights();
-        // if ((*search_node) != NULL) {
-
-        // }
+        // (*search_node)->update_weights();
     }
 
     void print(Tnode * visitor) {

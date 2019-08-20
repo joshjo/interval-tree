@@ -43,12 +43,19 @@ public:
     }
 
     T get_location(Interval<T> other) {
-        if (other.left < left) {
+        if (other.right < left) {
             return LEFT;
-        } else if (right < other.left) {
+        }
+        if (other.left > right) {
             return RIGHT;
         }
         return MIDDLE;
+        // if (other.left < left && other.right < right) {
+        //     return LEFT;
+        // } else if (right < other.left) {
+        //     return RIGHT;
+        // }
+        // return MIDDLE;
     }
 
     void expand(const Interval & other) {
@@ -60,20 +67,45 @@ public:
         }
     }
 
+    bool intersects(Interval & other) {
+        // cout << "(*this) <= other   " << ((*this) <= other) << endl;
+        // cout << "!((*this) < other) " << (!((*this) < other)) << endl;
+        // cout << "(*this) >= other   " << ((*this) >= other) << endl;
+        // cout << "!((*this) > other) " << (!((*this) > other)) << endl;
+
+        return ((*this) <= other && !((*this) < other) || (*this) >= other && !((*this) > other));
+    }
+
     bool operator < (const Interval & other) {
-        return (left < other.left);
+        return (right < other.left);
     }
 
     bool operator <= (const Interval & other) {
-        return (left <= other.left);
+        if ((*this) < other) {
+            return true;
+        }
+        if (this->left <= other.left) {
+            return true;
+        }
+        int left_distance = other.left - left;
+        int right_distance = other.right - right;
+        return left_distance <= right_distance;
     }
 
     bool operator > (const Interval & other) {
-        return (left > other.left);
+        return (left > other.right);
     }
 
     bool operator >= (const Interval & other) {
-        return (left >= other.left);
+        if ((*this) > other) {
+            return true;
+        }
+        if (this->right >= other.right) {
+            return true;
+        }
+        int left_distance = left - other.left;
+        int right_distance = right - other.right;
+        return left_distance >= right_distance;
     }
 
     bool operator == (const Interval & other) {
