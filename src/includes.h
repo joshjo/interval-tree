@@ -5,6 +5,6 @@
 #include <algorithm>
 #include <math.h>
 #include <stdio.h>
-
+#include <vector>
 
 #endif // INCLUDES_H

@@ -73,7 +73,7 @@ public:
         // cout << "(*this) >= other   " << ((*this) >= other) << endl;
         // cout << "!((*this) > other) " << (!((*this) > other)) << endl;
 
-        return ((*this) <= other && !((*this) < other) || (*this) >= other && !((*this) > other));
+        return (((*this) <= other && !((*this) < other)) || ((*this) >= other && !((*this) > other)));
     }
 
     bool operator < (const Interval & other) {
@@ -81,14 +81,24 @@ public:
     }
 
     bool operator <= (const Interval & other) {
+        // Totally at left
         if ((*this) < other) {
             return true;
         }
-        if (this->left <= other.left) {
+        // Partial at left
+        if (this->left <= other.left && this->right < other.right) {
             return true;
         }
-        int left_distance = other.left - left;
-        int right_distance = other.right - right;
+        // Totally at right
+        if (this->left > other.right) {
+            return false;
+        }
+        // Partial at right
+        if (this->left >= other.left && this->right > other.right) {
+            return false;
+        }
+        int left_distance = abs(other.left - left);
+        int right_distance = abs(other.right - right);
         return left_distance <= right_distance;
     }
 
@@ -97,19 +107,52 @@ public:
     }
 
     bool operator >= (const Interval & other) {
-        if ((*this) > other) {
+        // Totally at right
+        if (this->left > other.right) {
             return true;
         }
-        if (this->right >= other.right) {
+        // Partial at right
+        if (this->left >= other.left && this->right > other.right) {
             return true;
         }
-        int left_distance = left - other.left;
-        int right_distance = right - other.right;
-        return left_distance >= right_distance;
+        // Totally at left
+        if ((*this) < other) {
+            return false;
+        }
+        // Partial at left
+        if (this->left <= other.left && this->right < other.right) {
+            return false;
+        }
+        int left_distance = abs(other.left - left);
+        int right_distance = abs(other.right - right);
+        return right_distance <= left_distance;
     }
 
     bool operator == (const Interval & other) {
         return (left == other.left) && (right == other.right);
+    }
+
+    void split(Interval & a, Interval & b) {
+        T middle = (right - left) / 2;
+        a = Interval(left, left + middle);
+        b = Interval(left + middle, right);
+    }
+
+    void slice(T size, vector<Interval<T> > & arr) {
+        if (distance() <= size) {
+            Interval<T> tmp (left, right);
+            arr.push_back(tmp);
+        }
+        else {
+            T x = left;
+            while ((right - x) > size) {
+                Interval<T> tmp (x, x + size);
+                arr.push_back(tmp);
+                x += size;
+            }
+            Interval<T> tmp (x, right);
+            arr.push_back(tmp);
+        }
     }
 
     friend ostream & operator << (ostream &out, const Interval & i) {

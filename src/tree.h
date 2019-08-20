@@ -42,31 +42,51 @@ public:
         return visitor;
     }
 
-    void insert_interval(Tinterval interval) {
+    void insert_interval_intern(Tinterval interval) {
         cout << "Inserting: " << interval << " ";
         Tnode * parent = NULL;
         Tnode ** search_node = search_interval(interval, parent, &root);
-        if (parent != NULL) {
-            T distance = parent->interval.distance(interval);
-            if (distance <= threshold) {
-                parent->expand(interval);
-                cout << "Expanding ";
-                cout << endl;
-                return;
-            }
+        if (parent != NULL && parent->is_leaf()) {
+            cout << "Parent is a leaf | ";
             if (parent->interval.intersects(interval)) {
+                cout << "Intersects | ";
                 parent->expand(interval);
-                cout << "Expanding ";
                 if (parent->interval.distance() > threshold) {
-                    cout << "Split ";
+                    cout << "Split | ";
+                    parent->split();
                 }
+            } else {
+                Tnode * left, * right;
+                cout << "No intersection | ";
+                if (parent->interval >= interval) {
+                    left = new Tnode(interval);
+                    right = new Tnode(parent->interval);
+                } else {
+                    left = new Tnode(parent->interval);
+                    right = new Tnode(interval);
+                }
+                parent->expand(interval);
+                parent->left = left;
+                parent->right = right;
+                left->parent = parent;
+                right->parent = parent;
             }
-            // if (parent->interval <= interval && parent->interval < interval)
+            parent->update_weights();
+            cout << endl;
+            return;
         }
         cout << endl;
         (*search_node) = new Tnode(interval);
         (*search_node)->parent = parent;
-        // (*search_node)->update_weights();
+        (*search_node)->update_weights();
+    }
+
+    void insert_interval(Tinterval interval) {
+        vector<Tinterval > arr;
+        interval.slice(threshold, arr);
+        for (auto & it: arr) {
+            insert_interval_intern(it);
+        }
     }
 
     void print(Tnode * visitor) {

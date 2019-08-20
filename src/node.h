@@ -37,8 +37,17 @@ public:
         }
     }
 
-    void split_node() {
+    void split() {
+        Tinterval left_interval, right_interval;
+        interval.split(left_interval, right_interval);
+        left = new Node(left_interval);
+        right = new Node(right_interval);
+        left->parent = this;
+        right->parent = this;
+    }
 
+    bool is_leaf() {
+        return ((left == NULL) && (right == NULL));
     }
 
     void update_weights() {
