@@ -42,22 +42,6 @@ public:
         );
     }
 
-    T get_location(Interval<T> other) {
-        if (other.right < left) {
-            return LEFT;
-        }
-        if (other.left > right) {
-            return RIGHT;
-        }
-        return MIDDLE;
-        // if (other.left < left && other.right < right) {
-        //     return LEFT;
-        // } else if (right < other.left) {
-        //     return RIGHT;
-        // }
-        // return MIDDLE;
-    }
-
     void expand(const Interval & other) {
         if (other.left < left) {
             left = other.left;
@@ -65,6 +49,10 @@ public:
         if (right < other.right) {
             right = other.right;
         }
+    }
+
+    bool includes(Interval & other) {
+        return (left < other.left && right > other.right);
     }
 
     bool intersects(Interval & other) {
@@ -138,7 +126,19 @@ public:
         b = Interval(left + middle, right);
     }
 
-    void slice(T size, vector<Interval<T> > & arr) {
+    void slice_right(Interval & other){
+        if (right > other.left && right < other.right) {
+            right = other.left;
+        }
+    }
+
+    void slice_left(Interval & other){
+        if (left < other.right && left > other.left) {
+            left = other.right;
+        }
+    }
+
+    void splice(T size, vector<Interval<T> > & arr) {
         if (distance() <= size) {
             Interval<T> tmp (left, right);
             arr.push_back(tmp);

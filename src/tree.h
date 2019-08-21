@@ -23,29 +23,45 @@ public:
         printf("\n");
     }
 
-    Tnode ** search_interval(Tinterval interval, Tnode * & parent = NULL, Tnode ** from_node = NULL) {
+    Tnode ** search_interval(Tinterval & interval, Tnode * & parent = NULL) {
         Tnode ** visitor = &(this->root);
-        // if (from_node != NULL) {
-        //     visitor = from_node;
-        // }
         while ((*visitor) != NULL) {
             parent = *visitor;
             if (interval == (*visitor)->interval) {
+            } else if (interval.includes((*visitor)->interval)) {
+                cout << "%";
+
+                // Here is missing to delete nodes
                 break;
             } else if (interval <= (*visitor)->interval) {
+                Tnode * right = ((*visitor)->right);
+                cout << "<";
+                if (right != NULL) {
+                    cout << "+";
+                    interval.slice_right(right->interval);
+                }
                 visitor = &((*visitor)->left);
+
             } else {
+                cout << ">";
+                Tnode * left = ((*visitor)->left);
+                if (left != NULL) {
+                    cout << "*";
+                    interval.slice_left(left->interval);
+                }
                 visitor = &((*visitor)->right);
             }
         }
 
+        cout << " ";
+
         return visitor;
     }
 
-    void insert_interval_intern(Tinterval interval) {
+    void insert_interval_intern(Tinterval & interval) {
         cout << "Inserting: " << interval << " ";
         Tnode * parent = NULL;
-        Tnode ** search_node = search_interval(interval, parent, &root);
+        Tnode ** search_node = search_interval(interval, parent);
         if (parent != NULL && parent->is_leaf()) {
             cout << "Parent is a leaf | ";
             if (parent->interval.intersects(interval)) {
@@ -83,7 +99,7 @@ public:
 
     void insert_interval(Tinterval interval) {
         vector<Tinterval > arr;
-        interval.slice(threshold, arr);
+        interval.splice(threshold, arr);
         for (auto & it: arr) {
             insert_interval_intern(it);
         }
