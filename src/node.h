@@ -51,8 +51,13 @@ public:
     }
 
     void update_weights() {
-        if (this->parent != NULL && this->top > parent->top) {
-            parent->top = this->top;
+        if (this->parent != NULL) {
+            if (this->interval.left < parent->interval.left) {
+                parent->interval.left = this->interval.left;
+            }
+            if (this->interval.right > parent->interval.right) {
+                parent->interval.right = this->interval.right;
+            }
             parent->update_weights();
         }
     }
@@ -64,7 +69,8 @@ public:
 
     void print() {
         // printf("[%d, %d](%d)", interval.left, interval.right, top);
-        std::cout << interval << '[' << top << ']';
+        std::cout << interval;
+        // std::cout << interval;
     }
 
     Tnode * left;
