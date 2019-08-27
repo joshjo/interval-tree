@@ -16,8 +16,10 @@ int main() {
     tree.insert_interval(I1);
     tree.insert_interval(I2);
     tree.insert_interval(I3);
-    tree.insert_interval(I4);
-    tree.insert_interval(I5);
+    // tree.insert_interval(I4);
+    // tree.insert_interval(I5);
+
+
     cout << endl;
     tree.print();
 

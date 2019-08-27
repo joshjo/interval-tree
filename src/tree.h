@@ -39,6 +39,7 @@ public:
                 if (right != NULL) {
                     cout << "+";
                     interval.slice_right(right->interval);
+                    cout << interval << "?";
                 }
                 visitor = &((*visitor)->left);
 
@@ -48,6 +49,7 @@ public:
                 if (left != NULL) {
                     cout << "*";
                     interval.slice_left(left->interval);
+                    cout << interval << "?";
                 }
                 visitor = &((*visitor)->right);
             }

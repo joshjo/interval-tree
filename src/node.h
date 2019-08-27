@@ -51,6 +51,11 @@ public:
     }
 
     void update_weights() {
+        // if (this->parent != NULL && this->top > parent->top) {
+        //     parent->top = this->top;
+        //     parent->update_weights();
+        // }
+
         if (this->parent != NULL) {
             if (parent->left > this->left) {
                 parent->left = this->left;
@@ -58,6 +63,7 @@ public:
             if (parent->right < this->right) {
                 parent->right = this->right;
             }
+            parent->update_weights();
         }
     }
 
