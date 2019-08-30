@@ -31,6 +31,10 @@ public:
         return left != right;
     }
 
+    bool includes(Interval<T> & other) {
+        return (left <= other.left && right >= other.right);
+    }
+
     T distance() {
         return right - left;
     }

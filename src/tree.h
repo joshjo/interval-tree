@@ -12,7 +12,9 @@ class Tree {
 public:
     typedef Node<T> Tnode;
     typedef Interval<T> Tinterval;
+
     bool debug;
+    queue <Tinterval> pending;
 
     Tree() {
         this->root = NULL;
@@ -28,18 +30,33 @@ public:
         printf("\n");
     }
 
-    Tnode ** search_interval(Tinterval interval, Tnode * & parent = NULL, Tnode ** from_node = NULL) {
+    Tnode ** search_interval(Tinterval & interval, Tnode * & parent = NULL, Tnode ** from_node = NULL) {
         Tnode ** visitor = &(this->root);
         while ((*visitor) != NULL) {
             parent = *visitor;
-            if (interval == (*visitor)->interval) {
+            if (interval.includes((*visitor)->interval)) {
+                cout << "includes in search ";
+                visitor = &((*visitor)->left);
                 break;
             } else if (interval <= (*visitor)->interval) {
+                Tnode * sibling = parent->right;
                 visitor = &((*visitor)->left);
-                cout << "<";
-            } else {
+                if (sibling != NULL && sibling->interval.intersects(interval)) {
+                    Tinterval temp((*visitor)->interval.right, interval.right);
+                    interval.right = (*visitor)->interval.right;
+                    // insert_interval_intern(temp);
+                    cout << " right intersection " << temp << " | " << interval;
+                }
+
+            } else if (interval >= (*visitor)->interval) {
                 visitor = &((*visitor)->right);
-                cout << ">";
+                Tnode * sibling = parent->left;
+                if (sibling != NULL && sibling->interval.intersects(interval)) {
+                    Tinterval temp((*visitor)->interval.left, interval.left);
+                    interval.left = (*visitor)->interval.left;
+                    // insert_interval_intern(temp);
+                    cout << " left intersection " << temp << " | " << interval;
+                }
             }
         }
 
@@ -51,42 +68,49 @@ public:
         Tnode * parent = NULL;
         Tnode ** search_node = search_interval(interval, parent, &root);
         cout << "*search_node " << (*search_node) << " ";
-        if (parent != NULL && parent->is_leaf()) {
-            cout << "Parent is a leaf | ";
-            if (parent->interval.intersects(interval)) {
-                cout << "Intersects | ";
-                parent->expand(interval);
-                if (parent->interval.distance() > threshold) {
-                    cout << "Split | ";
-                    parent->split();
-                }
-            } else {
-                Tnode * left, * right;
-                cout << "No intersection | ";
-                if (debug) {
-                    cout << endl;
-                    print();
-                    cout << endl;
-                }
-                if (interval <= parent->interval) {
-                    left = new Tnode(interval);
-                    right = new Tnode(parent->interval);
+        if (parent != NULL) {
+            if (parent->is_leaf()) {
+                cout << "Parent is a leaf | ";
+                if (parent->interval.intersects(interval)) {
+                    cout << "Intersects | ";
+                    parent->expand(interval);
+                    if (parent->interval.distance() > threshold) {
+                        cout << "Split | ";
+                        parent->split();
+                    }
                 } else {
-                    left = new Tnode(parent->interval);
-                    right = new Tnode(interval);
+                    Tnode * left, * right;
+                    cout << "No intersection | ";
+                    if (debug) {
+                        cout << endl;
+                        print();
+                        cout << endl;
+                    }
+                    if (interval <= parent->interval) {
+                        left = new Tnode(interval);
+                        right = new Tnode(parent->interval);
+                    } else {
+                        left = new Tnode(parent->interval);
+                        right = new Tnode(interval);
+                    }
+                    if(debug) {
+                        cout << "parent: " << parent << " left " << left << " right: " << right << " ";
+                    }
+                    parent->expand(interval);
+                    parent->left = left;
+                    parent->right = right;
+                    left->parent = parent;
+                    right->parent = parent;
                 }
-                if(debug) {
-                    cout << "parent: " << parent << " left " << left << " right: " << right << " ";
-                }
+                parent->update_weights();
+                cout << endl;
+                return;
+            } else {
                 parent->expand(interval);
-                parent->left = left;
-                parent->right = right;
-                left->parent = parent;
-                right->parent = parent;
+                parent->left = NULL;
+                parent->right = NULL;
             }
-            parent->update_weights();
-            cout << endl;
-            return;
+
         }
         cout << "***" << endl;
 
