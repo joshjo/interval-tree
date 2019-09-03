@@ -3,8 +3,8 @@
 #include "includes.h"
 
 #define MIDDLE 0
-#define LEFT 1
-#define RIGHT 2
+#define LEFT -1
+#define RIGHT 1
 
 
 using namespace std;
@@ -62,6 +62,14 @@ public:
         // return MIDDLE;
     }
 
+    bool on_left_of(Interval & other) {
+        return right <= other.right;
+    }
+
+    bool on_right_of(Interval & other) {
+        return left >= other.left;
+    }
+
     void expand(const Interval & other) {
         if (other.left < left) {
             left = other.left;
@@ -72,16 +80,25 @@ public:
     }
 
     bool intersects(Interval & other) {
-        // cout << "(*this) <= other   " << ((*this) <= other) << endl;
-        // cout << "!((*this) < other) " << (!((*this) < other)) << endl;
-        // cout << "(*this) >= other   " << ((*this) >= other) << endl;
-        // cout << "!((*this) > other) " << (!((*this) > other)) << endl;
+        if (distance() == 0) {
+            return false;
+        }
+        if (right <= other.left) {
+            return false;
+        }
+        if (left >= other.right) {
+            return false;
+        }
+        cout << "(*this) <= other   " << ((*this) <= other) << endl;
+        cout << "!((*this) < other) " << (!((*this) < other)) << endl;
+        cout << "(*this) >= other   " << ((*this) >= other) << endl;
+        cout << "!((*this) > other) " << (!((*this) > other)) << endl;
 
         return (((*this) <= other && !((*this) < other)) || ((*this) >= other && !((*this) > other)));
     }
 
     bool operator < (const Interval & other) {
-        return (right < other.left);
+        return (right <= other.left);
     }
 
     bool operator <= (const Interval & other) {
