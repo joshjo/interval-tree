@@ -62,6 +62,11 @@ public:
         // return MIDDLE;
     }
 
+    T middle() {
+        T d = distance();
+        return (d / 2) + left;
+    }
+
     bool on_left_of(Interval & other) {
         return right <= other.right;
     }

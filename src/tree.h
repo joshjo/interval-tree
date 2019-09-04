@@ -130,18 +130,36 @@ public:
     //     // cout << "pending size " << pending.size();
     // }
 
-    int decide(Tnode ** parent, Tnode ** node, Tnode ** sibling) {
-        Tnode leftNode = (*visitor_node)->left;
-        Tnode rightNode = (*visitor_node)->right;
+    int decide(Tinterval & interval ,Tnode ** parent) {
+        Tnode * leftNode = (*parent)->left;
+        Tnode * rightNode = (*parent)->right;
+        Tinterval parentInterval = (*parent)->interval;
+        T parentMiddle = (*parent)->interval.middle();
+        T middle = interval.middle();
 
-        if (leftNode == NULL && rightNode == NULL) {
-
+        if (interval.includes(parentInterval)) {
+            return MIDDLE;
+        }
+        if (leftNode != NULL && interval.right <= leftNode->interval.right) {
+            // node = &leftNode;
+            // sibling = &rightNode;
+            return LEFT;
+        }
+        if (rightNode != NULL && interval.left >= rightNode->interval.left) {
+            // node = &rightNode;
+            // sibling = &leftNode;
+            return RIGHT;
         }
 
-
-        // if (leftNode == rightNode) {
-
-        // }
+        if (middle < parentMiddle) {
+            // node = &leftNode;
+            // sibling = &rightNode;
+            return LEFT;
+        } else {
+            // node = &rightNode;
+            // sibling = &rightNode;
+            return RIGHT;
+        }
     }
 
     void insert_interval_intern(Tinterval interval) {
@@ -149,17 +167,28 @@ public:
             root = new Tnode(interval);
             return;
         }
-        Tnode ** visitor_node = &root;
-        while(visitor_node != NULL) {
-
-            if (leftNode != NULL && interval.on_left_of(leftNode->interval)) {
-
-            } else if (rightNode != NULL && interval.on_right_of(rightNode->interval)) {
-
+        Tnode ** visitor = &root;
+        Tnode * parent = NULL;
+        while((*visitor) != NULL) {
+            int direction = decide(interval, visitor);
+            if (direction == LEFT) {
+                parent = (*visitor);
+                visitor = &((*visitor)->left);
             }
-            // if (leftNode->interval)
-            // if ((*visitor_node)->left !=)
+            if (direction == RIGHT) {
+                parent = (*visitor);
+                visitor = &((*visitor)->right);
+            }
+            if (direction == MIDDLE) {
+                parent = NULL;
+                break;
+            }
         }
+        (*visitor) = new Tnode(interval);
+        if (parent != NULL) {
+            (*visitor)->parent = parent;
+        }
+
 
     }
 
