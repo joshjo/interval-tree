@@ -8,7 +8,7 @@ int main() {
     int S = 1000;
     int R = 150;
     Tree <int> tree;
-    for(int i = 0; i < 20; i += 1) {
+    for(int i = 0; i < 100; i += 1) {
         int S1 = rand() % S;
         int R1 = rand() % R;
         Interval<int> I(S1, S1 + R1);
