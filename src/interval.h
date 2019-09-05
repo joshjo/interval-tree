@@ -5,6 +5,8 @@
 #define MIDDLE 0
 #define LEFT -1
 #define RIGHT 1
+#define LEFT_PARENT -2
+#define RIGHT_PARENT 2
 
 
 using namespace std;
@@ -94,10 +96,10 @@ public:
         if (left >= other.right) {
             return false;
         }
-        cout << "(*this) <= other   " << ((*this) <= other) << endl;
-        cout << "!((*this) < other) " << (!((*this) < other)) << endl;
-        cout << "(*this) >= other   " << ((*this) >= other) << endl;
-        cout << "!((*this) > other) " << (!((*this) > other)) << endl;
+        // cout << "(*this) <= other   " << ((*this) <= other) << endl;
+        // cout << "!((*this) < other) " << (!((*this) < other)) << endl;
+        // cout << "(*this) >= other   " << ((*this) >= other) << endl;
+        // cout << "!((*this) > other) " << (!((*this) > other)) << endl;
 
         return (((*this) <= other && !((*this) < other)) || ((*this) >= other && !((*this) > other)));
     }
