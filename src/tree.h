@@ -79,7 +79,9 @@ public:
                 if (LEFT_PARENT && sibling != NULL) {
                     if (sibling->interval.intersects(interval)) {
                         Tinterval slice(sibling->interval.left, interval.right);
-                        pending.push(slice);
+                        if (slice.distance() > 0) {
+                            pending.push(slice);
+                        }
                         interval.right = sibling->interval.left;
                     }
                 }
@@ -94,17 +96,18 @@ public:
                     } else {
                         Tnode * parent = (*visitor);
                         if ((*visitor)->interval.intersects(interval)) {
-                            parent->expand(interval);
+                            parent->interval.expand(interval);
                             parent->update_weights();
                             parent->split();
                         } else {
                             Tnode * leftNode = new Tnode(interval);
                             Tnode * rightNode = new Tnode(parent->interval);
-                            leftNode->parent = parent;
-                            rightNode->parent = parent;
-                            parent->expand(interval);
-                            (*visitor)->left = leftNode;
-                            (*visitor)->right = rightNode;
+                            // cout << "left " << (parent->interval) << " - "  << interval << endl;
+                            // parent->interval.expand(interval);
+                            // leftNode->parent = parent;
+                            // rightNode->parent = parent;
+                            // (*visitor)->left = leftNode;
+                            // (*visitor)->right = rightNode;
                         }
                     }
                     break;
@@ -116,7 +119,9 @@ public:
                 if (RIGHT_PARENT && sibling != NULL) {
                     if (sibling->interval.intersects(interval)) {
                         Tinterval slice(interval.left, sibling->interval.right);
-                        pending.push(slice);
+                        if (slice.distance() > 0) {
+                            pending.push(slice);
+                        }
                         interval.left = sibling->interval.right;
                     }
                 }
@@ -131,17 +136,27 @@ public:
                     } else {
                         Tnode * parent = (*visitor);
                         if ((*visitor)->interval.intersects(interval)) {
-                            parent->expand(interval);
+                            parent->interval.expand(interval);
                             parent->update_weights();
                             parent->split();
                         } else {
                             Tnode * leftNode = new Tnode(parent->interval);
                             Tnode * rightNode = new Tnode(interval);
-                            parent->expand(interval);
-                            leftNode->parent = parent;
-                            rightNode->parent = parent;
-                            (*visitor)->left = leftNode;
-                            (*visitor)->right = rightNode;
+                            if (interval.left < parent->interval.left) {
+                                parent->interval.left = interval.left;
+                            }
+                            if (interval.right > parent->interval.right) {
+                                cout << "hereee: " << interval.right << " + " << parent->interval.right << endl;
+                                print();
+                                // parent->interval.right = interval.right;
+                            }
+                            // cout << "right " << (parent->interval) << " - "  << interval << endl;
+                            // parent->interval.expand(interval);
+                            // cout << "passsssed" << endl;
+                            // leftNode->parent = parent;
+                            // rightNode->parent = parent;
+                            // (*visitor)->left = leftNode;
+                            // (*visitor)->right = rightNode;
                         }
                     }
                     break;
@@ -160,15 +175,18 @@ public:
     void insert_interval(Tinterval interval, bool dbg=false) {
         vector<Tinterval > arr;
         debug = dbg;
+        // cout << "interval " << interval;
         interval.slice(threshold, arr);
         for (auto & it: arr) {
             insert_interval_intern(it);
         }
-        while (!pending.empty()) {
-            Tinterval tmp = pending.front();
-            insert_interval_intern(tmp);
-            pending.pop();
-        }
+        // while (!pending.empty()) {
+        //     Tinterval tmp = pending.front();
+        //     // cout << "tmp" << tmp << " + ";
+        //     insert_interval_intern(tmp);
+        //     pending.pop();
+        // }
+        // cout << endl;
     }
 
     void getLeafs() {
@@ -195,6 +213,51 @@ public:
         } else {
             printf("nil | ");
         }
+    }
+
+    void graphviz(Tnode *node, string & tree, string iter=""){
+        // tree += node->rectangle->get_strid() + " [ label =\"" + node->rectangle->get_strid() + " | " + node->rectangle->min.to_string() + " | " + node->rectangle->max.to_string() + "\" shape = \"record\"  ]\n";
+        // if (node->parent != NULL) {
+        //     tree += node->parent->rectangle->get_strid() + " -> " + node->rectangle->get_strid() + "\n";
+        // }
+        if (node != NULL) {
+            if (node->parent == NULL && node->left == NULL && node->right == NULL) {
+                tree += node->interval.to_graphviz(iter);
+            }
+            if (node->left != NULL) {
+                tree += node->interval.to_graphviz(iter) + " -> " + node->left->interval.to_graphviz(iter) + " ";
+            }
+            if (node->right != NULL) {
+                tree += node->interval.to_graphviz(iter) + " -> " + node->right->interval.to_graphviz(iter) + " ";
+            }
+            graphviz(node->left, tree, iter);
+            graphviz(node->right, tree, iter);
+        }
+
+        // if (node->leaf) {
+        //     // tree += node->parent->rectangle->get_strid() + " [ label =\"" + "x" + "\" shape = \"record\"  ]\n";
+        //     string polygons;
+        //     for (int i=0; i<node->count; i++) {
+        //         tree += node->rectangle->get_strid() + " -> " + node->polygons[i]->get_strid() + "\n";
+        //         polygons += node->polygons[i]->get_strid() + " [ ";
+        //         polygons += "label = \"" + node->polygons[i]->get_strid() + " | " + node->polygons[i]->points[0].to_string() + "\" shape = \"record\" color = \"blue\" ]\n";
+        //     }
+        //     tree += polygons;
+        // } else {
+        //     // cout << "heeeere" << endl;
+        //     for (int i=0; i < node->count; i++) {
+        //         graphviz(node->children[i], tree);
+        //     }
+        // }
+    }
+
+
+    string graphviz(string iter="1"){
+        // string str = "digraph G {\n";
+        string tree = "";
+        graphviz(root, tree, iter);
+        // str += tree + "}";
+        return tree;
     }
 
     Tnode * root;

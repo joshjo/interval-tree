@@ -62,10 +62,6 @@ public:
         }
     }
 
-    void expand(Tinterval & other_interval) {
-        this->interval.expand(other_interval);
-        this->top = this->interval.right;
-    }
 
     void print() {
         // printf("[%d, %d](%d)", interval.left, interval.right, top);
