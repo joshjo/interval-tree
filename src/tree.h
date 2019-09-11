@@ -60,10 +60,6 @@ public:
             root = new Tnode(interval);
             return;
         }
-        if(interval.left == 280) {
-            debug = true;
-        }
-
         Tnode ** visitor = &root;
         Tnode * parent = NULL;
         while((*visitor) != NULL) {
@@ -79,10 +75,16 @@ public:
 
             int direction = decide(interval, visitor);
             if (debug) {
-                cout << "direction " << direction << endl;
+                cout << "direction " << direction << " Interval " << interval << endl;
+                cout << "left  ifs: " << (direction == LEFT || direction == LEFT_PARENT) << endl;
+                cout << "right ifs: " << (direction == RIGHT || direction == RIGHT_PARENT) << endl;
             }
             if (direction == LEFT || direction == LEFT_PARENT) {
                 Tnode * sibling = ((*visitor)->right);
+                if(debug) {
+                    cout << "visitor: " << (*visitor)->interval << endl;
+                    cout << "sibling " << sibling << endl;
+                }
                 if (LEFT_PARENT && sibling != NULL) {
                     if (sibling->interval.intersects(interval)) {
                         Tinterval slice(sibling->interval.left, interval.right);
@@ -96,12 +98,17 @@ public:
                     Tinterval tmp = (*visitor)->interval;
                     tmp.expand(interval);
                     if (tmp.distance() <= threshold) {
+                        if (debug) cout << "update nodes" << endl;
                         (*visitor)->interval = tmp;
                         (*visitor)->update_weights();
                         (*visitor)->left = NULL;
                         (*visitor)->right = NULL;
                     } else {
                         Tnode * parent = (*visitor);
+                        if (debug) {
+                            cout << "intersects? " << (*visitor)->interval.intersects(interval) << endl;
+                            cout << "parent: " << parent->interval << endl;
+                        }
                         if ((*visitor)->interval.intersects(interval)) {
                             parent->interval.expand(interval);
                             parent->update_weights();
@@ -109,7 +116,6 @@ public:
                         } else {
                             Tnode * leftNode = new Tnode(interval);
                             Tnode * rightNode = new Tnode(parent->interval);
-                            // cout << "left " << (parent->interval) << " - "  << interval << endl;
                             parent->interval.expand(interval);
                             leftNode->parent = parent;
                             rightNode->parent = parent;
@@ -149,19 +155,7 @@ public:
                         } else {
                             Tnode * leftNode = new Tnode(parent->interval);
                             Tnode * rightNode = new Tnode(interval);
-                            // if (interval.left < parent->interval.left) {
-                            //     parent->interval.left = interval.left;
-                            // }
-                            // cout << "before" << endl;
-                            // if (interval.right > parent->interval.right) {
-                            //     // print();
-                            //     parent->interval.right = interval.right;
-                            // }
-                            // cout << "after" << endl;
-
-                            // cout << "right " << (parent->interval) << " - "  << interval << endl;
                             parent->interval.expand(interval);
-                            // cout << "passsssed" << endl;
                             leftNode->parent = parent;
                             rightNode->parent = parent;
                             (*visitor)->left = leftNode;
@@ -184,18 +178,16 @@ public:
     void insert_interval(Tinterval interval, bool dbg=false) {
         vector<Tinterval > arr;
         debug = dbg;
-        // cout << "interval " << interval;
         interval.slice(threshold, arr);
         for (auto & it: arr) {
             insert_interval_intern(it);
         }
-        // while (!pending.empty()) {
-        //     Tinterval tmp = pending.front();
-        //     // cout << "tmp" << tmp << " + ";
-        //     insert_interval_intern(tmp);
-        //     pending.pop();
-        // }
-        // cout << endl;
+        while (!pending.empty()) {
+            Tinterval tmp = pending.front();
+            insert_interval_intern(tmp);
+            pending.pop();
+        }
+        cout << endl;
     }
 
     void getLeafs() {

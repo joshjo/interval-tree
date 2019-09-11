@@ -14,11 +14,12 @@ public:
     Node() {
         left = NULL;
         right = NULL;
+        parent = NULL;
     }
 
     Node(Tinterval interval) {
         this->interval = interval;
-        top = interval.right;
+        parent = NULL;
         left = NULL;
         right = NULL;
     }
