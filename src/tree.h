@@ -20,6 +20,7 @@ public:
     Tree(int threshold=100) {
         this->root = NULL;
         this->threshold = 100;
+        // debug = true;
         debug = false;
     }
 
@@ -63,8 +64,8 @@ public:
         Tnode ** visitor = &root;
         Tnode * parent = NULL;
         while((*visitor) != NULL) {
-            Tinterval tmp = (*visitor)->interval;
             if ((*visitor)->interval.includes(interval)) {
+                Tinterval tmp = (*visitor)->interval;
                 if (tmp.distance() < threshold) {
                     tmp.expand(interval);
                     (*visitor)->left = NULL;
@@ -97,7 +98,7 @@ public:
                 if (((*visitor)->left) == NULL) {
                     Tinterval tmp = (*visitor)->interval;
                     tmp.expand(interval);
-                    if (tmp.distance() <= threshold) {
+                    if (tmp.distance() <= threshold && (*visitor)->interval.intersects(interval)) {
                         if (debug) cout << "update nodes" << endl;
                         (*visitor)->interval = tmp;
                         (*visitor)->update_weights();
@@ -111,8 +112,8 @@ public:
                         }
                         if ((*visitor)->interval.intersects(interval)) {
                             parent->interval.expand(interval);
-                            parent->update_weights();
                             parent->split();
+                            parent->update_weights();
                         } else {
                             Tnode * leftNode = new Tnode(interval);
                             Tnode * rightNode = new Tnode(parent->interval);
@@ -121,6 +122,7 @@ public:
                             rightNode->parent = parent;
                             (*visitor)->left = leftNode;
                             (*visitor)->right = rightNode;
+                            parent->update_weights();
                         }
                     }
                     break;
@@ -141,18 +143,21 @@ public:
                 if (((*visitor)->right) == NULL) {
                     Tinterval tmp = (*visitor)->interval;
                     tmp.expand(interval);
-                    if (tmp.distance() <= threshold) {
+                    if (tmp.distance() <= threshold && (*visitor)->interval.intersects(interval)) {
                         (*visitor)->interval = tmp;
-                        (*visitor)->update_weights();
                         (*visitor)->left = NULL;
                         (*visitor)->right = NULL;
+                        (*visitor)->update_weights();
                     } else {
                         Tnode * parent = (*visitor);
                         if ((*visitor)->interval.intersects(interval)) {
                             parent->interval.expand(interval);
-                            parent->update_weights();
                             parent->split();
+                            parent->update_weights();
                         } else {
+                            if (debug) {
+                                cout << "new node at left" << endl;
+                            }
                             Tnode * leftNode = new Tnode(parent->interval);
                             Tnode * rightNode = new Tnode(interval);
                             parent->interval.expand(interval);
@@ -160,6 +165,7 @@ public:
                             rightNode->parent = parent;
                             (*visitor)->left = leftNode;
                             (*visitor)->right = rightNode;
+                            parent->update_weights();
                         }
                     }
                     break;

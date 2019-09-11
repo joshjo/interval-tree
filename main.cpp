@@ -17,8 +17,11 @@ int main() {
     // }
 
     vector<Interval<int> > intervals;
-    intervals.push_back(Interval<int>(20, 90));
-    intervals.push_back(Interval<int>(100, 150));
+    intervals.push_back(Interval<int>(10, 15));
+    intervals.push_back(Interval<int>(25, 30));
+    intervals.push_back(Interval<int>(45, 50));
+    // intervals.push_back(Interval<int>(60, 65));
+    // intervals.push_back(Interval<int>(30, 45));
 
     // intervals.push_back(Interval<int>(46, 57));
     // intervals.push_back(Interval<int>(284, 424));
@@ -36,12 +39,12 @@ int main() {
     // Tree <int> tree;
     // cout << "digraph G {\n";
 
-    for (int i = 0; i < intervals.size(); i+=1) {
+    for (int i = 0; i < intervals.size(); i += 1) {
         // Interval<int> interval = intervals[i];
         // cout << "i: " << i << endl;
         tree.insert_interval_intern(intervals[i]);
         // cout << intervals[i] << endl;
-        // cout << tree.graphviz(to_string(i)) << endl;
+        cout << tree.graphviz(to_string(i)) << endl;
     }
     // tree.insert_interval(Interval<int>(280, 379));
     // cout << tree.graphviz("4") << endl;
@@ -56,7 +59,8 @@ int main() {
     // tree.insert_interval(I0);
 
     cout << endl;
-    tree.print();
+    // cout << tree.graphviz() << endl;
+    // tree.print();
 
     // tree.getLeafs();
 
