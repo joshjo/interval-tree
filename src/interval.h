@@ -77,11 +77,20 @@ public:
         return left >= other.left;
     }
 
-    void expand(const Interval & other) {
+    void update(Interval other) {
         if (other.left < left) {
             left = other.left;
         }
-        if (right < other.right) {
+        if (other.right > right) {
+            right = other.right;
+        }
+    }
+
+    void expand(Interval other) {
+        if (other.left < left) {
+            left = other.left;
+        }
+        if (other.right > right) {
             right = other.right;
         }
     }
@@ -181,6 +190,16 @@ public:
             Interval<T> tmp (x, right);
             arr.push_back(tmp);
         }
+    }
+
+    string to_graphviz(string iter) {
+        string str = "\"[" + iter + "]" + to_string() + "\"";
+        return str;
+    }
+
+    string to_string() {
+        string str = "(" + std::to_string(left) + "," + std::to_string(right) + ")";
+        return str;
     }
 
     friend ostream & operator << (ostream &out, const Interval & i) {

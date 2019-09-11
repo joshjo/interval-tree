@@ -14,11 +14,12 @@ public:
     Node() {
         left = NULL;
         right = NULL;
+        parent = NULL;
     }
 
     Node(Tinterval interval) {
         this->interval = interval;
-        top = interval.right;
+        parent = NULL;
         left = NULL;
         right = NULL;
     }
@@ -62,9 +63,12 @@ public:
         }
     }
 
-    void expand(Tinterval & other_interval) {
-        this->interval.expand(other_interval);
-        this->top = this->interval.right;
+    void printNodes() {
+        cout << "interval" << interval << endl;
+        cout << "this: " << this << endl;
+        cout << "left: " << left << endl;
+        cout << "right: " << right << endl;
+        cout << "parent: " << parent << endl;
     }
 
     void print() {
