@@ -17,9 +17,9 @@ public:
     // queue <pair<Tinterval, Tnode* >> pending;
     queue <Tinterval> pending;
 
-    Tree() {
+    Tree(int threshold=100) {
         this->root = NULL;
-        threshold = 100;
+        this->threshold = 100;
         debug = false;
     }
 
@@ -231,25 +231,12 @@ public:
             if (node->right != NULL) {
                 tree += node->interval.to_graphviz(iter) + " -> " + node->right->interval.to_graphviz(iter) + " ";
             }
+            if (node->left == NULL && node->right == NULL) {
+                tree += node->interval.to_graphviz(iter) + " [shape=box color=blue]";
+            }
             graphviz(node->left, tree, iter);
             graphviz(node->right, tree, iter);
         }
-
-        // if (node->leaf) {
-        //     // tree += node->parent->rectangle->get_strid() + " [ label =\"" + "x" + "\" shape = \"record\"  ]\n";
-        //     string polygons;
-        //     for (int i=0; i<node->count; i++) {
-        //         tree += node->rectangle->get_strid() + " -> " + node->polygons[i]->get_strid() + "\n";
-        //         polygons += node->polygons[i]->get_strid() + " [ ";
-        //         polygons += "label = \"" + node->polygons[i]->get_strid() + " | " + node->polygons[i]->points[0].to_string() + "\" shape = \"record\" color = \"blue\" ]\n";
-        //     }
-        //     tree += polygons;
-        // } else {
-        //     // cout << "heeeere" << endl;
-        //     for (int i=0; i < node->count; i++) {
-        //         graphviz(node->children[i], tree);
-        //     }
-        // }
     }
 
 

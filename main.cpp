@@ -17,18 +17,20 @@ int main() {
     // }
 
     vector<Interval<int> > intervals;
+    intervals.push_back(Interval<int>(20, 90));
+    intervals.push_back(Interval<int>(100, 150));
 
-    intervals.push_back(Interval<int>(46, 57));
-    intervals.push_back(Interval<int>(284, 424));
-    intervals.push_back(Interval<int>(914, 1002));
-    intervals.push_back(Interval<int>(23, 160));
-    intervals.push_back(Interval<int>(280, 379));
+    // intervals.push_back(Interval<int>(46, 57));
+    // intervals.push_back(Interval<int>(284, 424));
+    // intervals.push_back(Interval<int>(914, 1002));
+    // intervals.push_back(Interval<int>(23, 160));
+    // intervals.push_back(Interval<int>(280, 379));
 
-    intervals.push_back(Interval<int>(684, 833));
-    intervals.push_back(Interval<int>(760, 827));
-    intervals.push_back(Interval<int>(403, 512));
-    intervals.push_back(Interval<int>(945, 1031));
-    intervals.push_back(Interval<int>(597, 725));
+    // intervals.push_back(Interval<int>(684, 833));
+    // intervals.push_back(Interval<int>(760, 827));
+    // intervals.push_back(Interval<int>(403, 512));
+    // intervals.push_back(Interval<int>(945, 1031));
+    // intervals.push_back(Interval<int>(597, 725));
 
 
     // Tree <int> tree;
@@ -39,7 +41,7 @@ int main() {
         // cout << "i: " << i << endl;
         tree.insert_interval_intern(intervals[i]);
         // cout << intervals[i] << endl;
-        cout << tree.graphviz(to_string(i)) << endl;
+        // cout << tree.graphviz(to_string(i)) << endl;
     }
     // tree.insert_interval(Interval<int>(280, 379));
     // cout << tree.graphviz("4") << endl;
