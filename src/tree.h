@@ -60,6 +60,10 @@ public:
             root = new Tnode(interval);
             return;
         }
+        if(interval.left == 280) {
+            debug = true;
+        }
+
         Tnode ** visitor = &root;
         Tnode * parent = NULL;
         while((*visitor) != NULL) {
@@ -74,6 +78,9 @@ public:
             }
 
             int direction = decide(interval, visitor);
+            if (debug) {
+                cout << "direction " << direction << endl;
+            }
             if (direction == LEFT || direction == LEFT_PARENT) {
                 Tnode * sibling = ((*visitor)->right);
                 if (LEFT_PARENT && sibling != NULL) {
@@ -103,11 +110,11 @@ public:
                             Tnode * leftNode = new Tnode(interval);
                             Tnode * rightNode = new Tnode(parent->interval);
                             // cout << "left " << (parent->interval) << " - "  << interval << endl;
-                            // parent->interval.expand(interval);
-                            // leftNode->parent = parent;
-                            // rightNode->parent = parent;
-                            // (*visitor)->left = leftNode;
-                            // (*visitor)->right = rightNode;
+                            parent->interval.expand(interval);
+                            leftNode->parent = parent;
+                            rightNode->parent = parent;
+                            (*visitor)->left = leftNode;
+                            (*visitor)->right = rightNode;
                         }
                     }
                     break;
@@ -142,21 +149,23 @@ public:
                         } else {
                             Tnode * leftNode = new Tnode(parent->interval);
                             Tnode * rightNode = new Tnode(interval);
-                            if (interval.left < parent->interval.left) {
-                                parent->interval.left = interval.left;
-                            }
-                            if (interval.right > parent->interval.right) {
-                                cout << "hereee: " << interval.right << " + " << parent->interval.right << endl;
-                                print();
-                                // parent->interval.right = interval.right;
-                            }
+                            // if (interval.left < parent->interval.left) {
+                            //     parent->interval.left = interval.left;
+                            // }
+                            // cout << "before" << endl;
+                            // if (interval.right > parent->interval.right) {
+                            //     // print();
+                            //     parent->interval.right = interval.right;
+                            // }
+                            // cout << "after" << endl;
+
                             // cout << "right " << (parent->interval) << " - "  << interval << endl;
-                            // parent->interval.expand(interval);
+                            parent->interval.expand(interval);
                             // cout << "passsssed" << endl;
-                            // leftNode->parent = parent;
-                            // rightNode->parent = parent;
-                            // (*visitor)->left = leftNode;
-                            // (*visitor)->right = rightNode;
+                            leftNode->parent = parent;
+                            rightNode->parent = parent;
+                            (*visitor)->left = leftNode;
+                            (*visitor)->right = rightNode;
                         }
                     }
                     break;

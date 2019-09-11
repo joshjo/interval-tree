@@ -62,6 +62,13 @@ public:
         }
     }
 
+    void printNodes() {
+        cout << "interval" << interval << endl;
+        cout << "this: " << this << endl;
+        cout << "left: " << left << endl;
+        cout << "right: " << right << endl;
+        cout << "parent: " << parent << endl;
+    }
 
     void print() {
         // printf("[%d, %d](%d)", interval.left, interval.right, top);
