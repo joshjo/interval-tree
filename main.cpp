@@ -5,21 +5,22 @@ using namespace std;
 
 int main() {
     srand (time(NULL));
-    int S = 1000;
-    int R = 150;
+    int S = 100000;
+    int R = 15000;
     Tree <int> tree;
-    // for (int i = 0; i < 10; i += 1) {
-    //     int S1 = rand() % S;
-    //     int R1 = rand() % R;
-    //     Interval<int> I(S1, S1 + R1);
-    //     cout << I << endl;
-    //     tree.insert_interval(I);
-    // }
-
     vector<Interval<int> > intervals;
-    intervals.push_back(Interval<int>(10, 15));
-    intervals.push_back(Interval<int>(25, 30));
-    intervals.push_back(Interval<int>(45, 50));
+    for (int i = 0; i < 100000; i += 1) {
+        int S1 = rand() % S;
+        int R1 = rand() % R;
+        Interval<int> I(S1, S1 + R1);
+        // cout << I << endl;
+        intervals.push_back(I);
+        // tree.insert_interval(I);
+    }
+
+    // intervals.push_back(Interval<int>(10, 15));
+    // intervals.push_back(Interval<int>(25, 30));
+    // intervals.push_back(Interval<int>(45, 50));
     // intervals.push_back(Interval<int>(60, 65));
     // intervals.push_back(Interval<int>(30, 45));
 
@@ -42,12 +43,13 @@ int main() {
     for (int i = 0; i < intervals.size(); i += 1) {
         // Interval<int> interval = intervals[i];
         // cout << "i: " << i << endl;
+        // cout << ".";
         tree.insert_interval_intern(intervals[i]);
         // cout << intervals[i] << endl;
-        cout << tree.graphviz(to_string(i)) << endl;
+        // cout << tree.graphviz(to_string(i)) << endl;
     }
     // tree.insert_interval(Interval<int>(280, 379));
-    // cout << tree.graphviz("4") << endl;
+    cout << tree.graphviz() << endl;
     // cout << "}\n";
     // tree.insert_interval(I3);
     // tree.insert_interval(I4);
@@ -58,7 +60,7 @@ int main() {
     // tree.insert_interval(I9);
     // tree.insert_interval(I0);
 
-    cout << endl;
+    // cout << endl;
     // cout << tree.graphviz() << endl;
     // tree.print();
 
