@@ -5,7 +5,9 @@
 
 #include "node.h"
 
+
 using namespace std;
+
 
 template <class T>
 class Tree {
@@ -193,23 +195,40 @@ public:
             insert_interval_intern(tmp);
             pending.pop();
         }
-        cout << endl;
+        // cout << endl;
     }
 
-    void getLeafs() {
-        getLeafs(root);
-        cout << endl;
+    int numberLeafs() {
+        int counter = 0;
+        numberLeafs(root, counter);
+        return counter;
     }
 
-    void getLeafs(Tnode * visitor) {
-        if(visitor != NULL) {
+    int numberLeafs(Tnode * visitor, int & counter) {
+        if (visitor != NULL) {
             if (visitor->left == NULL && visitor->right == NULL) {
-                cout << visitor->interval << " | ";
+                counter += 1;
             }
-            getLeafs(visitor->left);
-            getLeafs(visitor->right);
+            numberLeafs(visitor->left, counter);
+            numberLeafs(visitor->right, counter);
         }
+        return 0;
     }
+
+    // void getLeafs() {
+    //     getLeafs(root);
+    //     cout << endl;
+    // }
+
+    // void getLeafs(Tnode * visitor) {
+    //     if(visitor != NULL) {
+    //         if (visitor->left == NULL && visitor->right == NULL) {
+    //             cout << visitor->interval << " | ";
+    //         }
+    //         getLeafs(visitor->left);
+    //         getLeafs(visitor->right);
+    //     }
+    // }
 
     void print(Tnode * visitor) {
         if (visitor != NULL) {
@@ -222,7 +241,7 @@ public:
         }
     }
 
-    void graphviz(Tnode *node, string & tree, string iter=""){
+    void graphviz(Tnode *node, string & tree, string iter="") {
         // tree += node->rectangle->get_strid() + " [ label =\"" + node->rectangle->get_strid() + " | " + node->rectangle->min.to_string() + " | " + node->rectangle->max.to_string() + "\" shape = \"record\"  ]\n";
         // if (node->parent != NULL) {
         //     tree += node->parent->rectangle->get_strid() + " -> " + node->rectangle->get_strid() + "\n";
@@ -238,7 +257,7 @@ public:
                 tree += node->interval.to_graphviz(iter) + " -> " + node->right->interval.to_graphviz(iter) + " ";
             }
             if (node->left == NULL && node->right == NULL) {
-                tree += node->interval.to_graphviz(iter) + " [shape=box color=blue]";
+                tree += node->interval.to_graphviz(iter) + " [shape=box color=blue fillcolor=blue fontcolor=white style=filled]";
             }
             graphviz(node->left, tree, iter);
             graphviz(node->right, tree, iter);
