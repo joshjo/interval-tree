@@ -195,7 +195,6 @@ public:
             insert_interval_intern(tmp);
             pending.pop();
         }
-        // cout << endl;
     }
 
     int numberLeafs() {
