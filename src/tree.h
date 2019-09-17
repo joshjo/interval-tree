@@ -21,7 +21,7 @@ public:
 
     Tree(int threshold=100) {
         this->root = NULL;
-        this->threshold = 100;
+        this->threshold = threshold;
         // debug = true;
         debug = false;
     }
@@ -63,10 +63,16 @@ public:
             root = new Tnode(interval);
             return;
         }
+        if (interval.left == 579) {
+            debug = true;
+        }
         Tnode ** visitor = &root;
         Tnode * parent = NULL;
         while((*visitor) != NULL) {
             if ((*visitor)->interval.includes(interval)) {
+                if (debug ){
+                    cout << "includes" << endl;
+                }
                 Tinterval tmp = (*visitor)->interval;
                 if (tmp.distance() < threshold) {
                     tmp.expand(interval);
@@ -187,6 +193,7 @@ public:
         vector<Tinterval > arr;
         debug = dbg;
         interval.slice(threshold, arr);
+
         for (auto & it: arr) {
             insert_interval_intern(it);
         }
