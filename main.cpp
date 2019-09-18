@@ -24,6 +24,7 @@ int main() {
     intervals.push_back(Interval<int>(385, 512));
     intervals.push_back(Interval<int>(74, 168));
     intervals.push_back(Interval<int>(579, 666));
+    intervals.push_back(Interval<int>(550, 600));
 
     for (int i = 0; i < intervals.size(); i += 1) {
         // Interval<int> interval = intervals[i];
@@ -31,7 +32,7 @@ int main() {
         // cout << ".";
         tree.insert_interval(intervals[i]);
         // cout << intervals[i] << endl;
-        // cout << tree.graphviz(to_string(i)) << endl;
+        cout << tree.graphviz(to_string(i)) << endl;
     }
     // tree.insert_interval(Interval<int>(280, 379));
     // cout << "digraph G {\n";

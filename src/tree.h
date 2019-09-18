@@ -63,13 +63,14 @@ public:
             root = new Tnode(interval);
             return;
         }
-        if (interval.left == 579) {
-            debug = true;
-        }
+        // if (interval.left == 579) {
+        //     debug = true;
+        // }
         Tnode ** visitor = &root;
         Tnode * parent = NULL;
         while((*visitor) != NULL) {
-            if ((*visitor)->interval.includes(interval)) {
+            // if ((*visitor)->interval.includes(interval)) {
+            if (interval.includes((*visitor)->interval)) {
                 if (debug ){
                     cout << "includes" << endl;
                 }
