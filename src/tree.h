@@ -63,13 +63,10 @@ public:
             root = new Tnode(interval);
             return;
         }
-        // if (interval.left == 579) {
-        //     debug = true;
-        // }
+
         Tnode ** visitor = &root;
         Tnode * parent = NULL;
         while((*visitor) != NULL) {
-            // if ((*visitor)->interval.includes(interval)) {
             if (interval.includes((*visitor)->interval)) {
                 if (debug ){
                     cout << "includes" << endl;
@@ -222,20 +219,20 @@ public:
         return 0;
     }
 
-    // void getLeafs() {
-    //     getLeafs(root);
-    //     cout << endl;
-    // }
+    void getLeafs(vector<Tinterval> & leafs) {
+        getLeafs(root, leafs);
+    }
 
-    // void getLeafs(Tnode * visitor) {
-    //     if(visitor != NULL) {
-    //         if (visitor->left == NULL && visitor->right == NULL) {
-    //             cout << visitor->interval << " | ";
-    //         }
-    //         getLeafs(visitor->left);
-    //         getLeafs(visitor->right);
-    //     }
-    // }
+    void getLeafs(Tnode * visitor, vector<Tinterval> & leafs) {
+        if(visitor != NULL) {
+            if (visitor->left == NULL && visitor->right == NULL) {
+                // cout << visitor->interval << " | ";
+                leafs.push_back(visitor->interval);
+            }
+            getLeafs(visitor->left, leafs);
+            getLeafs(visitor->right, leafs);
+        }
+    }
 
     void print(Tnode * visitor) {
         if (visitor != NULL) {
@@ -249,10 +246,6 @@ public:
     }
 
     void graphviz(Tnode *node, string & tree, string iter="") {
-        // tree += node->rectangle->get_strid() + " [ label =\"" + node->rectangle->get_strid() + " | " + node->rectangle->min.to_string() + " | " + node->rectangle->max.to_string() + "\" shape = \"record\"  ]\n";
-        // if (node->parent != NULL) {
-        //     tree += node->parent->rectangle->get_strid() + " -> " + node->rectangle->get_strid() + "\n";
-        // }
         if (node != NULL) {
             if (node->parent == NULL && node->left == NULL && node->right == NULL) {
                 tree += node->interval.to_graphviz(iter);
