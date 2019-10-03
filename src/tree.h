@@ -18,6 +18,7 @@ public:
     bool debug;
     // queue <pair<Tinterval, Tnode* >> pending;
     queue <Tinterval> pending;
+    map <Tnode *, bool> leafs;
 
     Tree(int threshold=100) {
         this->root = NULL;
@@ -61,6 +62,7 @@ public:
     void insert_interval_intern(Tinterval interval) {
         if (root == NULL ) {
             root = new Tnode(interval);
+            leafs[root] = true;
             return;
         }
 
@@ -120,6 +122,10 @@ public:
                             parent->interval.expand(interval);
                             parent->split();
                             parent->update_weights();
+
+                            leafs.erase(parent);
+                            leafs[parent->left] = true;
+                            leafs[parent->right] = true;
                         } else {
                             Tnode * leftNode = new Tnode(interval);
                             Tnode * rightNode = new Tnode(parent->interval);
@@ -129,6 +135,10 @@ public:
                             (*visitor)->left = leftNode;
                             (*visitor)->right = rightNode;
                             parent->update_weights();
+
+                            leafs.erase(parent);
+                            leafs[parent->left] = true;
+                            leafs[parent->right] = true;
                         }
                     }
                     break;
@@ -160,6 +170,10 @@ public:
                             parent->interval.expand(interval);
                             parent->split();
                             parent->update_weights();
+
+                            leafs.erase(parent);
+                            leafs[parent->left] = true;
+                            leafs[parent->right] = true;
                         } else {
                             if (debug) {
                                 cout << "new node at left" << endl;
@@ -172,6 +186,10 @@ public:
                             (*visitor)->left = leftNode;
                             (*visitor)->right = rightNode;
                             parent->update_weights();
+
+                            leafs.erase(parent);
+                            leafs[parent->left] = true;
+                            leafs[parent->right] = true;
                         }
                     }
                     break;
@@ -184,6 +202,12 @@ public:
                 (*visitor)->right = NULL;
                 break;
             }
+        }
+    }
+
+    void print_intervals() {
+        for (map<Tinterval, bool>::iterator it=leafs.begin(); it!=leafs.end(); ++it) {
+            cout << it->first << endl;
         }
     }
 

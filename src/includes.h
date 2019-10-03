@@ -6,6 +6,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <vector>
+#include <map>
 #include <queue>
 #include <time.h>
 
