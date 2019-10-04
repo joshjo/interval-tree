@@ -8,9 +8,13 @@ using namespace std;
 
 int main(int argc, char** argv) {
     srand (time(NULL));
-    int key_domain_size = 10000000;
-    int leaf_size = 1000000;
-    int Q = 1500000;
+    // int key_domain_size = 10000000;
+    // int leaf_size = 1000000;
+    // int Q = 1500000;
+
+    int key_domain_size = 1000;
+    int leaf_size = 100;
+    int Q = 150;
 
 
     int query_number;
@@ -34,13 +38,14 @@ int main(int argc, char** argv) {
             // cout << I << endl;
             intervals.push_back(I);
             // tree.insert_interval(I);
-            // cout << tree.graphviz() << endl;
         }
+        // cout << "++++++++++++++++++++++++++" << endl;
         auto start_time = std::chrono::system_clock::now();
 
         Tree <int> tree(leaf_size);
         for (int i = 0; i < query_number; i += 1) {
             tree.insert_interval(intervals[i]);
+            // cout << tree.graphviz(to_string(i)) << endl;
         }
         vector<Interval<int> > leafs;
         tree.getLeafs(leafs);
@@ -53,9 +58,13 @@ int main(int argc, char** argv) {
             cout << leafs[i] << endl;
         }
 
-        tree.print_intervals();
+        // cout << "------------------------" << endl;
+
+        // tree.print_intervals();
+
+        cout << endl << leafs.size() << " - " << tree.leafs.size() << endl;
         // cout << leafs.size() << " -- " << tree.leafs.size() << endl;
-        // cout << elapsed_seconds.count() << endl;
+        cout << elapsed_seconds.count() << endl;
 
 
     }
