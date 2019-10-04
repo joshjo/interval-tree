@@ -113,7 +113,7 @@ public:
         return (((*this) <= other && !((*this) < other)) || ((*this) >= other && !((*this) > other)));
     }
 
-    bool operator < (const Interval & other) {
+    bool operator < (const Interval & other) const {
         return (right <= other.left);
     }
 
@@ -139,7 +139,7 @@ public:
         return left_distance <= right_distance;
     }
 
-    bool operator > (const Interval & other) {
+    bool operator > (const Interval & other) const {
         return (left > other.right);
     }
 

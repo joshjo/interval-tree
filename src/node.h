@@ -10,6 +10,8 @@ class Node {
 public:
     typedef Node<T> Tnode;
     typedef Interval<T> Tinterval;
+    vector <Tnode* > leafs;
+
 
     Node() {
         left = NULL;

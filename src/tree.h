@@ -18,12 +18,14 @@ public:
     bool debug;
     // queue <pair<Tinterval, Tnode* >> pending;
     queue <Tinterval> pending;
+    int number_pending;
 
     Tree(int threshold=100) {
         this->root = NULL;
         this->threshold = threshold;
         // debug = true;
         debug = false;
+        number_pending = 0;
     }
 
     void print() {
@@ -200,6 +202,7 @@ public:
         for (auto & it: arr) {
             insert_interval_intern(it);
         }
+        number_pending += pending.size();
         while (!pending.empty()) {
             Tinterval tmp = pending.front();
             insert_interval_intern(tmp);
