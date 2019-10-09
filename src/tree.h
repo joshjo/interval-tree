@@ -18,6 +18,7 @@ public:
     bool debug;
     // queue <pair<Tinterval, Tnode* >> pending;
     queue <Tinterval> pending;
+    queue <pair<Tinterval, Tinterval> > npending;
     int number_pending;
 
     Tree(int threshold=100) {
@@ -60,7 +61,11 @@ public:
         }
     }
 
-    void insert_interval_intern(Tinterval interval) {
+    void insert_interval_intern(Tinterval interval, Tinterval query) {
+        if (debug) {
+            cout << "inserting: " << interval << endl;
+        }
+
         if (root == NULL ) {
             root = new Tnode(interval);
             return;
@@ -103,6 +108,7 @@ public:
                         Tinterval slice(sibling->interval.left, interval.right);
                         if (slice.distance() > 0) {
                             pending.push(slice);
+                            npending.push(make_pair(slice, interval));
                         }
                         interval.right = sibling->interval.left;
                     }
@@ -148,6 +154,7 @@ public:
                         Tinterval slice(interval.left, sibling->interval.right);
                         if (slice.distance() > 0) {
                             pending.push(slice);
+                            npending.push(make_pair(slice, interval));
                         }
                         interval.left = sibling->interval.right;
                     }
@@ -200,13 +207,13 @@ public:
         interval.slice(threshold, arr);
 
         for (auto & it: arr) {
-            insert_interval_intern(it);
+            insert_interval_intern(it, it);
         }
-        number_pending += pending.size();
-        while (!pending.empty()) {
-            Tinterval tmp = pending.front();
-            insert_interval_intern(tmp);
-            pending.pop();
+        number_pending += npending.size();
+        while (!npending.empty()) {
+            pair<Tinterval, Tinterval> tmp = npending.front();
+            insert_interval_intern(tmp.first, tmp.second);
+            npending.pop();
         }
         return 0;
     }

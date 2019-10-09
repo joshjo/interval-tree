@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
 
     int query_number;
     double times = 0;
-    int iters = 1;
+    int iters = 1000;
 
     if (argc != 2) {
         cout << "Please enter an initial size" << endl;
@@ -39,11 +39,12 @@ int main(int argc, char** argv) {
             intervals.push_back(I);
             // tree.insert_interval(I);
         }
+
         // cout << "++++++++++++++++++++++++++" << endl;
         auto start_time = std::chrono::system_clock::now();
 
         Tree <int> tree(leaf_size);
-        for (int i = 0; i < query_number; i += 1) {
+        for (int i = 0; i < intervals.size(); i += 1) {
             tree.insert_interval(intervals[i]);
             // cout << tree.graphviz(to_string(i)) << endl;
         }
@@ -54,17 +55,23 @@ int main(int argc, char** argv) {
         std::chrono::duration<double> elapsed_seconds = end_time - start_time;
         times += elapsed_seconds.count();
 
-        for(int i = 0; i < leafs.size(); i++) {
-            cout << leafs[i] << endl;
-        }
+        // for (int i = 0; i < tree.root->leafs.size(); i++) {
+        //     cout << tree.root->leafs[i]->interval << endl;
+        // }
+        // cout << tree.graphviz("") << endl;
+        // cout << "tree " << tree.root->leafs.size() << endl;
+
+        // for(int i = 0; i < leafs.size(); i++) {
+        //     cout << leafs[i] << endl;
+        // }
 
         // cout << "------------------------" << endl;
 
         // tree.print_intervals();
 
-        cout << endl << leafs.size() << " - " << tree.leafs.size() << endl;
+        // cout << endl << leafs.size() << " - " << tree.leafs.size() << endl;
         // cout << leafs.size() << " -- " << tree.leafs.size() << endl;
-        cout << elapsed_seconds.count() << endl;
+        // cout << elapsed_seconds.count() << endl;
 
 
     }
@@ -75,12 +82,7 @@ int main(int argc, char** argv) {
 
     // cout << "leafs size: " << leafs.size() << endl;
 
-    // intervals.push_back(Interval<int>(591, 640));
-    // intervals.push_back(Interval<int>(824, 965));
-    // intervals.push_back(Interval<int>(385, 512));
-    // intervals.push_back(Interval<int>(74, 168));
-    // intervals.push_back(Interval<int>(579, 666));
-    // intervals.push_back(Interval<int>(550, 600));
+
 
     // for (int i = 0; i < intervals.size(); i += 1) {
         // Interval<int> interval = intervals[i];
