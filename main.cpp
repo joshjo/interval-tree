@@ -8,6 +8,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
     srand (time(NULL));
+
     // int key_domain_size = 10000000;
     // int leaf_size = 1000000;
     // int Q = 1500000;
@@ -16,10 +17,12 @@ int main(int argc, char** argv) {
     int leaf_size = 100;
     int Q = 150;
 
+    string * hash_map;
+
 
     int query_number;
     double times = 0;
-    int iters = 1000;
+    int iters = 1;
 
     if (argc != 2) {
         cout << "Please enter an initial size" << endl;
@@ -55,9 +58,17 @@ int main(int argc, char** argv) {
         std::chrono::duration<double> elapsed_seconds = end_time - start_time;
         times += elapsed_seconds.count();
 
-        // for (int i = 0; i < tree.root->leafs.size(); i++) {
-        //     cout << tree.root->leafs[i]->interval << endl;
-        // }
+        int min = tree.root->leafs[0]->interval.left;
+        int max = tree.root->leafs[tree.root->leafs.size() - 1]->interval.right;
+
+        hash_map = new string[max - min];
+
+        for (int i = 0; i < tree.root->leafs.size(); i++) {
+            cout << tree.root->leafs[i]->interval << endl;
+        }
+
+        // cout << "min " << min << endl;
+        // cout << "max " << max << endl;
         // cout << tree.graphviz("") << endl;
         // cout << "tree " << tree.root->leafs.size() << endl;
 
@@ -75,7 +86,7 @@ int main(int argc, char** argv) {
 
 
     }
-    cout << "Avg: " << (times / iters) << endl;
+    // cout << "Avg: " << (times / iters) << endl;
 
 
     // tree.getLeafs(leafs);

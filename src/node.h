@@ -27,6 +27,14 @@ public:
         right = NULL;
     }
 
+    Node(Tinterval interval, Tinterval query) {
+        this->interval = interval;
+        parent = NULL;
+        left = NULL;
+        right = NULL;
+        queries.push_back(query);
+    }
+
     bool is_interval() {
         return (interval.left != interval.right);
     }

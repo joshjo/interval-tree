@@ -105,11 +105,6 @@ public:
         if (left >= other.right) {
             return false;
         }
-        // cout << "(*this) <= other   " << ((*this) <= other) << endl;
-        // cout << "!((*this) < other) " << (!((*this) < other)) << endl;
-        // cout << "(*this) >= other   " << ((*this) >= other) << endl;
-        // cout << "!((*this) > other) " << (!((*this) > other)) << endl;
-
         return (((*this) <= other && !((*this) < other)) || ((*this) >= other && !((*this) > other)));
     }
 

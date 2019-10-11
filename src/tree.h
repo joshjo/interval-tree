@@ -14,6 +14,8 @@ class Tree {
 public:
     typedef Node<T> Tnode;
     typedef Interval<T> Tinterval;
+    Tnode * root;
+    T threshold;
 
     bool debug;
     // queue <pair<Tinterval, Tnode* >> pending;
@@ -75,7 +77,7 @@ public:
         Tnode * parent = NULL;
         while((*visitor) != NULL) {
             if (interval.includes((*visitor)->interval)) {
-                if (debug){
+                if (debug) {
                     cout << "******* " << interval << " includes " << (*visitor)->interval << endl;
                 }
                 Tinterval tmp = (*visitor)->interval;
@@ -288,9 +290,6 @@ public:
         // str += tree + "}";
         return tree;
     }
-
-    Tnode * root;
-    T threshold;
 };
 
 
