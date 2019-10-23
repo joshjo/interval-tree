@@ -1,32 +1,89 @@
+#include <chrono>
+#include <ctime>
+
 #include "src/tree.h"
 
 using namespace std;
 
 
-int main() {
+int main(int argc, char** argv) {
     srand (time(NULL));
-    int S = 1000000;
-    int R = 150000;
-    Tree <int> tree(1000);
-    vector<Interval<int> > intervals;
-    for (int i = 0; i < 100; i += 1) {
-        int S1 = rand() % S;
-        int R1 = rand() % R;
-        Interval<int> I(S1, S1 + R1);
-        // cout << I << endl;
-        // intervals.push_back(I);
-        tree.insert_interval(I);
-        // cout << tree.graphviz() << endl;
+
+    // int key_domain_size = 10000000;
+    // int leaf_size = 1000000;
+    // int Q = 1500000;
+
+    int key_domain_size = 1000;
+    int leaf_size = 100;
+    int Q = 150;
+
+    int query_number;
+    double times = 0;
+    int iters = 10;
+
+    if (argc != 2) {
+        cout << "Please enter an initial size" << endl;
+        return 1;
     }
 
-    vector<Interval<int> > leafs;
+    sscanf(argv[1], "%d", &query_number);
 
-    // intervals.push_back(Interval<int>(591, 640));
-    // intervals.push_back(Interval<int>(824, 965));
-    // intervals.push_back(Interval<int>(385, 512));
-    // intervals.push_back(Interval<int>(74, 168));
-    // intervals.push_back(Interval<int>(579, 666));
-    // intervals.push_back(Interval<int>(550, 600));
+    for (int z = 0; z < iters; z++) {
+        vector<Interval<int> > intervals;
+
+        for (int i = 0; i < query_number; i += 1) {
+            int S1 = rand() % key_domain_size;
+            int R1 = rand() % Q;
+            Interval<int> I(S1, S1 + R1);
+            // cout << I << endl;
+            intervals.push_back(I);
+            // tree.insert_interval(I);
+        }
+
+        // cout << "++++++++++++++++++++++++++" << endl;
+        auto start_time = std::chrono::system_clock::now();
+
+        Tree <int> tree(leaf_size);
+        for (int i = 0; i < intervals.size(); i += 1) {
+            tree.insert_interval(intervals[i]);
+            // cout << tree.graphviz(to_string(i)) << endl;
+        }
+        vector<Interval<int> > leafs;
+        tree.getLeafs(leafs);
+
+        auto end_time = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end_time - start_time;
+        times += elapsed_seconds.count();
+
+        cout << tree.extra_operations << " - " << tree.extra_insertions << endl;
+
+        // cout << "min " << min << endl;
+        // cout << "max " << max << endl;
+        // cout << tree.graphviz("") << endl;
+        // cout << "tree " << tree.root->leafs.size() << endl;
+
+        // for(int i = 0; i < leafs.size(); i++) {
+        //     cout << leafs[i] << endl;
+        // }
+
+        // cout << "------------------------" << endl;
+
+        // tree.print_intervals();
+
+        // cout << endl << leafs.size() << " - " << tree.leafs.size() << endl;
+        // cout << leafs.size() << " -- " << tree.leafs.size() << endl;
+        // cout << elapsed_seconds.count() << endl;
+
+
+    }
+    // cout << "Avg: " << (times / iters) << endl;
+
+
+    // tree.getLeafs(leafs);
+
+    // cout << "leafs size: " << leafs.size() << endl;
+
+
 
     // for (int i = 0; i < intervals.size(); i += 1) {
         // Interval<int> interval = intervals[i];
@@ -40,9 +97,9 @@ int main() {
     // cout << "digraph G {\n";
     // cout << tree.graphviz() << endl;
     // cout << "}\n";
-    tree.getLeafs(leafs);
+    // tree.getLeafs(leafs);
 
-    cout << leafs.size() << endl;
+    // cout << leafs.size() << endl;
     // cout << endl;
     // cout << tree.graphviz() << endl;
     // tree.print();

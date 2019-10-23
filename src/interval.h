@@ -105,15 +105,10 @@ public:
         if (left >= other.right) {
             return false;
         }
-        // cout << "(*this) <= other   " << ((*this) <= other) << endl;
-        // cout << "!((*this) < other) " << (!((*this) < other)) << endl;
-        // cout << "(*this) >= other   " << ((*this) >= other) << endl;
-        // cout << "!((*this) > other) " << (!((*this) > other)) << endl;
-
         return (((*this) <= other && !((*this) < other)) || ((*this) >= other && !((*this) > other)));
     }
 
-    bool operator < (const Interval & other) {
+    bool operator < (const Interval & other) const {
         return (right <= other.left);
     }
 
@@ -139,7 +134,7 @@ public:
         return left_distance <= right_distance;
     }
 
-    bool operator > (const Interval & other) {
+    bool operator > (const Interval & other) const {
         return (left > other.right);
     }
 
@@ -192,7 +187,11 @@ public:
         }
     }
 
-    string to_graphviz(string iter) {
+    string to_graphviz(string iter = "") {
+        if (iter == "") {
+            string str = "\"" + to_string() + "\"";
+            return str;
+        }
         string str = "\"[" + iter + "]" + to_string() + "\"";
         return str;
     }

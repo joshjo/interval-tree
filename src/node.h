@@ -10,6 +10,9 @@ class Node {
 public:
     typedef Node<T> Tnode;
     typedef Interval<T> Tinterval;
+    vector <Tnode* > leafs;
+    vector <Tinterval> queries;
+
 
     Node() {
         left = NULL;
@@ -22,6 +25,14 @@ public:
         parent = NULL;
         left = NULL;
         right = NULL;
+    }
+
+    Node(Tinterval interval, Tinterval query) {
+        this->interval = interval;
+        parent = NULL;
+        left = NULL;
+        right = NULL;
+        queries.push_back(query);
     }
 
     bool is_interval() {
@@ -52,6 +63,24 @@ public:
     }
 
     void update_weights() {
+        // leafs.push_back(1);
+        leafs.clear();
+        if (left != NULL) {
+            if (left->is_leaf()) {
+                leafs.push_back(left);
+            }
+            else {
+                leafs.insert(leafs.end(), left->leafs.begin(), left->leafs.end());
+            }
+        }
+        if (right != NULL) {
+            if (right->is_leaf()) {
+                leafs.push_back(right);
+            }
+            else {
+                leafs.insert(leafs.end(), right->leafs.begin(), right->leafs.end());
+            }
+        }
         if (this->parent != NULL) {
             if (this->interval.left < parent->interval.left) {
                 parent->interval.left = this->interval.left;

@@ -14,16 +14,25 @@ class Tree {
 public:
     typedef Node<T> Tnode;
     typedef Interval<T> Tinterval;
+    Tnode * root;
+    T threshold;
+    int extra_operations;
+    int extra_insertions;
 
     bool debug;
     // queue <pair<Tinterval, Tnode* >> pending;
     queue <Tinterval> pending;
+    queue <pair<Tinterval, Tinterval> > npending;
+    int number_pending;
 
     Tree(int threshold=100) {
         this->root = NULL;
         this->threshold = threshold;
         // debug = true;
         debug = false;
+        number_pending = 0;
+        extra_operations = 0;
+        extra_insertions = 0;
     }
 
     void print() {
@@ -58,9 +67,19 @@ public:
         }
     }
 
-    void insert_interval_intern(Tinterval interval) {
+    void insert_interval_intern(Tinterval interval, Tinterval query, bool count = false) {
+        if (count) {
+            extra_operations += 1;
+        }
+        if (debug) {
+            cout << "inserting: " << interval << endl;
+        }
+
         if (root == NULL ) {
             root = new Tnode(interval);
+            if (count) {
+                extra_insertions += 1;
+            }
             return;
         }
 
@@ -68,14 +87,18 @@ public:
         Tnode * parent = NULL;
         while((*visitor) != NULL) {
             if (interval.includes((*visitor)->interval)) {
-                if (debug ){
-                    cout << "includes" << endl;
+                if (debug) {
+                    cout << "******* " << interval << " includes " << (*visitor)->interval << endl;
                 }
                 Tinterval tmp = (*visitor)->interval;
+                tmp.expand(interval);
                 if (tmp.distance() < threshold) {
-                    tmp.expand(interval);
+                    // tmp.expand(interval);
+                    (*visitor)->interval = tmp;
+
                     (*visitor)->left = NULL;
                     (*visitor)->right = NULL;
+                    (*visitor)->update_weights();
                     break;
                 }
             }
@@ -97,6 +120,7 @@ public:
                         Tinterval slice(sibling->interval.left, interval.right);
                         if (slice.distance() > 0) {
                             pending.push(slice);
+                            npending.push(make_pair(slice, interval));
                         }
                         interval.right = sibling->interval.left;
                     }
@@ -123,6 +147,9 @@ public:
                         } else {
                             Tnode * leftNode = new Tnode(interval);
                             Tnode * rightNode = new Tnode(parent->interval);
+                            if (count) {
+                                extra_insertions += 2;
+                            }
                             parent->interval.expand(interval);
                             leftNode->parent = parent;
                             rightNode->parent = parent;
@@ -142,6 +169,7 @@ public:
                         Tinterval slice(interval.left, sibling->interval.right);
                         if (slice.distance() > 0) {
                             pending.push(slice);
+                            npending.push(make_pair(slice, interval));
                         }
                         interval.left = sibling->interval.right;
                     }
@@ -166,6 +194,11 @@ public:
                             }
                             Tnode * leftNode = new Tnode(parent->interval);
                             Tnode * rightNode = new Tnode(interval);
+
+                            if (count) {
+                                extra_insertions += 2;
+                            }
+
                             parent->interval.expand(interval);
                             leftNode->parent = parent;
                             rightNode->parent = parent;
@@ -182,24 +215,27 @@ public:
                 (*visitor)->interval.expand(interval);
                 (*visitor)->left = NULL;
                 (*visitor)->right = NULL;
+                (*visitor)->update_weights();
                 break;
             }
         }
     }
 
-    void insert_interval(Tinterval interval, bool dbg=false) {
+    int insert_interval(Tinterval interval, bool dbg=false) {
         vector<Tinterval > arr;
         debug = dbg;
         interval.slice(threshold, arr);
 
         for (auto & it: arr) {
-            insert_interval_intern(it);
+            insert_interval_intern(it, it);
         }
-        while (!pending.empty()) {
-            Tinterval tmp = pending.front();
-            insert_interval_intern(tmp);
-            pending.pop();
+        number_pending += npending.size();
+        while (!npending.empty()) {
+            pair<Tinterval, Tinterval> tmp = npending.front();
+            insert_interval_intern(tmp.first, tmp.second, true);
+            npending.pop();
         }
+        return 0;
     }
 
     int numberLeafs() {
@@ -265,16 +301,13 @@ public:
     }
 
 
-    string graphviz(string iter="1"){
+    string graphviz(string iter=""){
         // string str = "digraph G {\n";
         string tree = "";
         graphviz(root, tree, iter);
         // str += tree + "}";
         return tree;
     }
-
-    Tnode * root;
-    T threshold;
 };
 
 
