@@ -187,7 +187,11 @@ public:
         }
     }
 
-    string to_graphviz(string iter) {
+    string to_graphviz(string iter = "") {
+        if (iter == "") {
+            string str = "\"" + to_string() + "\"";
+            return str;
+        }
         string str = "\"[" + iter + "]" + to_string() + "\"";
         return str;
     }

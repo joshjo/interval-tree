@@ -27,6 +27,9 @@ public:
     LeafNode(Tinterval interval) {
         this->interval = interval;
         T size = interval.right - interval.left;
+        left = NULL;
+        right = NULL;
+        parent = NULL;
     }
 
     void update_weights() {
@@ -36,6 +39,12 @@ public:
         }
     }
 
+
+    void printHashMap() {
+        for (int i = 0; i < hashmap.size(); i += 1) {
+            cout << *(hashmap[i].first) << ", ";
+        }
+    }
 
     void print() {
         printf("[%d, %d](%d)", interval.left, interval.right, max);
@@ -55,7 +64,7 @@ public:
         root = NULL;
     }
 
-    T assign(Tinterval * query) {
+    void assign(Tinterval * query) {
         Tinterval interval(*query);
         Tnode ** visitor = &(this->root);
         while ((*visitor) != NULL) {
@@ -65,54 +74,17 @@ public:
                 visitor = &((*visitor)->right);
             } else {
                 if ((*visitor)->interval.right < interval.right) {
-                    // for (T i = interval.left; i < (*visitor)->interval.right; i++) {
-                    //     result[index + i - interval.left] = (*visitor)->hashmap[i - (*visitor)->interval.left];
-                    // }
-                    // index += (*visitor)->interval.right - interval.left;
-                    Interval tmp = Tinterval(interval.left, (*visitor)->interval.right);
-                    (*visitor)->hashmap.push_back(make_pair(query, tmp))
+                    Tinterval tmp = Tinterval(interval.left, (*visitor)->interval.right);
+                    (*visitor)->hashmap.push_back(make_pair(query, tmp));
                     interval = Tinterval((*visitor)->interval.right, interval.right);
                     visitor = &(this->root);
                 } else {
                     (*visitor)->hashmap.push_back(make_pair(query, interval));
-                    // for (T i = interval.left; i < interval.right; i++) {
-                    //     result[index + i - interval.left] = (*visitor)->hashmap[i - (*visitor)->interval.left];
-                    // }
                     break;
                 }
             }
         }
     }
-
-    // T find (Tinterval interval, string * & result) {
-    //     T size = interval.right - interval.left;
-    //     result = new string[interval.right - interval.left];
-    //     Tnode ** visitor = &(this->root);
-    //     int index = 0;
-    //     while ((*visitor) != NULL) {
-    //         if ((*visitor)->interval.left > interval.right) {
-    //             visitor = &((*visitor)->left);
-    //         } else if ((*visitor)->interval.right <= interval.left) {
-    //             visitor = &((*visitor)->right);
-    //         } else {
-    //             if ((*visitor)->interval.right < interval.right) {
-    //                 for (T i = interval.left; i < (*visitor)->interval.right; i++) {
-    //                     result[index + i - interval.left] = (*visitor)->hashmap[i - (*visitor)->interval.left];
-    //                 }
-    //                 index += (*visitor)->interval.right - interval.left;
-    //                 interval = Tinterval((*visitor)->interval.right, interval.right);
-    //                 visitor = &(this->root);
-    //             } else {
-    //                 for (T i = interval.left; i < interval.right; i++) {
-    //                     result[index + i - interval.left] = (*visitor)->hashmap[i - (*visitor)->interval.left];
-    //                 }
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //     return size;
-    // }
-
 
     Tnode ** search(Tinterval interval, Tnode * & parent = NULL) {
         Tnode ** visitor = &(this->root);
@@ -163,6 +135,9 @@ public:
         if (node != NULL) {
             if (node->parent == NULL && node->left == NULL && node->right == NULL) {
                 tree += node->interval.to_graphviz(iter);
+                for (int i = 0; i < node->hashmap.size(); i += 1) {
+                    tree += node->interval.to_graphviz(iter); + " -> " + node->hashmap[i].first->to_graphviz(iter) + " ";
+                }
             }
             if (node->left != NULL) {
                 tree += node->interval.to_graphviz(iter) + " -> " + node->left->interval.to_graphviz(iter) + " ";
@@ -176,13 +151,40 @@ public:
         }
     }
 
+    void getLeafHash() {
+        getLeafHash(root);
+    }
 
-    string graphviz(string iter="1"){
+    void getLeafHash(Tnode * visitor) {
+        if (visitor != NULL) {
+            cout << "==>" << visitor->interval << " - ";
+            visitor->printHashMap();
+            cout << endl;
+            getLeafHash(visitor->left);
+            getLeafHash(visitor->right);
+        }
+    }
+
+    string graphviz(string iter=""){
         // string str = "digraph G {\n";
         string tree = "";
         graphviz(root, tree, iter);
         // str += tree + "}";
         return tree;
+    }
+
+    void get_nodes(Tnode * visitor, vector<Tnode *> & nodes) {
+        if (visitor != NULL) {
+            nodes.push_back(visitor);
+            get_nodes(visitor->left, nodes);
+            get_nodes(visitor->right, nodes);
+        }
+    }
+
+    vector<Tnode *> nodes () {
+        vector<Tnode *> result;
+        get_nodes(root, result);
+        return result;
     }
 
 };

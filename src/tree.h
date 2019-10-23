@@ -16,6 +16,8 @@ public:
     typedef Interval<T> Tinterval;
     Tnode * root;
     T threshold;
+    int extra_operations;
+    int extra_insertions;
 
     bool debug;
     // queue <pair<Tinterval, Tnode* >> pending;
@@ -29,6 +31,8 @@ public:
         // debug = true;
         debug = false;
         number_pending = 0;
+        extra_operations = 0;
+        extra_insertions = 0;
     }
 
     void print() {
@@ -63,13 +67,19 @@ public:
         }
     }
 
-    void insert_interval_intern(Tinterval interval, Tinterval query) {
+    void insert_interval_intern(Tinterval interval, Tinterval query, bool count = false) {
+        if (count) {
+            extra_operations += 1;
+        }
         if (debug) {
             cout << "inserting: " << interval << endl;
         }
 
         if (root == NULL ) {
             root = new Tnode(interval);
+            if (count) {
+                extra_insertions += 1;
+            }
             return;
         }
 
@@ -137,6 +147,9 @@ public:
                         } else {
                             Tnode * leftNode = new Tnode(interval);
                             Tnode * rightNode = new Tnode(parent->interval);
+                            if (count) {
+                                extra_insertions += 2;
+                            }
                             parent->interval.expand(interval);
                             leftNode->parent = parent;
                             rightNode->parent = parent;
@@ -181,6 +194,11 @@ public:
                             }
                             Tnode * leftNode = new Tnode(parent->interval);
                             Tnode * rightNode = new Tnode(interval);
+
+                            if (count) {
+                                extra_insertions += 2;
+                            }
+
                             parent->interval.expand(interval);
                             leftNode->parent = parent;
                             rightNode->parent = parent;
@@ -214,7 +232,7 @@ public:
         number_pending += npending.size();
         while (!npending.empty()) {
             pair<Tinterval, Tinterval> tmp = npending.front();
-            insert_interval_intern(tmp.first, tmp.second);
+            insert_interval_intern(tmp.first, tmp.second, true);
             npending.pop();
         }
         return 0;
@@ -283,7 +301,7 @@ public:
     }
 
 
-    string graphviz(string iter="1"){
+    string graphviz(string iter=""){
         // string str = "digraph G {\n";
         string tree = "";
         graphviz(root, tree, iter);
