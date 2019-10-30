@@ -64,6 +64,13 @@ public:
         // return MIDDLE;
     }
 
+    Interval<T> intersection(Interval<T> other) {
+        Interval<T> result(0, 0);
+        result.left = left > other.left ? left : other.left;
+        result.right = right < other.right ? right : other.right;
+        return result;
+    }
+
     T middle() {
         T d = distance();
         return (d / 2) + left;

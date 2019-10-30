@@ -10,10 +10,10 @@ using namespace std;
 
 
 int main () {
-    int key_domain_size = 1000;
-    int leaf_size = 100;
-    int Q = 150;
-    int query_number = 10;
+    int key_domain_size = 1000000;
+    int leaf_size = 100000;
+    int Q = 150000;
+    int query_number = 2;
 
     vector<Interval<int> > queries;
     LeafTree<int> leaftree;
@@ -27,36 +27,36 @@ int main () {
         int R1 = rand() % Q;
         Interval<int> I(S1, S1 + R1);
         queries.push_back(I);
-        cout << I << endl;
     }
 
     // Insert queries to tree
     for (int i = 0; i < queries.size(); i += 1) {
+        cout << i << endl;
         tree.insert_interval(queries[i]);
     }
 
     // cout << tree.graphviz() << endl << endl;
 
 
-    for (int i = 0; i < tree.root->leafs.size(); i += 1) {
-        leafs.push_back(tree.root->leafs[i]->interval);
-    }
+    // for (int i = 0; i < tree.root->leafs.size(); i += 1) {
+    //     leafs.push_back(tree.root->leafs[i]->interval);
+    // }
 
-    random_shuffle(leafs.begin(), leafs.end());
+    // random_shuffle(leafs.begin(), leafs.end());
 
-    for (int i = 0; i < leafs.size(); i += 1) {
-        leaftree.insert(leafs[i]);
-    }
+    // for (int i = 0; i < leafs.size(); i += 1) {
+    //     leaftree.insert(leafs[i]);
+    // }
 
-    for (int i = 0; i < queries.size(); i += 1) {
-        leaftree.assign(&queries[i]);
-    }
+    // for (int i = 0; i < queries.size(); i += 1) {
+    //     leaftree.assign(&queries[i]);
+    // }
 
-    vector <LeafNode<int> *> nodes = leaftree.nodes();
+    // vector <LeafNode<int> *> nodes = leaftree.nodes();
 
-    for (int i = 0; i < nodes.size(); i++) {
+    // for (int i = 0; i < nodes.size(); i++) {
 
-    }
+    // }
 
     // cout << nodes.size() << endl;
 

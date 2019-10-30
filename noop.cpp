@@ -2,6 +2,7 @@
 #include <ctime>
 
 #include "src/tree.h"
+#include "src/leaftree.h"
 
 using namespace std;
 
@@ -23,25 +24,54 @@ void noop() {
 
 
 int main(int argc, char** argv) {
-    int query_number;
+    // srand (time(NULL));
 
-    if (argc != 2) {
-        cout << "Please enter an initial size" << endl;
-        return 1;
+    int key_domain_size = 100000;
+    int leaf_size = 10000;
+    int Q = 15000;
+    int query_number = 100;
+
+    vector<Interval<int> > queries;
+    LeafTree<int> leaftree;
+
+    for (int i = 0; i < query_number; i += 1) {
+        int S1 = rand() % key_domain_size;
+        int R1 = rand() % Q;
+        Interval<int> I(S1, S1 + R1);
+        // cout << i << ": " << I << endl;
+        queries.push_back(I);
+        // tree.insert_interval(I);
+    }
+    // queries.push_back(Interval<int>(100, 150));
+    // queries.push_back(Interval<int>(180, 190));
+    // queries.push_back(Interval<int>(100, 200));
+
+    Tree <int> tree(leaf_size);
+    for (int i = 0; i < queries.size(); i += 1) {
+        // cout << "q" << i + 1 << ": " << queries[i] << endl;
+        tree.insert_interval(queries[i], false);
+        // cout << tree.graphviz(to_string(i)) << endl;
     }
 
-    sscanf(argv[1], "%d", &query_number);
+    // cout << tree.graphviz() << endl;
 
-    auto start_time = std::chrono::system_clock::now();
-    // A a;
-    for(int i = 0; i < query_number; i += 1) {
-        noop();
-    }
-    auto end_time = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end_time - start_time;
+    // cout << tree.root->leafs.size() << endl;
 
-    cout << elapsed_seconds.count() << endl;
+    // for (int i = 0; i < tree.root->leafs.size(); i += 1) {
+    //     Tree<int>::Tnode * node = tree.root->leafs[i];
+    //     cout << "node:   " << node->interval << endl;
+    //     for (int j = 0; j < node->queries.size(); j += 1) {
+    //         cout << "\t" << *(node->queries[j].first) << " - " << node->queries[j].second << endl;
+    //     }
+    //     cout << "queries: " << node->queries.size() << endl;
+    // }
 
+
+    // for (int i = 0; i < queries[])
+    // cout << tree.graphviz() << endl;
+
+    // cout << *(tree.root->queries[0].first) << " - " << tree.root->queries[0].second << endl;
+    // cout << tree.root->queries.size() << endl;
 
     return 0;
 }

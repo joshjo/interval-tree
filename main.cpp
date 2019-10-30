@@ -2,6 +2,7 @@
 #include <ctime>
 
 #include "src/tree.h"
+#include "src/leaftree.h"
 
 using namespace std;
 
@@ -9,17 +10,17 @@ using namespace std;
 int main(int argc, char** argv) {
     srand (time(NULL));
 
-    // int key_domain_size = 10000000;
-    // int leaf_size = 1000000;
-    // int Q = 1500000;
+    int key_domain_size = 1000000;
+    int leaf_size = 100000;
+    int Q = 150000;
 
-    int key_domain_size = 1000;
-    int leaf_size = 100;
-    int Q = 150;
+    // int key_domain_size = 1000;
+    // int leaf_size = 100;
+    // int Q = 150;
 
     int query_number;
-    double times = 0;
-    int iters = 10;
+    double tree_time = 0;
+    int iters = 5;
 
     if (argc != 2) {
         cout << "Please enter an initial size" << endl;
@@ -29,14 +30,15 @@ int main(int argc, char** argv) {
     sscanf(argv[1], "%d", &query_number);
 
     for (int z = 0; z < iters; z++) {
-        vector<Interval<int> > intervals;
+        vector<Interval<int> > queries;
+        LeafTree<int> leaftree;
 
         for (int i = 0; i < query_number; i += 1) {
             int S1 = rand() % key_domain_size;
             int R1 = rand() % Q;
             Interval<int> I(S1, S1 + R1);
             // cout << I << endl;
-            intervals.push_back(I);
+            queries.push_back(I);
             // tree.insert_interval(I);
         }
 
@@ -44,27 +46,22 @@ int main(int argc, char** argv) {
         auto start_time = std::chrono::system_clock::now();
 
         Tree <int> tree(leaf_size);
-        for (int i = 0; i < intervals.size(); i += 1) {
-            tree.insert_interval(intervals[i]);
+        for (int i = 0; i < queries.size(); i += 1) {
+            // cout << "i: " << i << endl;
+            tree.insert_interval(queries[i]);
             // cout << tree.graphviz(to_string(i)) << endl;
         }
-        vector<Interval<int> > leafs;
-        tree.getLeafs(leafs);
+        // vector<Interval<int> > leafs;
+        // tree.getLeafs(leafs);
 
         auto end_time = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsed_seconds = end_time - start_time;
-        times += elapsed_seconds.count();
+        double local_time = elapsed_seconds.count();
+        tree_time += local_time;
 
-        cout << tree.extra_operations << " - " << tree.extra_insertions << endl;
-
-        // cout << "min " << min << endl;
-        // cout << "max " << max << endl;
         // cout << tree.graphviz("") << endl;
-        // cout << "tree " << tree.root->leafs.size() << endl;
-
-        // for(int i = 0; i < leafs.size(); i++) {
-        //     cout << leafs[i] << endl;
-        // }
+        cout << tree.extra_operations << " - " << tree.extra_insertions << endl;
+        cout << "-> " << local_time << endl;
 
         // cout << "------------------------" << endl;
 
@@ -76,7 +73,10 @@ int main(int argc, char** argv) {
 
 
     }
-    // cout << "Avg: " << (times / iters) << endl;
+
+    cout << endl << " ---------------------- " << endl;
+    cout << tree_time << " - " << iters << endl;
+    cout << "Avg: " << (tree_time / iters) << endl;
 
 
     // tree.getLeafs(leafs);
