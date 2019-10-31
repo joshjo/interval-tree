@@ -49,6 +49,9 @@ public:
         }
     }
 
+    // void split_half(Tinterval new_interval) {
+    // }
+
     void split() {
         Tinterval left_interval, right_interval;
         interval.split(left_interval, right_interval);
@@ -62,25 +65,27 @@ public:
         return ((left == NULL) && (right == NULL));
     }
 
-    void update_weights() {
-        // leafs.push_back(1);
-        leafs.clear();
-        if (left != NULL) {
-            if (left->is_leaf()) {
-                leafs.push_back(left);
+    void update_weights(bool with_leafs = false) {
+        if (with_leafs) {
+            leafs.clear();
+            if (left != NULL) {
+                if (left->is_leaf()) {
+                    leafs.push_back(left);
+                }
+                else {
+                    leafs.insert(leafs.end(), left->leafs.begin(), left->leafs.end());
+                }
             }
-            else {
-                leafs.insert(leafs.end(), left->leafs.begin(), left->leafs.end());
+            if (right != NULL) {
+                if (right->is_leaf()) {
+                    leafs.push_back(right);
+                }
+                else {
+                    leafs.insert(leafs.end(), right->leafs.begin(), right->leafs.end());
+                }
             }
         }
-        if (right != NULL) {
-            if (right->is_leaf()) {
-                leafs.push_back(right);
-            }
-            else {
-                leafs.insert(leafs.end(), right->leafs.begin(), right->leafs.end());
-            }
-        }
+
         if (this->parent != NULL) {
             if (this->interval.left < parent->interval.left) {
                 parent->interval.left = this->interval.left;
@@ -88,7 +93,7 @@ public:
             if (this->interval.right > parent->interval.right) {
                 parent->interval.right = this->interval.right;
             }
-            parent->update_weights();
+            parent->update_weights(with_leafs);
         }
     }
 
