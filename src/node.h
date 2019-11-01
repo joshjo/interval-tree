@@ -69,30 +69,31 @@ public:
         left->parent = this;
         right->parent = this;
 
-        // if(left_interval.intersects(*query)) {
-        //     Tinterval intersection = left_interval.intersection(*query);
-        //     left->queries.push_back(make_pair(query, intersection));
-        // }
-        // if(right_interval.intersects(*query)) {
-        //     Tinterval intersection = right_interval.intersection(*query);
-        //     right->queries.push_back(make_pair(query, intersection));
-        // }
+        if(left_interval.intersects(*query)) {
+            Tinterval intersection = left_interval.intersection(*query);
+            left->queries.push_back(make_pair(query, intersection));
+        }
+        if(right_interval.intersects(*query)) {
+            Tinterval intersection = right_interval.intersection(*query);
+            right->queries.push_back(make_pair(query, intersection));
+        }
 
         /*
         Updating queries intervals from parent to new nodes;
         */
-        // for (int i = 0; i < this->queries.size(); i += 1) {
-        //     pair <Tinterval *, Tinterval> pair_left(this->queries[i]);
-        //     pair <Tinterval *, Tinterval> pair_right(this->queries[i]);
-        //     if (left_interval.intersects(pair_left.second)) {
-        //         pair_left.second = left_interval.intersection(pair_left.second);
-        //         left->queries.push_back(pair_left);
-        //     }
-        //     if (right_interval.intersects(pair_right.second)) {
-        //         pair_right.second = right_interval.intersection(pair_right.second);
-        //         right->queries.push_back(pair_right);
-        //     }
-        // }
+        for (int i = 0; i < this->queries.size(); i += 1) {
+            pair <Tinterval *, Tinterval> pair_left(this->queries[i]);
+            pair <Tinterval *, Tinterval> pair_right(this->queries[i]);
+
+            if (left_interval.intersects(pair_left.second)) {
+                pair_left.second = left_interval.intersection(pair_left.second);
+                left->queries.push_back(pair_left);
+            }
+            if (right_interval.intersects(pair_right.second)) {
+                pair_right.second = right_interval.intersection(pair_right.second);
+                right->queries.push_back(pair_right);
+            }
+        }
         update_weights();
     }
 
@@ -152,24 +153,24 @@ public:
     }
 
     void update_weights(bool debug=false) {
-        // leafs.clear();
+        leafs.clear();
 
-        // if (left != NULL) {
-        //     if (left->is_leaf()) {
-        //         leafs.push_back(left);
-        //     }
-        //     else {
-        //         leafs.insert(leafs.end(), left->leafs.begin(), left->leafs.end());
-        //     }
-        // }
-        // if (right != NULL) {
-        //     if (right->is_leaf()) {
-        //         leafs.push_back(right);
-        //     }
-        //     else {
-        //         leafs.insert(leafs.end(), right->leafs.begin(), right->leafs.end());
-        //     }
-        // }
+        if (left != NULL) {
+            if (left->is_leaf()) {
+                leafs.push_back(left);
+            }
+            else {
+                leafs.insert(leafs.end(), left->leafs.begin(), left->leafs.end());
+            }
+        }
+        if (right != NULL) {
+            if (right->is_leaf()) {
+                leafs.push_back(right);
+            }
+            else {
+                leafs.insert(leafs.end(), right->leafs.begin(), right->leafs.end());
+            }
+        }
 
         if (this->parent != NULL) {
             if (this->interval.left < parent->interval.left) {
