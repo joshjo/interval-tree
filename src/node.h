@@ -6,33 +6,38 @@ using namespace std;
 
 
 template <class T>
-class Node {
+class NodeBase {
 public:
-    typedef Node<T> Tnode;
+    typedef NodeBase<T> Tnode;
     typedef Interval<T> Tinterval;
     vector <Tnode* > leafs;
-    vector <Tinterval> queries;
+    // vector <Tinterval> queries;
+    bool with_leafs;
+    Tnode * left;
+    Tnode * right;
+    Tnode * parent;
+    Tinterval interval;
+    T top;
 
-
-    Node() {
+    NodeBase() {
         left = NULL;
         right = NULL;
         parent = NULL;
     }
 
-    Node(Tinterval interval) {
+    NodeBase(Tinterval interval) {
         this->interval = interval;
         parent = NULL;
         left = NULL;
         right = NULL;
     }
 
-    Node(Tinterval interval, Tinterval query) {
+    NodeBase(Tinterval interval, Tinterval query) {
         this->interval = interval;
         parent = NULL;
         left = NULL;
         right = NULL;
-        queries.push_back(query);
+        // queries.push_back(query);
     }
 
     bool is_interval() {
@@ -55,10 +60,17 @@ public:
     void split() {
         Tinterval left_interval, right_interval;
         interval.split(left_interval, right_interval);
-        left = new Node(left_interval);
-        right = new Node(right_interval);
+        left = new Tnode(left_interval);
+        right = new Tnode(right_interval);
         left->parent = this;
         right->parent = this;
+    }
+
+    void expand(Tinterval & newInterval) {
+        interval.expand(newInterval);
+        left = NULL;
+        right = NULL;
+        update_weights();
     }
 
     bool is_leaf() {
@@ -110,12 +122,6 @@ public:
         std::cout << interval;
         // std::cout << interval;
     }
-
-    Tnode * left;
-    Tnode * right;
-    Tnode * parent;
-    Tinterval interval;
-    T top;
 };
 
 

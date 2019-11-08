@@ -9,10 +9,20 @@
 using namespace std;
 
 
-template <class T>
+class TraitsBase {
+    public:
+        typedef int T;
+        typedef NodeBase<T> Node;
+};
+
+
+
+template <class Tr>
 class Tree {
 public:
-    typedef Node<T> Tnode;
+    typedef typename Tr::T T;
+    typedef typename Tr::Node Tnode;
+
     typedef Interval<T> Tinterval;
     Tnode * root;
     T threshold;
@@ -26,11 +36,10 @@ public:
     queue <pair<Tinterval, Tinterval> > npending;
     int number_pending;
 
-    Tree(int threshold=100, bool with_leafs = false) {
+    Tree(int threshold=100) {
         this->root = NULL;
         this->threshold = threshold;
         this->with_leafs = with_leafs;
-        // debug = true;
         debug = false;
         number_pending = 0;
         extra_operations = 0;
