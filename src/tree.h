@@ -5,14 +5,22 @@
 
 #include "node.h"
 
-
 using namespace std;
 
 
-template <class T>
+// class TraitsBase {
+//     public:
+//         typedef int T;
+//         typedef Node<T> TNode;
+// };
+
+
+template <class Tr>
 class Tree {
 public:
-    typedef Node<T> Tnode;
+    typedef typename Tr::T T;
+    typedef typename Tr::TNode Tnode;
+    // typedef Node<T> Tnode;
     typedef Interval<T> Tinterval;
     Tnode * root;
     T threshold;

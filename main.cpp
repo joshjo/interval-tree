@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
         // cout << "++++++++++++++++++++++++++" << endl;
         auto start_time = std::chrono::system_clock::now();
 
-        Tree <int> tree(leaf_size);
+        Tree <TraitsBase> tree(leaf_size);
         for (int i = 0; i < intervals.size(); i += 1) {
             tree.insert_interval(intervals[i]);
             // cout << tree.graphviz(to_string(i)) << endl;
@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
         std::chrono::duration<double> elapsed_seconds = end_time - start_time;
         times += elapsed_seconds.count();
 
-        cout << tree.extra_operations << " - " << tree.extra_insertions << endl;
+        // cout << tree.extra_operations << " - " << tree.extra_insertions << endl;
 
         // cout << "min " << min << endl;
         // cout << "max " << max << endl;
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
 
         // cout << endl << leafs.size() << " - " << tree.leafs.size() << endl;
         // cout << leafs.size() << " -- " << tree.leafs.size() << endl;
-        // cout << elapsed_seconds.count() << endl;
+        cout << elapsed_seconds.count() << endl;
 
 
     }
