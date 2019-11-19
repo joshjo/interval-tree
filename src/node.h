@@ -11,27 +11,26 @@ public:
     typedef Node<T> Tnode;
     typedef Interval<T> Tinterval;
     vector <Tnode* > leafs;
-    vector <Tinterval> queries;
+    vector <Tinterval *> queries;
+    bool withLeafs;
 
 
     Node() {
         left = NULL;
         right = NULL;
         parent = NULL;
+        withLeafs = true;
+
+        if (withLeafs) {
+            leafs.push_back(this);
+        }
     }
 
-    Node(Tinterval interval) {
+    Node(Tinterval interval) : Node() {
         this->interval = interval;
-        parent = NULL;
-        left = NULL;
-        right = NULL;
     }
 
-    Node(Tinterval interval, Tinterval query) {
-        this->interval = interval;
-        parent = NULL;
-        left = NULL;
-        right = NULL;
+    Node(Tinterval interval, Tinterval * query) : Node(interval) {
         queries.push_back(query);
     }
 
@@ -49,8 +48,9 @@ public:
         }
     }
 
-    // void split_half(Tinterval new_interval) {
-    // }
+    void splitLeft(Tinterval newIntervl) {
+
+    }
 
     void split() {
         Tinterval left_interval, right_interval;
@@ -61,29 +61,27 @@ public:
         right->parent = this;
     }
 
+    void replace(Tinterval newInterval) {
+        interval = newInterval;
+        left = NULL;
+        right = NULL;
+    }
+
     bool is_leaf() {
         return ((left == NULL) && (right == NULL));
     }
 
-    void update_weights(bool with_leafs = false) {
-        if (with_leafs) {
-            leafs.clear();
-            if (left != NULL) {
-                if (left->is_leaf()) {
-                    leafs.push_back(left);
-                }
-                else {
-                    leafs.insert(leafs.end(), left->leafs.begin(), left->leafs.end());
-                }
-            }
-            if (right != NULL) {
-                if (right->is_leaf()) {
-                    leafs.push_back(right);
-                }
-                else {
-                    leafs.insert(leafs.end(), right->leafs.begin(), right->leafs.end());
-                }
-            }
+    void updateWeights() {
+        bool shouldUpdateLeafs = false;
+
+        int leftNodes = this->left != NULL ? this->left->leafs.size() : 0;
+        int rightNodes = this->right != NULL ? this->right->leafs.size() : 0;
+
+        if ((leftNodes + rightNodes) != leafs.size() || leafs.size() == 0) {
+            shouldUpdateLeafs = true;
+        }
+        if (withLeafs && shouldUpdateLeafs) {
+            updateLeafs();
         }
 
         if (this->parent != NULL) {
@@ -93,7 +91,28 @@ public:
             if (this->interval.right > parent->interval.right) {
                 parent->interval.right = this->interval.right;
             }
-            parent->update_weights(with_leafs);
+            parent->updateWeights();
+        }
+    }
+
+    void updateLeafs() {
+        leafs.clear();
+        if (left != NULL) {
+            if (left->is_leaf()) {
+                leafs.push_back(left);
+            } else {
+                leafs.insert(leafs.end(), left->leafs.begin(), left->leafs.end());
+            }
+        }
+        if (right != NULL) {
+            if (right->is_leaf()) {
+                leafs.push_back(right);
+            } else {
+                leafs.insert(leafs.end(), right->leafs.begin(), right->leafs.end());
+            }
+        }
+        if (right == NULL && left == NULL) {
+            leafs.push_back(this);
         }
     }
 
