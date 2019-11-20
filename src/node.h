@@ -48,8 +48,40 @@ public:
         }
     }
 
-    void splitLeft(Tinterval newIntervl) {
+    void splitLeft(Tinterval newInterval, Tinterval * query) {
+        Tnode * leftNode = new Tnode(newInterval, query);
+        Tnode * rightNode = new Tnode(interval, query);
+        interval.expand(newInterval);
+        leftNode->parent = this;
+        rightNode->parent = this;
+        left = leftNode;
+        right = rightNode;
+        updateWeights();
+    }
 
+    void splitRight(Tinterval newInterval, Tinterval * query) {
+        Tnode * leftNode = new Tnode(interval, query);
+        Tnode * rightNode = new Tnode(newInterval, query);
+        interval.expand(newInterval);
+        leftNode->parent = this;
+        rightNode->parent = this;
+        left = leftNode;
+        right = rightNode;
+        updateWeights();
+    }
+
+    void replaceDestroy(Tinterval newInterval, Tinterval * query) {
+        interval = newInterval;
+        updateWeights();
+        left = NULL;
+        right = NULL;
+    }
+
+    void expandDestroy(Tinterval newInterval, Tinterval * query) {
+        interval.expand(newInterval);
+        left = NULL;
+        right = NULL;
+        updateWeights();
     }
 
     void split() {
@@ -59,6 +91,7 @@ public:
         right = new Node(right_interval);
         left->parent = this;
         right->parent = this;
+        updateWeights();
     }
 
     void replace(Tinterval newInterval) {

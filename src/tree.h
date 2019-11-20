@@ -75,21 +75,8 @@ public:
     }
 
     void insert_interval_intern(Tinterval interval, Tinterval * query, bool count = false) {
-        if (count) {
-            extra_operations += 1;
-        }
-        if (debug) {
-            cout << "inserting: " << interval << endl;
-        }
-
         if (root == NULL ) {
             root = new Tnode(interval, query);
-            if (count) {
-                extra_insertions += 1;
-            }
-            if (debug) {
-                cout << "root :)" << endl;
-            }
             return;
         }
 
@@ -97,32 +84,17 @@ public:
         Tnode * parent = NULL;
         while((*visitor) != NULL) {
             if (interval.includes((*visitor)->interval)) {
-                if (debug) {
-                    cout << "******* " << interval << " includes " << (*visitor)->interval << endl;
-                }
                 Tinterval tmp = (*visitor)->interval;
                 tmp.expand(interval);
                 if (tmp.distance() < threshold) {
-                    (*visitor)->interval = tmp;
-                    (*visitor)->left = NULL;
-                    (*visitor)->right = NULL;
-                    (*visitor)->updateWeights();
+                    (*visitor)->replaceDestroy(tmp, query);
                     break;
                 }
             }
 
             int direction = decide(interval, visitor);
-            if (debug) {
-                cout << "direction " << direction << " Interval " << interval << endl;
-                cout << "left  ifs: " << (direction == LEFT || direction == LEFT_PARENT) << endl;
-                cout << "right ifs: " << (direction == RIGHT || direction == RIGHT_PARENT) << endl;
-            }
             if (direction == LEFT || direction == LEFT_PARENT) {
                 Tnode * sibling = ((*visitor)->right);
-                if(debug) {
-                    cout << "visitor: " << (*visitor)->interval << endl;
-                    cout << "sibling " << sibling << endl;
-                }
                 if (LEFT_PARENT && sibling != NULL) {
                     if (sibling->interval.intersects(interval)) {
                         Tinterval slice(sibling->interval.left, interval.right);
@@ -137,33 +109,13 @@ public:
                     Tinterval tmp = (*visitor)->interval;
                     tmp.expand(interval);
                     if (tmp.distance() <= threshold && (*visitor)->interval.intersects(interval)) {
-                        if (debug) cout << "update nodes" << endl;
-                        (*visitor)->interval = tmp;
-                        (*visitor)->updateWeights();
-                        (*visitor)->left = NULL;
-                        (*visitor)->right = NULL;
+                        (*visitor)->replaceDestroy(tmp, query);
                     } else {
-                        Tnode * parent = (*visitor);
-                        if (debug) {
-                            cout << "intersects? " << (*visitor)->interval.intersects(interval) << endl;
-                            cout << "parent: " << parent->interval << endl;
-                        }
                         if ((*visitor)->interval.intersects(interval)) {
-                            parent->interval.expand(interval);
-                            parent->split();
-                            parent->updateWeights();
+                            (*visitor)->interval.expand(interval);
+                            (*visitor)->split();
                         } else {
-                            Tnode * leftNode = new Tnode(interval, query);
-                            Tnode * rightNode = new Tnode(parent->interval, query);
-                            if (count) {
-                                extra_insertions += 2;
-                            }
-                            parent->interval.expand(interval);
-                            leftNode->parent = parent;
-                            rightNode->parent = parent;
-                            (*visitor)->left = leftNode;
-                            (*visitor)->right = rightNode;
-                            parent->updateWeights();
+                            (*visitor)->splitLeft(interval, query);
                         }
                     }
                     break;
@@ -186,32 +138,13 @@ public:
                     Tinterval tmp = (*visitor)->interval;
                     tmp.expand(interval);
                     if (tmp.distance() <= threshold && (*visitor)->interval.intersects(interval)) {
-                        (*visitor)->interval = tmp;
-                        (*visitor)->updateWeights();
-                        (*visitor)->left = NULL;
-                        (*visitor)->right = NULL;
+                        (*visitor)->replaceDestroy(tmp, query);
                     } else {
-                        Tnode * parent = (*visitor);
                         if ((*visitor)->interval.intersects(interval)) {
-                            parent->interval.expand(interval);
-                            parent->split();
-                            parent->updateWeights();
+                            (*visitor)->interval.expand(interval);
+                            (*visitor)->split();
                         } else {
-                            if (debug) {
-                                cout << "new node at right" << endl;
-                            }
-                            Tnode * leftNode = new Tnode(parent->interval, query);
-                            Tnode * rightNode = new Tnode(interval, query);
-                            if (count) {
-                                extra_insertions += 2;
-                            }
-
-                            parent->interval.expand(interval);
-                            leftNode->parent = parent;
-                            rightNode->parent = parent;
-                            (*visitor)->left = leftNode;
-                            (*visitor)->right = rightNode;
-                            parent->updateWeights();
+                            (*visitor)->splitRight(interval, query);
                         }
                     }
                     break;
@@ -219,10 +152,7 @@ public:
                 visitor = &(*visitor)->right;
             }
             if (direction == MIDDLE) {
-                (*visitor)->interval.expand(interval);
-                (*visitor)->left = NULL;
-                (*visitor)->right = NULL;
-                (*visitor)->updateWeights();
+                (*visitor)->expandDestroy(interval, query);
                 break;
             }
         }

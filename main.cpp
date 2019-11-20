@@ -56,25 +56,19 @@ int main(int argc, char** argv) {
         }
         auto end_time = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsed_seconds = end_time - start_time;
-        times += elapsed_seconds.count();
+        double iter_time = elapsed_seconds.count();
+        times += iter_time;
+
+        // cout << iter_time << endl;
         vector<Interval<int> > leafs;
         tree.getLeafs(leafs);
-
-        // cout << tree.extra_operations << " - " << tree.extra_insertions << endl;
-
-        // cout << "min " << min << endl;
-        // cout << "max " << max << endl;
-        // cout << tree.graphviz() << endl;
-        // cout << "tree " << tree.root->leafs.size() << endl;
 
         // for(int i = 0; i < tree.root->leafs.size(); i++) {
         //     cout << tree.root->leafs[i]->interval << endl;
         // }
 
-        // cout << "------------------------" << endl;
-
         // tree.print_intervals();
-        cout << tree.root->leafs.size() << "/" << leafs.size() << " " << elapsed_seconds.count() << endl;
+        cout << tree.root->leafs.size() << "/" << leafs.size() << " " << iter_time << endl;
     }
     // cout << "Avg: " << (times / iters) << endl;
 
