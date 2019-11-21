@@ -75,7 +75,7 @@ public:
     }
 
     void insert_interval_intern(Tinterval interval, Tinterval * query, bool count = false) {
-        if (root == NULL ) {
+        if (root == NULL) {
             root = new Tnode(interval, query);
             return;
         }
@@ -113,7 +113,7 @@ public:
                     } else {
                         if ((*visitor)->interval.intersects(interval)) {
                             (*visitor)->interval.expand(interval);
-                            (*visitor)->split();
+                            (*visitor)->split(query);
                         } else {
                             (*visitor)->splitLeft(interval, query);
                         }
@@ -142,7 +142,7 @@ public:
                     } else {
                         if ((*visitor)->interval.intersects(interval)) {
                             (*visitor)->interval.expand(interval);
-                            (*visitor)->split();
+                            (*visitor)->split(query);
                         } else {
                             (*visitor)->splitRight(interval, query);
                         }

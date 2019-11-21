@@ -10,16 +10,18 @@ class Node {
 public:
     typedef Node<T> Tnode;
     typedef Interval<T> Tinterval;
+    typedef typename set <Tinterval *>::iterator it;
     vector <Tnode* > leafs;
-    vector <Tinterval *> queries;
+    set <Tinterval *> queries;
     bool withLeafs;
-
+    bool withQueries;
 
     Node() {
         left = NULL;
         right = NULL;
         parent = NULL;
         withLeafs = true;
+        withQueries = withLeafs && true;
 
         if (withLeafs) {
             leafs.push_back(this);
@@ -31,7 +33,9 @@ public:
     }
 
     Node(Tinterval interval, Tinterval * query) : Node(interval) {
-        queries.push_back(query);
+        if (withQueries) {
+            queries.insert(query);
+        }
     }
 
     bool is_interval() {
@@ -54,6 +58,12 @@ public:
         interval.expand(newInterval);
         leftNode->parent = this;
         rightNode->parent = this;
+
+        if (withQueries) {
+            leftNode->queries.insert(queries.begin(), queries.end());
+            rightNode->queries.insert(queries.begin(), queries.end());
+        }
+
         left = leftNode;
         right = rightNode;
         updateWeights();
@@ -65,6 +75,12 @@ public:
         interval.expand(newInterval);
         leftNode->parent = this;
         rightNode->parent = this;
+
+        if (withQueries) {
+            leftNode->queries.insert(queries.begin(), queries.end());
+            rightNode->queries.insert(queries.begin(), queries.end());
+        }
+
         left = leftNode;
         right = rightNode;
         updateWeights();
@@ -72,6 +88,13 @@ public:
 
     void replaceDestroy(Tinterval newInterval, Tinterval * query) {
         interval = newInterval;
+
+        if (withQueries) {
+            for(int i = 0; i < leafs.size(); i += 1) {
+                queries.insert(leafs[i]->queries.begin(), leafs[i]->queries.end());
+            }
+            queries.insert(query);
+        }
         updateWeights();
         left = NULL;
         right = NULL;
@@ -79,25 +102,34 @@ public:
 
     void expandDestroy(Tinterval newInterval, Tinterval * query) {
         interval.expand(newInterval);
+
+        if (withQueries) {
+            for(int i = 0; i < leafs.size(); i += 1) {
+                queries.insert(leafs[i]->queries.begin(), leafs[i]->queries.end());
+            }
+            queries.insert(query);
+        }
+
         left = NULL;
         right = NULL;
         updateWeights();
     }
 
-    void split() {
+    void split(Tinterval * query) {
+        // Here problably we will need to store the queries from left or right
         Tinterval left_interval, right_interval;
         interval.split(left_interval, right_interval);
-        left = new Node(left_interval);
-        right = new Node(right_interval);
+        left = new Node(left_interval, query);
+        right = new Node(right_interval, query);
         left->parent = this;
         right->parent = this;
-        updateWeights();
-    }
 
-    void replace(Tinterval newInterval) {
-        interval = newInterval;
-        left = NULL;
-        right = NULL;
+        if (withQueries) {
+            left->queries.insert(queries.begin(), queries.end());
+            right->queries.insert(queries.begin(), queries.end());
+        }
+
+        updateWeights();
     }
 
     bool is_leaf() {
