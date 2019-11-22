@@ -86,14 +86,17 @@ public:
         updateWeights();
     }
 
-    void replaceDestroy(Tinterval newInterval, Tinterval * query) {
+    void replaceDestroy(Tinterval newInterval, Tinterval * query, double & a = 0) {
         interval = newInterval;
-
         if (withQueries) {
+            auto start_time = std::chrono::system_clock::now();
             for(int i = 0; i < leafs.size(); i += 1) {
-                queries.insert(leafs[i]->queries.begin(), leafs[i]->queries.end());
+                this->queries.insert(leafs[i]->queries.begin(), leafs[i]->queries.end());
             }
-            queries.insert(query);
+            auto end_time = std::chrono::system_clock::now();
+            // this->queries.insert(query);
+            chrono::duration<double> elapsed_seconds = end_time - start_time;
+            a += elapsed_seconds.count();
         }
         updateWeights();
         left = NULL;
@@ -104,10 +107,10 @@ public:
         interval.expand(newInterval);
 
         if (withQueries) {
+            queries.insert(query);
             for(int i = 0; i < leafs.size(); i += 1) {
                 queries.insert(leafs[i]->queries.begin(), leafs[i]->queries.end());
             }
-            queries.insert(query);
         }
 
         left = NULL;

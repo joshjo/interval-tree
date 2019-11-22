@@ -7,7 +7,8 @@ using namespace std;
 
 
 int main(int argc, char** argv) {
-    srand (time(NULL));
+    // srand (time(NULL));
+    srand (100);
 
     int key_domain_size = 10000000;
     int leaf_size = 1000000;
@@ -36,7 +37,7 @@ int main(int argc, char** argv) {
         for (int i = 0; i < query_number; i += 1) {
             int S1 = rand() % key_domain_size;
             int R1 = rand() % Q;
-            Interval<int> I(S1, S1 + R1);
+            Interval<int> I(S1, S1 + leaf_size);
             // cout << I << endl;
             intervals.push_back(I);
             // tree.insert_interval(I);

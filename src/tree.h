@@ -26,6 +26,8 @@ public:
     T threshold;
     int extra_operations;
     int extra_insertions;
+    double counter;
+    int insertions = 0;
 
     bool debug;
     // queue <pair<Tinterval, Tnode* >> pending;
@@ -40,6 +42,8 @@ public:
         number_pending = 0;
         extra_operations = 0;
         extra_insertions = 0;
+        counter = 0;
+        insertions = 0;
     }
 
     void print() {
@@ -75,6 +79,8 @@ public:
     }
 
     void insert_interval_intern(Tinterval interval, Tinterval * query, bool count = false) {
+        insertions += 1;
+
         if (root == NULL) {
             root = new Tnode(interval, query);
             return;
@@ -87,7 +93,7 @@ public:
                 Tinterval tmp = (*visitor)->interval;
                 tmp.expand(interval);
                 if (tmp.distance() < threshold) {
-                    (*visitor)->replaceDestroy(tmp, query);
+                    (*visitor)->replaceDestroy(tmp, query, counter);
                     break;
                 }
             }
@@ -109,7 +115,7 @@ public:
                     Tinterval tmp = (*visitor)->interval;
                     tmp.expand(interval);
                     if (tmp.distance() <= threshold && (*visitor)->interval.intersects(interval)) {
-                        (*visitor)->replaceDestroy(tmp, query);
+                        (*visitor)->replaceDestroy(tmp, query, counter);
                     } else {
                         if ((*visitor)->interval.intersects(interval)) {
                             (*visitor)->interval.expand(interval);
@@ -138,7 +144,7 @@ public:
                     Tinterval tmp = (*visitor)->interval;
                     tmp.expand(interval);
                     if (tmp.distance() <= threshold && (*visitor)->interval.intersects(interval)) {
-                        (*visitor)->replaceDestroy(tmp, query);
+                        (*visitor)->replaceDestroy(tmp, query, counter);
                     } else {
                         if ((*visitor)->interval.intersects(interval)) {
                             (*visitor)->interval.expand(interval);
