@@ -11,9 +11,9 @@ typedef Interval<int> Tinterval;
 int main(int argc, char** argv) {
     srand (100);
 
-    int key_domain_size = 10000000;
-    int leaf_size = 1000000;
-    int Q = 1500000;
+    int key_domain_size = 1000000;
+    int leaf_size = 100000;
+    int Q = 150000;
 
     // int key_domain_size = 1000;
     // int leaf_size = 100;
@@ -53,12 +53,12 @@ int main(int argc, char** argv) {
     cout << iter_time << endl;
     cout << tree.counter << " -- " << tree.insertions << endl;
 
-    // for (int i = 0; i < tree.root->leafs.size(); i += 1) {
-    //     cout << tree.root->leafs[i]->interval << " -> " << tree.root->leafs[i]->queries.size() << endl;
-    //     for (set<Tinterval *>::iterator it = tree.root->leafs[i]->queries.begin(); it != tree.root->leafs[i]->queries.end(); it++) {
-    //         cout << "\t" << *(*it) << endl;
-    //     }
-    // }
+    for (int i = 0; i < tree.root->leafs.size(); i += 1) {
+        cout << tree.root->leafs[i]->interval << " -> " << tree.root->leafs[i]->queries.size() << endl;
+        // for (set<Tinterval *>::iterator it = tree.root->leafs[i]->queries.begin(); it != tree.root->leafs[i]->queries.end(); it++) {
+        //     cout << "\t" << *(*it) << endl;
+        // }
+    }
 
     // cout << tree.graphviz() << endl;
     // vector<Interval<int> > leafs;
