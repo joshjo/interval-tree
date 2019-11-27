@@ -3,24 +3,18 @@
 #include <iostream>
 #include <utility>
 
-#include "node.h"
+#include "interval.h"
+#include "nodebase.h"
 
 using namespace std;
-
-
-class TraitsBase {
-    public:
-        typedef int T;
-        typedef Node<T> TNode;
-};
 
 
 template <class Tr>
 class Tree {
 public:
     typedef typename Tr::T T;
-    typedef typename Tr::TNode Tnode;
-    // typedef Node<T> Tnode;
+    // typedef typename Tr::Tnode Tnode;
+    typedef NodeLeafs<T> Tnode;
     typedef Interval<T> Tinterval;
     Tnode * root;
     T threshold;

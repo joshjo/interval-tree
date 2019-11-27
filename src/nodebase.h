@@ -6,36 +6,23 @@ using namespace std;
 
 
 template <class T>
-class Node {
+class NodeSimple {
 public:
-    typedef Node<T> Tnode;
+    typedef NodeSimple<T> Tnode;
     typedef Interval<T> Tinterval;
     typedef typename set <Tinterval *>::iterator it;
-    vector <Tnode* > leafs;
-    set <Tinterval *> queries;
-    bool withLeafs;
-    bool withQueries;
 
-    Node() {
+    NodeSimple() {
         left = NULL;
         right = NULL;
         parent = NULL;
-        withLeafs = false;
-        withQueries = withLeafs && true;
-
-        if (withLeafs) {
-            leafs.push_back(this);
-        }
     }
 
-    Node(Tinterval interval) : Node() {
+    NodeSimple(Tinterval interval) : NodeSimple() {
         this->interval = interval;
     }
 
-    Node(Tinterval interval, Tinterval * query) : Node(interval) {
-        if (withQueries) {
-            queries.insert(query);
-        }
+    NodeSimple(Tinterval interval, Tinterval * query) : NodeSimple(interval) {
     }
 
     bool is_interval() {
@@ -59,11 +46,6 @@ public:
         leftNode->parent = this;
         rightNode->parent = this;
 
-        if (withQueries) {
-            leftNode->queries.insert(queries.begin(), queries.end());
-            rightNode->queries.insert(queries.begin(), queries.end());
-        }
-
         left = leftNode;
         right = rightNode;
         updateWeights();
@@ -76,11 +58,6 @@ public:
         leftNode->parent = this;
         rightNode->parent = this;
 
-        if (withQueries) {
-            leftNode->queries.insert(queries.begin(), queries.end());
-            rightNode->queries.insert(queries.begin(), queries.end());
-        }
-
         left = leftNode;
         right = rightNode;
         updateWeights();
@@ -88,19 +65,6 @@ public:
 
     void replaceDestroy(Tinterval newInterval, Tinterval * query, double & a) {
         interval = newInterval;
-        if (withQueries) {
-            auto start_time = std::chrono::system_clock::now();
-            // cout << leafs.size() << endl;
-            for(int i = 0; i < leafs.size(); i += 1) {
-                // if (leafs[i] != this) {
-                    this->queries.insert(leafs[i]->queries.begin(), leafs[i]->queries.end());
-                // }
-            }
-            this->queries.insert(query);
-            auto end_time = std::chrono::system_clock::now();
-            chrono::duration<double> elapsed_seconds = end_time - start_time;
-            a += elapsed_seconds.count();
-        }
         updateWeights();
         left = NULL;
         right = NULL;
@@ -108,14 +72,6 @@ public:
 
     void expandDestroy(Tinterval newInterval, Tinterval * query) {
         interval.expand(newInterval);
-
-        if (withQueries) {
-            queries.insert(query);
-            for(int i = 0; i < leafs.size(); i += 1) {
-                queries.insert(leafs[i]->queries.begin(), leafs[i]->queries.end());
-            }
-        }
-
         left = NULL;
         right = NULL;
         updateWeights();
@@ -125,16 +81,10 @@ public:
         // Here problably we will need to store the queries from left or right
         Tinterval left_interval, right_interval;
         interval.split(left_interval, right_interval);
-        left = new Node(left_interval, query);
-        right = new Node(right_interval, query);
+        left = new Tnode(left_interval, query);
+        right = new Tnode(right_interval, query);
         left->parent = this;
         right->parent = this;
-
-        if (withQueries) {
-            left->queries.insert(queries.begin(), queries.end());
-            right->queries.insert(queries.begin(), queries.end());
-        }
-
         updateWeights();
     }
 
@@ -143,18 +93,6 @@ public:
     }
 
     void updateWeights() {
-        bool shouldUpdateLeafs = false;
-
-        int leftNodes = this->left != NULL ? this->left->leafs.size() : 0;
-        int rightNodes = this->right != NULL ? this->right->leafs.size() : 0;
-
-        if ((leftNodes + rightNodes) != leafs.size() || leafs.size() == 0) {
-            shouldUpdateLeafs = true;
-        }
-        if (withLeafs && shouldUpdateLeafs) {
-            updateLeafs();
-        }
-
         if (this->parent != NULL) {
             if (this->interval.left < parent->interval.left) {
                 parent->interval.left = this->interval.left;
@@ -164,29 +102,6 @@ public:
             }
             parent->updateWeights();
         }
-    }
-
-    void updateLeafs() {
-        leafs.clear();
-        if (left != NULL) {
-            if (left->is_leaf()) {
-                leafs.push_back(left);
-            }
-            // } else {
-            leafs.insert(leafs.end(), left->leafs.begin(), left->leafs.end());
-            // }
-        }
-        if (right != NULL) {
-            if (right->is_leaf()) {
-                leafs.push_back(right);
-            }
-            // } else {
-            leafs.insert(leafs.end(), right->leafs.begin(), right->leafs.end());
-            // }
-        }
-        // if (right == NULL && left == NULL) {
-        //     leafs.push_back(this);
-        // }
     }
 
     void printNodes() {
@@ -208,6 +123,22 @@ public:
     Tnode * parent;
     Tinterval interval;
     T top;
+};
+
+
+template <class T>
+class NodeLeafs : public NodeSimple <T> {
+public:
+    typedef Interval<T> Tinterval;
+    typedef NodeLeafs<T> Tnode;
+
+    // using NodeSimple;
+
+    NodeLeafs() : NodeSimple<T> () {
+    }
+    NodeLeafs(Tinterval interval) : NodeSimple<T> (interval) {}
+    NodeLeafs(Tinterval interval, Tinterval * query) : NodeSimple<T> (interval, query) {}
+
 };
 
 

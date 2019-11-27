@@ -1,10 +1,18 @@
 #include <chrono>
 #include <ctime>
 
+// #include "src/node.h"
+#include "src/nodebase.h"
 #include "src/tree.h"
 
 using namespace std;
 
+
+class TraitsBase {
+    public:
+        typedef int T;
+        typedef NodeLeafs<T> Tnode;
+};
 
 int main(int argc, char** argv) {
     // srand (time(NULL));
@@ -69,7 +77,7 @@ int main(int argc, char** argv) {
         // }
 
         // tree.print_intervals();
-        cout << tree.root->leafs.size() << "/" << leafs.size() << " " << iter_time << endl;
+        cout << 0 << "/" << leafs.size() << " " << iter_time << endl;
     }
     // cout << "Avg: " << (times / iters) << endl;
 

@@ -1,6 +1,7 @@
 #include <chrono>
 #include <ctime>
 
+#include "src/node.h"
 #include "src/tree.h"
 
 using namespace std;
