@@ -6,13 +6,16 @@
 using namespace std;
 
 
+typedef int T;
+
+
 int main(int argc, char** argv) {
     // srand (time(NULL));
     srand (100);
 
-    int key_domain_size = 10000000;
-    int leaf_size = 1000000;
-    int Q = 1500000;
+    int key_domain_size = 1000000;
+    int leaf_size = 100000;
+    int Q = 150000;
 
     // int key_domain_size = 1000;
     // int leaf_size = 100;
@@ -46,7 +49,7 @@ int main(int argc, char** argv) {
         // cout << "++++++++++++++++++++++++++" << endl;
         auto start_time = std::chrono::system_clock::now();
 
-        Tree <TraitsBase> tree(leaf_size);
+        Tree <T> tree(leaf_size);
         for (int i = 0; i < intervals.size(); i += 1) {
             tree.insert_interval(intervals[i], false);
 
@@ -69,7 +72,8 @@ int main(int argc, char** argv) {
         // }
 
         // tree.print_intervals();
-        cout << tree.root->leafs.size() << "/" << leafs.size() << " " << iter_time << endl;
+        cout << leafs.size() << " " << iter_time << endl;
+        // cout << tree.root->leafs.size() << "/" << leafs.size() << " " << iter_time << endl;
     }
     // cout << "Avg: " << (times / iters) << endl;
 

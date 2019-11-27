@@ -8,19 +8,18 @@
 using namespace std;
 
 
-class TraitsBase {
-    public:
-        typedef int T;
-        typedef Node<T> TNode;
-};
+// class TraitsBase {
+//     public:
+//         typedef int T;
+//         typedef Node<T> TNode;
+// };
 
 
-template <class Tr>
+template <class T>
 class Tree {
 public:
-    typedef typename Tr::T T;
-    typedef typename Tr::TNode Tnode;
-    // typedef Node<T> Tnode;
+    // typedef typename Tr::TNode Tnode;
+    typedef Node<T> Tnode;
     typedef Interval<T> Tinterval;
     Tnode * root;
     T threshold;

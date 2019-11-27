@@ -11,8 +11,8 @@ public:
     typedef Node<T> Tnode;
     typedef Interval<T> Tinterval;
     typedef typename set <Tinterval *>::iterator it;
-    vector <Tnode* > leafs;
-    set <Tinterval *> queries;
+    vector <Tnode* > * leafs;
+    set <Tinterval *> * queries;
     bool withLeafs;
     bool withQueries;
 
@@ -20,11 +20,16 @@ public:
         left = NULL;
         right = NULL;
         parent = NULL;
-        withLeafs = true;
+        withLeafs = false;
         withQueries = withLeafs && true;
+        leafs = NULL;
+        // queries = NULL;
 
         if (withLeafs) {
-            leafs.push_back(this);
+            leafs = new vector <Tnode *>;
+            leafs->push_back(this);
+        } else {
+            leafs = NULL;
         }
     }
 
@@ -33,8 +38,9 @@ public:
     }
 
     Node(Tinterval interval, Tinterval * query) : Node(interval) {
+        queries = new set <Tinterval *>;
         if (withQueries) {
-            queries.insert(query);
+            queries->insert(query);
         }
     }
 
@@ -60,8 +66,8 @@ public:
         rightNode->parent = this;
 
         if (withQueries) {
-            leftNode->queries.insert(queries.begin(), queries.end());
-            rightNode->queries.insert(queries.begin(), queries.end());
+            leftNode->queries->insert(queries->begin(), queries->end());
+            rightNode->queries->insert(queries->begin(), queries->end());
         }
 
         left = leftNode;
@@ -77,8 +83,8 @@ public:
         rightNode->parent = this;
 
         if (withQueries) {
-            leftNode->queries.insert(queries.begin(), queries.end());
-            rightNode->queries.insert(queries.begin(), queries.end());
+            leftNode->queries->insert(queries->begin(), queries->end());
+            rightNode->queries->insert(queries->begin(), queries->end());
         }
 
         left = leftNode;
@@ -90,12 +96,12 @@ public:
         interval = newInterval;
         if (withQueries) {
             auto start_time = std::chrono::system_clock::now();
-            for(int i = 0; i < leafs.size(); i += 1) {
-                if (leafs[i] != this) {
-                    this->queries.insert(leafs[i]->queries.begin(), leafs[i]->queries.end());
+            for(int i = 0; i < leafs->size(); i += 1) {
+                if (leafs->at(i) != this) {
+                    this->queries->insert(leafs->at(i)->queries->begin(), leafs->at(i)->queries->end());
                 }
             }
-            this->queries.insert(query);
+            this->queries->insert(query);
             auto end_time = std::chrono::system_clock::now();
             chrono::duration<double> elapsed_seconds = end_time - start_time;
             a += elapsed_seconds.count();
@@ -109,9 +115,11 @@ public:
         interval.expand(newInterval);
 
         if (withQueries) {
-            queries.insert(query);
-            for(int i = 0; i < leafs.size(); i += 1) {
-                queries.insert(leafs[i]->queries.begin(), leafs[i]->queries.end());
+            queries->insert(query);
+            for(int i = 0; i < leafs->size(); i += 1) {
+                if (leafs->at(i) != this) {
+                    this->queries->insert(leafs->at(i)->queries->begin(), leafs->at(i)->queries->end());
+                }
             }
         }
 
@@ -130,8 +138,8 @@ public:
         right->parent = this;
 
         if (withQueries) {
-            left->queries.insert(queries.begin(), queries.end());
-            right->queries.insert(queries.begin(), queries.end());
+            left->queries->insert(queries->begin(), queries->end());
+            right->queries->insert(queries->begin(), queries->end());
         }
 
         updateWeights();
@@ -142,16 +150,17 @@ public:
     }
 
     void updateWeights() {
-        bool shouldUpdateLeafs = false;
+        if (withLeafs) {
+            bool shouldUpdateLeafs = false;
+            int leftNodes = this->left != NULL ? this->left->leafs->size() : 0;
+            int rightNodes = this->right != NULL ? this->right->leafs->size() : 0;
 
-        int leftNodes = this->left != NULL ? this->left->leafs.size() : 0;
-        int rightNodes = this->right != NULL ? this->right->leafs.size() : 0;
-
-        if ((leftNodes + rightNodes) != leafs.size() || leafs.size() == 0) {
-            shouldUpdateLeafs = true;
-        }
-        if (withLeafs && shouldUpdateLeafs) {
-            updateLeafs();
+            if ((leftNodes + rightNodes) != leafs->size() || leafs->size() == 0) {
+                shouldUpdateLeafs = true;
+            }
+            if (shouldUpdateLeafs) {
+                updateLeafs();
+            }
         }
 
         if (this->parent != NULL) {
@@ -166,23 +175,23 @@ public:
     }
 
     void updateLeafs() {
-        leafs.clear();
+        leafs->clear();
         if (left != NULL) {
             if (left->is_leaf()) {
-                leafs.push_back(left);
+                leafs->push_back(left);
             } else {
-                leafs.insert(leafs.end(), left->leafs.begin(), left->leafs.end());
+                leafs->insert(leafs->end(), left->leafs->begin(), left->leafs->end());
             }
         }
         if (right != NULL) {
             if (right->is_leaf()) {
-                leafs.push_back(right);
+                leafs->push_back(right);
             } else {
-                leafs.insert(leafs.end(), right->leafs.begin(), right->leafs.end());
+                leafs->insert(leafs->end(), right->leafs->begin(), right->leafs->end());
             }
         }
         if (right == NULL && left == NULL) {
-            leafs.push_back(this);
+            leafs->push_back(this);
         }
     }
 
