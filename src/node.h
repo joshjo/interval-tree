@@ -90,11 +90,10 @@ public:
         interval = newInterval;
         if (withQueries) {
             auto start_time = std::chrono::system_clock::now();
-            // cout << leafs.size() << endl;
             for(int i = 0; i < leafs.size(); i += 1) {
-                // if (leafs[i] != this) {
+                if (leafs[i] != this) {
                     this->queries.insert(leafs[i]->queries.begin(), leafs[i]->queries.end());
-                // }
+                }
             }
             this->queries.insert(query);
             auto end_time = std::chrono::system_clock::now();
@@ -171,22 +170,20 @@ public:
         if (left != NULL) {
             if (left->is_leaf()) {
                 leafs.push_back(left);
+            } else {
+                leafs.insert(leafs.end(), left->leafs.begin(), left->leafs.end());
             }
-            // } else {
-            leafs.insert(leafs.end(), left->leafs.begin(), left->leafs.end());
-            // }
         }
         if (right != NULL) {
             if (right->is_leaf()) {
                 leafs.push_back(right);
+            } else {
+                leafs.insert(leafs.end(), right->leafs.begin(), right->leafs.end());
             }
-            // } else {
-            leafs.insert(leafs.end(), right->leafs.begin(), right->leafs.end());
-            // }
         }
-        // if (right == NULL && left == NULL) {
-        //     leafs.push_back(this);
-        // }
+        if (right == NULL && left == NULL) {
+            leafs.push_back(this);
+        }
     }
 
     void printNodes() {
