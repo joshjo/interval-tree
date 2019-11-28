@@ -20,7 +20,7 @@ public:
         left = NULL;
         right = NULL;
         parent = NULL;
-        withLeafs = false;
+        withLeafs = true;
         withQueries = withLeafs && true;
         leafs = NULL;
         // queries = NULL;
@@ -204,9 +204,7 @@ public:
     }
 
     void print() {
-        // printf("[%d, %d](%d)", interval.left, interval.right, top);
         std::cout << interval;
-        // std::cout << interval;
     }
 
     Tnode * left;
