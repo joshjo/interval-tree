@@ -2,17 +2,13 @@
 #include <ctime>
 
 #include "src/tree.h"
+#include "src/config.h"
 
 using namespace std;
 
-// typedef int T;
+typedef long T;
+typedef Interval<T> Tinterval;
 
-class TraitsBase {
-    public:
-        typedef int T;
-        static const bool withQueries = 1;
-        static const bool withLeafs = 1;
-};
 
 int main(int argc, char** argv) {
     // srand (time(NULL));
@@ -38,14 +34,14 @@ int main(int argc, char** argv) {
     sscanf(argv[1], "%d", &query_number);
 
     for (int z = 0; z < iters; z++) {
-        vector<Interval<int> > intervals;
+        vector<Tinterval > intervals;
         // intervals.push_back(Interval<int> (49, 161));
         // intervals.push_back(Interval<int> (648, 747));
 
         for (int i = 0; i < query_number; i += 1) {
-            int S1 = rand() % key_domain_size;
-            int R1 = rand() % Q;
-            Interval<int> I(S1, S1 + leaf_size);
+            T S1 = rand() % key_domain_size;
+            T R1 = rand() % Q;
+            Tinterval I(S1, S1 + leaf_size);
             // cout << I << endl;
             intervals.push_back(I);
             // tree.insert_interval(I);
@@ -54,7 +50,7 @@ int main(int argc, char** argv) {
         // cout << "++++++++++++++++++++++++++" << endl;
         auto start_time = std::chrono::system_clock::now();
 
-        Tree <TraitsBase> tree(leaf_size);
+        Tree <ConfigBase<T> > tree(leaf_size);
         for (int i = 0; i < intervals.size(); i += 1) {
             tree.insert_interval(intervals[i], false);
 
@@ -69,7 +65,7 @@ int main(int argc, char** argv) {
         times += iter_time;
 
         // cout << iter_time << endl;
-        vector<Interval<int> > leafs;
+        vector<Tinterval> leafs;
         tree.getLeafs(leafs);
 
         // for(int i = 0; i < tree.root->leafs.size(); i++) {

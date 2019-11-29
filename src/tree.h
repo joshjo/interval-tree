@@ -12,7 +12,7 @@ template <class Tr>
 class Tree {
 public:
     typedef typename Tr::T T;
-    typedef Node<T> Tnode;
+    typedef Node<Tr> Tnode;
     typedef Interval<T> Tinterval;
     Tnode * root;
     T threshold;

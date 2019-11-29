@@ -5,10 +5,11 @@
 using namespace std;
 
 
-template <class T>
+template <class Tr>
 class Node {
 public:
-    typedef Node<T> Tnode;
+    typedef typename Tr::T T;
+    typedef Node<Tr> Tnode;
     typedef Interval<T> Tinterval;
     typedef typename set <Tinterval *>::iterator it;
     vector <Tnode* > * leafs;
@@ -20,10 +21,9 @@ public:
         left = NULL;
         right = NULL;
         parent = NULL;
-        withLeafs = true;
-        withQueries = withLeafs && true;
+        withLeafs = Tr::withLeafs;
+        withQueries = withLeafs && Tr::withQueries;
         leafs = NULL;
-        // queries = NULL;
 
         if (withLeafs) {
             leafs = new vector <Tnode *>;
@@ -132,8 +132,8 @@ public:
         // Here problably we will need to store the queries from left or right
         Tinterval left_interval, right_interval;
         interval.split(left_interval, right_interval);
-        left = new Node(left_interval, query);
-        right = new Node(right_interval, query);
+        left = new Tnode(left_interval, query);
+        right = new Tnode(right_interval, query);
         left->parent = this;
         right->parent = this;
 
