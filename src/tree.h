@@ -190,15 +190,15 @@ public:
         return 0;
     }
 
-    void getLeafs(vector<Tinterval> & leafs) {
+    void getLeafs(vector<Tinterval *> & leafs) {
         getLeafs(root, leafs);
     }
 
-    void getLeafs(Tnode * visitor, vector<Tinterval> & leafs) {
+    void getLeafs(Tnode * visitor, vector<Tinterval *> & leafs) {
         if(visitor != NULL) {
             if (visitor->left == NULL && visitor->right == NULL) {
                 // cout << visitor->interval << " | ";
-                leafs.push_back(visitor->interval);
+                leafs.push_back(&(visitor->interval));
             }
             getLeafs(visitor->left, leafs);
             getLeafs(visitor->right, leafs);

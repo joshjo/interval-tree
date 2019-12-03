@@ -3,7 +3,7 @@
 
 
 template <class C>
-class ConfigBase {
+class ConfigExtra {
     public:
         typedef C T;
         static const bool withLeafs = 0;
@@ -21,7 +21,7 @@ class ConfigOnlyLeafs {
 
 
 template <class C>
-class ConfigWithQueries {
+class ConfigLazy {
     public:
         typedef C T;
         static const bool withLeafs = 1;

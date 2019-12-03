@@ -4,30 +4,33 @@
 
 #include "src/leaftree.h"
 #include "src/tree.h"
+#include "src/config.h"
 
+typedef long T;
+typedef Interval<T> Tinterval;
 
 using namespace std;
 
 
 int main () {
-    int key_domain_size = 1000;
-    int leaf_size = 100;
-    int Q = 150;
-    int query_number = 10;
+    srand (100);
 
-    vector<Interval<int> > queries;
-    LeafTree<int> leaftree;
-    Tree<int> tree;
-    vector<Interval<int> > leafs;
+    int key_domain_size = 10000000;
+    int leaf_size = 1000000;
+    int query_number = 1000000;
 
+    vector<Tinterval > queries;
+    LeafTree<T> leaftree;
+    Tree <ConfigExtra<T> > tree(leaf_size);
+    vector<Tinterval* > leafs;
 
+    T max_random = key_domain_size - leaf_size;
     // Create random queries
     for (int i = 0; i < query_number; i += 1) {
-        int S1 = rand() % key_domain_size;
-        int R1 = rand() % Q;
-        Interval<int> I(S1, S1 + R1);
+        T S1 = rand() % max_random;
+        Tinterval I(S1, S1 + leaf_size);
         queries.push_back(I);
-        cout << I << endl;
+        // cout << I << endl;
     }
 
     // Insert queries to tree
@@ -35,28 +38,30 @@ int main () {
         tree.insert_interval(queries[i]);
     }
 
-    // cout << tree.graphviz() << endl << endl;
+    // // cout << tree.graphviz() << endl << endl;
 
-
-    for (int i = 0; i < tree.root->leafs.size(); i += 1) {
-        leafs.push_back(tree.root->leafs[i]->interval);
-    }
+    tree.getLeafs(leafs);
 
     random_shuffle(leafs.begin(), leafs.end());
 
     for (int i = 0; i < leafs.size(); i += 1) {
-        leaftree.insert(leafs[i]);
+        leaftree.insert(*(leafs[i]));
     }
 
     for (int i = 0; i < queries.size(); i += 1) {
         leaftree.assign(&queries[i]);
     }
 
-    vector <LeafNode<int> *> nodes = leaftree.nodes();
+    vector <LeafNode<T> *> nodes = leaftree.nodes();
 
-    for (int i = 0; i < nodes.size(); i++) {
-
-    }
+    // for (int i = 0; i < nodes.size(); i++) {
+    //     cout << nodes[i]->interval << endl;
+    //     for(int j = 0; j < nodes[i]->hashmap.size(); j++) {
+    //         Tinterval * query = nodes[i]->hashmap[j].first;
+    //         Tinterval interval = nodes[i]->hashmap[j].second;
+    //         cout << "\t" << (*query) << " -> " << interval << endl;
+    //     }
+    // }
 
     // cout << nodes.size() << endl;
 
