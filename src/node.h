@@ -14,8 +14,10 @@ public:
     typedef typename set <Tinterval *>::iterator it;
     vector <Tnode* > * leafs;
     set <Tinterval *> * queries;
+    vector <pair<Tinterval *, Tinterval>> * queries_map;
     bool withLeafs;
     bool withQueries;
+    bool mapQueries;
 
     Node() {
         left = NULL;
@@ -23,6 +25,7 @@ public:
         parent = NULL;
         withLeafs = Tr::withLeafs;
         withQueries = withLeafs && Tr::withQueries;
+        mapQueries = withQueries && Tr::mapQueries;
         leafs = NULL;
 
         if (withLeafs) {
@@ -39,23 +42,45 @@ public:
 
     Node(Tinterval interval, Tinterval * query) : Node(interval) {
         queries = new set <Tinterval *>;
+        queries_map = new vector <pair<Tinterval *, Tinterval>>;
         if (withQueries) {
-            queries->insert(query);
+            if (mapQueries) {
+                queries_map->push_back(make_pair(query, interval.intersection(*query)));
+            } else {
+                queries->insert(query);
+            }
         }
     }
 
-    bool is_interval() {
-        return (interval.left != interval.right);
-    }
+    void split(Tinterval * query) {
+        // Here problably we will need to store the queries from left or right
+        // cout << "query: " << (*query) << endl;
+        Tinterval left_interval, right_interval;
+        interval.split(left_interval, right_interval);
+        left = new Tnode(left_interval, query);
+        right = new Tnode(right_interval, query);
+        left->parent = this;
+        right->parent = this;
 
-    void update_interval(T elem) {
-        if (elem > interval.left) {
-            interval.right = elem;
-            top = elem;
-        } else {
-            interval.left = elem;
-            top = interval.left;
+        if (withQueries) {
+            if (mapQueries) {
+                for (typename vector<pair<Tinterval *, Tinterval>>::iterator it = queries_map->begin(); it != queries_map->end(); it++) {
+                    Tinterval tmp(it->second);
+                    if (tmp.intersects(left_interval)) {
+                        left->queries_map->push_back(make_pair(move(it->first), tmp.intersection(left_interval)));
+                    }
+                    if (tmp.intersects(right_interval)) {
+                        right->queries_map->push_back(make_pair(move(it->first), tmp.intersection(right_interval)));
+                    }
+                }
+            } else {
+                left->queries->insert(queries->begin(), queries->end());
+                right->queries->insert(queries->begin(), queries->end());
+
+            }
         }
+
+        updateWeights();
     }
 
     void splitLeft(Tinterval newInterval, Tinterval * query) {
@@ -66,8 +91,12 @@ public:
         rightNode->parent = this;
 
         if (withQueries) {
-            leftNode->queries->insert(queries->begin(), queries->end());
-            rightNode->queries->insert(queries->begin(), queries->end());
+            if (mapQueries) {
+                rightNode->queries_map = queries_map;
+            } else {
+                leftNode->queries->insert(queries->begin(), queries->end());
+                rightNode->queries->insert(queries->begin(), queries->end());
+            }
         }
 
         left = leftNode;
@@ -83,8 +112,12 @@ public:
         rightNode->parent = this;
 
         if (withQueries) {
-            leftNode->queries->insert(queries->begin(), queries->end());
-            rightNode->queries->insert(queries->begin(), queries->end());
+            if (mapQueries) {
+                leftNode->queries_map = queries_map;
+            } else {
+                leftNode->queries->insert(queries->begin(), queries->end());
+                rightNode->queries->insert(queries->begin(), queries->end());
+            }
         }
 
         left = leftNode;
@@ -94,55 +127,50 @@ public:
 
     void replaceDestroy(Tinterval newInterval, Tinterval * query, double & a) {
         interval = newInterval;
-        if (withQueries) {
-            auto start_time = std::chrono::system_clock::now();
-            for(int i = 0; i < leafs->size(); i += 1) {
-                if (leafs->at(i) != this) {
-                    this->queries->insert(leafs->at(i)->queries->begin(), leafs->at(i)->queries->end());
-                }
-            }
-            this->queries->insert(query);
-            auto end_time = std::chrono::system_clock::now();
-            chrono::duration<double> elapsed_seconds = end_time - start_time;
-            a += elapsed_seconds.count();
-        }
-        updateWeights();
+        rebuildNodeQueries(query);
+
         left = NULL;
         right = NULL;
+        updateWeights();
     }
 
     void expandDestroy(Tinterval newInterval, Tinterval * query) {
         interval.expand(newInterval);
-
-        if (withQueries) {
-            queries->insert(query);
-            for(int i = 0; i < leafs->size(); i += 1) {
-                if (leafs->at(i) != this) {
-                    this->queries->insert(leafs->at(i)->queries->begin(), leafs->at(i)->queries->end());
-                }
-            }
-        }
+        rebuildNodeQueries(query);
 
         left = NULL;
         right = NULL;
         updateWeights();
     }
 
-    void split(Tinterval * query) {
-        // Here problably we will need to store the queries from left or right
-        Tinterval left_interval, right_interval;
-        interval.split(left_interval, right_interval);
-        left = new Tnode(left_interval, query);
-        right = new Tnode(right_interval, query);
-        left->parent = this;
-        right->parent = this;
-
+    void rebuildNodeQueries(Tinterval * query) {
         if (withQueries) {
-            left->queries->insert(queries->begin(), queries->end());
-            right->queries->insert(queries->begin(), queries->end());
-        }
+            if (mapQueries) {
+                if (!is_leaf()) {
+                    queries_map = new vector <pair<Tinterval *, Tinterval>>;
+                }
+                queries_map->push_back(make_pair(query, query->intersection(interval)));
+                set<Tinterval *> allQueries;
+                for(int i = 0; i < leafs->size(); i += 1) {
+                    if (leafs->at(i) != this) {
+                        for(int j = 0; j < leafs->at(i)->queries_map->size(); j += 1) {
+                            allQueries.insert(leafs->at(i)->queries_map->at(j).first);
+                        }
+                    }
+                }
 
-        updateWeights();
+                for(typename set<Tinterval *>::iterator it = allQueries.begin(); it != allQueries.end(); it++) {
+                    queries_map->push_back(make_pair(*it, (*it)->intersection(interval)));
+                }
+            } else {
+                queries->insert(query);
+                for(int i = 0; i < leafs->size(); i += 1) {
+                    if (leafs->at(i) != this) {
+                        queries->insert(leafs->at(i)->queries->begin(), leafs->at(i)->queries->end());
+                    }
+                }
+            }
+        }
     }
 
     bool is_leaf() {

@@ -108,6 +108,13 @@ public:
         return (((*this) <= other && !((*this) < other)) || ((*this) >= other && !((*this) > other)));
     }
 
+    Interval intersection(Interval other) {
+        Interval result(0, 0);
+        result.left = left > other.left ? left : other.left;
+        result.right = right < other.right ? right : other.right;
+        return result;
+    }
+
     bool operator < (const Interval & other) const {
         return (right <= other.left);
     }
@@ -208,6 +215,5 @@ public:
 
     T left, right;
 };
-
 
 #endif // INTERVAL_H

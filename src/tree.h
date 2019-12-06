@@ -22,8 +22,6 @@ public:
     int insertions = 0;
 
     bool debug;
-    // queue <pair<Tinterval, Tnode* >> pending;
-    queue <Tinterval> pending;
     queue <pair<Tinterval, Tinterval *> > npending;
     int number_pending;
 
@@ -97,7 +95,6 @@ public:
                     if (sibling->interval.intersects(interval)) {
                         Tinterval slice(sibling->interval.left, interval.right);
                         if (slice.distance() > 0) {
-                            pending.push(slice);
                             npending.push(make_pair(slice, query));
                         }
                         interval.right = sibling->interval.left;
@@ -126,7 +123,6 @@ public:
                     if (sibling->interval.intersects(interval)) {
                         Tinterval slice(interval.left, sibling->interval.right);
                         if (slice.distance() > 0) {
-                            pending.push(slice);
                             npending.push(make_pair(slice, query));
                         }
                         interval.left = sibling->interval.right;

@@ -14,9 +14,8 @@ int main(int argc, char** argv) {
     // srand (time(NULL));
     srand (100);
 
-    int key_domain_size = 10000000;
-    int leaf_size = 1000000;
-    int Q = 1500000;
+    int key_domain_size = 1000000;
+    int leaf_size = 100000;
 
     // int key_domain_size = 1000;
     // int leaf_size = 100;
@@ -40,24 +39,16 @@ int main(int argc, char** argv) {
 
         for (int i = 0; i < query_number; i += 1) {
             T S1 = rand() % key_domain_size;
-            T R1 = rand() % Q;
             Tinterval I(S1, S1 + leaf_size);
             // cout << I << endl;
             intervals.push_back(I);
-            // tree.insert_interval(I);
         }
 
-        // cout << "++++++++++++++++++++++++++" << endl;
         auto start_time = std::chrono::system_clock::now();
 
-        Tree <ConfigBase<T> > tree(leaf_size);
+        Tree <ConfigEager<T> > tree(leaf_size);
         for (int i = 0; i < intervals.size(); i += 1) {
             tree.insert_interval(intervals[i], false);
-
-            // cout << tree.graphviz(to_string(i)) << endl;
-            // cout << "--> " << tree.root->left->leafs.size() << tree.root->right->leafs.size() << endl;
-            // cout << tree.root->leafs.size() << "/" << leafs.size() << endl;
-            // cout << tree.graphviz(to_string(i)) << endl;
         }
         auto end_time = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsed_seconds = end_time - start_time;
@@ -65,14 +56,8 @@ int main(int argc, char** argv) {
         times += iter_time;
 
         // cout << iter_time << endl;
-        vector<Tinterval> leafs;
+        vector<Tinterval *> leafs;
         tree.getLeafs(leafs);
-
-        // for(int i = 0; i < tree.root->leafs.size(); i++) {
-        //     cout << tree.root->leafs[i]->interval << endl;
-        // }
-
-        // tree.print_intervals();
 
         if (tree.root->leafs != NULL) {
             cout << tree.root->leafs->size();
@@ -80,35 +65,19 @@ int main(int argc, char** argv) {
             cout << "-";
         }
         cout << "/" << leafs.size() << " " << iter_time << endl;
+
+        // for (int i = 0; i < tree.root->leafs->size(); i += 1) {
+            // cout << tree.root->leafs->at(i)->interval << endl;
+            // cout << tree.root->leafs->at(i)->queries_map->size() << " | " << tree.root->leafs->at(i)->queries->size() << endl;
+            // for (int j = 0; j < tree.root->leafs->at(i)->queries_map->size(); j += 1) {
+            //     cout << "\t" << *(tree.root->leafs->at(i)->queries_map->at(j).first) << " -> " << tree.root->leafs->at(i)->queries_map->at(j).second << endl;
+            // }
+            // cout << endl;
+            // cout << tree.root->leafs->at(i)->queries->size() << endl;
+        // }
         // cout << tree.root->leafs.size() << "/" << leafs.size() << " " << iter_time << endl;
     }
-    // cout << "Avg: " << (times / iters) << endl;
 
-
-    // tree.getLeafs(leafs);
-
-    // cout << "leafs size: " << leafs.size() << endl;
-
-
-
-    // for (int i = 0; i < intervals.size(); i += 1) {
-        // Interval<int> interval = intervals[i];
-        // cout << "i: " << i << endl;
-        // cout << ".";
-        // tree.insert_interval(intervals[i]);
-        // cout << intervals[i] << endl;
-        // cout << tree.graphviz(to_string(i)) << endl;
-    // }
-    // tree.insert_interval(Interval<int>(280, 379));
-    // cout << "digraph G {\n";
-    // cout << tree.graphviz() << endl;
-    // cout << "}\n";
-    // tree.getLeafs(leafs);
-
-    // cout << leafs.size() << endl;
-    // cout << endl;
-    // cout << tree.graphviz() << endl;
-    // tree.print();
 
     return 0;
 }
