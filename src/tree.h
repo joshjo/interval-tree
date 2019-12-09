@@ -8,41 +8,32 @@
 using namespace std;
 
 
-// class TraitsBase {
-//     public:
-//         typedef int T;
-//         typedef Node<T> TNode;
-// };
-
-
 template <class Tr>
 class Tree {
 public:
     typedef typename Tr::T T;
-    typedef typename Tr::TNode Tnode;
-    // typedef Node<T> Tnode;
+    typedef Node<Tr> Tnode;
     typedef Interval<T> Tinterval;
     Tnode * root;
     T threshold;
     int extra_operations;
     int extra_insertions;
-    bool with_leafs;
+    double counter;
+    int insertions = 0;
 
     bool debug;
-    // queue <pair<Tinterval, Tnode* >> pending;
-    queue <Tinterval> pending;
-    queue <pair<Tinterval, Tinterval> > npending;
+    queue <pair<Tinterval, Tinterval *> > npending;
     int number_pending;
 
-    Tree(int threshold=100, bool with_leafs = false) {
+    Tree(int threshold=100) {
         this->root = NULL;
         this->threshold = threshold;
-        this->with_leafs = with_leafs;
-        // debug = true;
-        debug = false;
+        debug = true;
         number_pending = 0;
         extra_operations = 0;
         extra_insertions = 0;
+        counter = 0;
+        insertions = 0;
     }
 
     void print() {
@@ -77,19 +68,11 @@ public:
         }
     }
 
-    void insert_interval_intern(Tinterval interval, Tinterval query, bool count = false) {
-        if (count) {
-            extra_operations += 1;
-        }
-        if (debug) {
-            cout << "inserting: " << interval << endl;
-        }
+    void insert_interval_intern(Tinterval interval, Tinterval * query, bool count = false) {
+        insertions += 1;
 
-        if (root == NULL ) {
-            root = new Tnode(interval);
-            if (count) {
-                extra_insertions += 1;
-            }
+        if (root == NULL) {
+            root = new Tnode(interval, query);
             return;
         }
 
@@ -97,40 +80,22 @@ public:
         Tnode * parent = NULL;
         while((*visitor) != NULL) {
             if (interval.includes((*visitor)->interval)) {
-                if (debug) {
-                    cout << "******* " << interval << " includes " << (*visitor)->interval << endl;
-                }
                 Tinterval tmp = (*visitor)->interval;
                 tmp.expand(interval);
                 if (tmp.distance() < threshold) {
-                    // tmp.expand(interval);
-                    (*visitor)->interval = tmp;
-
-                    (*visitor)->left = NULL;
-                    (*visitor)->right = NULL;
-                    (*visitor)->update_weights(with_leafs);
+                    (*visitor)->replaceDestroy(tmp, query, counter);
                     break;
                 }
             }
 
             int direction = decide(interval, visitor);
-            if (debug) {
-                cout << "direction " << direction << " Interval " << interval << endl;
-                cout << "left  ifs: " << (direction == LEFT || direction == LEFT_PARENT) << endl;
-                cout << "right ifs: " << (direction == RIGHT || direction == RIGHT_PARENT) << endl;
-            }
             if (direction == LEFT || direction == LEFT_PARENT) {
                 Tnode * sibling = ((*visitor)->right);
-                if(debug) {
-                    cout << "visitor: " << (*visitor)->interval << endl;
-                    cout << "sibling " << sibling << endl;
-                }
                 if (LEFT_PARENT && sibling != NULL) {
                     if (sibling->interval.intersects(interval)) {
                         Tinterval slice(sibling->interval.left, interval.right);
                         if (slice.distance() > 0) {
-                            pending.push(slice);
-                            npending.push(make_pair(slice, interval));
+                            npending.push(make_pair(slice, query));
                         }
                         interval.right = sibling->interval.left;
                     }
@@ -139,33 +104,13 @@ public:
                     Tinterval tmp = (*visitor)->interval;
                     tmp.expand(interval);
                     if (tmp.distance() <= threshold && (*visitor)->interval.intersects(interval)) {
-                        if (debug) cout << "update nodes" << endl;
-                        (*visitor)->interval = tmp;
-                        (*visitor)->update_weights(with_leafs);
-                        (*visitor)->left = NULL;
-                        (*visitor)->right = NULL;
+                        (*visitor)->replaceDestroy(tmp, query, counter);
                     } else {
-                        Tnode * parent = (*visitor);
-                        if (debug) {
-                            cout << "intersects? " << (*visitor)->interval.intersects(interval) << endl;
-                            cout << "parent: " << parent->interval << endl;
-                        }
                         if ((*visitor)->interval.intersects(interval)) {
-                            parent->interval.expand(interval);
-                            parent->split();
-                            parent->update_weights(with_leafs);
+                            (*visitor)->interval.expand(interval);
+                            (*visitor)->split(query);
                         } else {
-                            Tnode * leftNode = new Tnode(interval);
-                            Tnode * rightNode = new Tnode(parent->interval);
-                            if (count) {
-                                extra_insertions += 2;
-                            }
-                            parent->interval.expand(interval);
-                            leftNode->parent = parent;
-                            rightNode->parent = parent;
-                            (*visitor)->left = leftNode;
-                            (*visitor)->right = rightNode;
-                            parent->update_weights(with_leafs);
+                            (*visitor)->splitLeft(interval, query);
                         }
                     }
                     break;
@@ -178,8 +123,7 @@ public:
                     if (sibling->interval.intersects(interval)) {
                         Tinterval slice(interval.left, sibling->interval.right);
                         if (slice.distance() > 0) {
-                            pending.push(slice);
-                            npending.push(make_pair(slice, interval));
+                            npending.push(make_pair(slice, query));
                         }
                         interval.left = sibling->interval.right;
                     }
@@ -188,33 +132,13 @@ public:
                     Tinterval tmp = (*visitor)->interval;
                     tmp.expand(interval);
                     if (tmp.distance() <= threshold && (*visitor)->interval.intersects(interval)) {
-                        (*visitor)->interval = tmp;
-                        (*visitor)->left = NULL;
-                        (*visitor)->right = NULL;
-                        (*visitor)->update_weights(with_leafs);
+                        (*visitor)->replaceDestroy(tmp, query, counter);
                     } else {
-                        Tnode * parent = (*visitor);
                         if ((*visitor)->interval.intersects(interval)) {
-                            parent->interval.expand(interval);
-                            parent->split();
-                            parent->update_weights(with_leafs);
+                            (*visitor)->interval.expand(interval);
+                            (*visitor)->split(query);
                         } else {
-                            if (debug) {
-                                cout << "new node at left" << endl;
-                            }
-                            Tnode * leftNode = new Tnode(parent->interval);
-                            Tnode * rightNode = new Tnode(interval);
-
-                            if (count) {
-                                extra_insertions += 2;
-                            }
-
-                            parent->interval.expand(interval);
-                            leftNode->parent = parent;
-                            rightNode->parent = parent;
-                            (*visitor)->left = leftNode;
-                            (*visitor)->right = rightNode;
-                            parent->update_weights(with_leafs);
+                            (*visitor)->splitRight(interval, query);
                         }
                     }
                     break;
@@ -222,26 +146,23 @@ public:
                 visitor = &(*visitor)->right;
             }
             if (direction == MIDDLE) {
-                (*visitor)->interval.expand(interval);
-                (*visitor)->left = NULL;
-                (*visitor)->right = NULL;
-                (*visitor)->update_weights(with_leafs);
+                (*visitor)->expandDestroy(interval, query);
                 break;
             }
         }
     }
 
-    int insert_interval(Tinterval interval, bool dbg=false) {
+    int insert_interval(Tinterval & interval, bool dbg=false) {
         vector<Tinterval > arr;
         debug = dbg;
         interval.slice(threshold, arr);
 
         for (auto & it: arr) {
-            insert_interval_intern(it, it);
+            insert_interval_intern(it, &interval);
         }
         number_pending += npending.size();
         while (!npending.empty()) {
-            pair<Tinterval, Tinterval> tmp = npending.front();
+            pair<Tinterval, Tinterval *> tmp = npending.front();
             insert_interval_intern(tmp.first, tmp.second, true);
             npending.pop();
         }
@@ -265,15 +186,15 @@ public:
         return 0;
     }
 
-    void getLeafs(vector<Tinterval> & leafs) {
+    void getLeafs(vector<Tinterval *> & leafs) {
         getLeafs(root, leafs);
     }
 
-    void getLeafs(Tnode * visitor, vector<Tinterval> & leafs) {
+    void getLeafs(Tnode * visitor, vector<Tinterval *> & leafs) {
         if(visitor != NULL) {
             if (visitor->left == NULL && visitor->right == NULL) {
                 // cout << visitor->interval << " | ";
-                leafs.push_back(visitor->interval);
+                leafs.push_back(&(visitor->interval));
             }
             getLeafs(visitor->left, leafs);
             getLeafs(visitor->right, leafs);

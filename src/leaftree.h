@@ -65,25 +65,41 @@ public:
     }
 
     void assign(Tinterval * query) {
-        Tinterval interval(*query);
-        Tnode ** visitor = &(this->root);
-        while ((*visitor) != NULL) {
-            if ((*visitor)->interval.left > interval.right) {
-                visitor = &((*visitor)->left);
-            } else if ((*visitor)->interval.right <= interval.left) {
-                visitor = &((*visitor)->right);
-            } else {
-                if ((*visitor)->interval.right < interval.right) {
-                    Tinterval tmp = Tinterval(interval.left, (*visitor)->interval.right);
-                    (*visitor)->hashmap.push_back(make_pair(query, tmp));
-                    interval = Tinterval((*visitor)->interval.right, interval.right);
-                    visitor = &(this->root);
+        queue<Tinterval> pending;
+        pending.push(*query);
+        while (!pending.empty()) {
+            Tnode ** visitor = &(this->root);
+            Tinterval interval = pending.front();
+            pending.pop();
+            while ((*visitor) != NULL) {
+                if (interval.left >= (*visitor)->interval.right) {
+                    visitor = &((*visitor)->right);
+                } else if (interval.right <= (*visitor)->interval.left) {
+                    visitor = &((*visitor)->left);
                 } else {
-                    (*visitor)->hashmap.push_back(make_pair(query, interval));
+                    T left, right;
+                    if (interval.left < (*visitor)->interval.left) {
+                        left = (*visitor)->interval.left;
+                        Tinterval tempInterval = Tinterval(interval.left, (*visitor)->interval.left);
+                        pending.push(tempInterval);
+                    } else {
+                        left = interval.left;
+                    }
+                    if (interval.right > (*visitor)->interval.right) {
+                        right = (*visitor)->interval.right;
+                        Tinterval tempInterval = Tinterval((*visitor)->interval.right, interval.right);
+                        pending.push(tempInterval);
+                    } else {
+                        right = interval.right;
+                    }
+                    (*visitor)->hashmap.push_back(make_pair(query, Tinterval(left, right)));
                     break;
                 }
             }
         }
+
+
+        // cout << endl;
     }
 
     Tnode ** search(Tinterval interval, Tnode * & parent = NULL) {
@@ -102,7 +118,7 @@ public:
         return visitor;
     }
 
-    bool insert(Tinterval key) {
+    bool insert(Tinterval & key) {
         Tnode * parent = NULL;
         Tnode ** searchNode = this->search(key, parent);
         if ((*searchNode) != NULL) {
