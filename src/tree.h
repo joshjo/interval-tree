@@ -20,6 +20,7 @@ public:
     int extra_insertions;
     double counter;
     int insertions = 0;
+    double update_time;
 
     bool debug;
     queue <pair<Tinterval, Tinterval *> > npending;
@@ -34,6 +35,7 @@ public:
         extra_insertions = 0;
         counter = 0;
         insertions = 0;
+        update_time = 0;
     }
 
     void print() {
@@ -83,7 +85,7 @@ public:
                 Tinterval tmp = (*visitor)->interval;
                 tmp.expand(interval);
                 if (tmp.distance() < threshold) {
-                    (*visitor)->replaceDestroy(tmp, query, counter);
+                    update_time += (*visitor)->replaceDestroy(tmp, query, counter);
                     break;
                 }
             }
@@ -104,13 +106,13 @@ public:
                     Tinterval tmp = (*visitor)->interval;
                     tmp.expand(interval);
                     if (tmp.distance() <= threshold && (*visitor)->interval.intersects(interval)) {
-                        (*visitor)->replaceDestroy(tmp, query, counter);
+                        update_time += (*visitor)->replaceDestroy(tmp, query, counter);
                     } else {
                         if ((*visitor)->interval.intersects(interval)) {
                             (*visitor)->interval.expand(interval);
-                            (*visitor)->split(query);
+                            update_time += (*visitor)->split(query);
                         } else {
-                            (*visitor)->splitLeft(interval, query);
+                            update_time += (*visitor)->splitLeft(interval, query);
                         }
                     }
                     break;
@@ -132,13 +134,13 @@ public:
                     Tinterval tmp = (*visitor)->interval;
                     tmp.expand(interval);
                     if (tmp.distance() <= threshold && (*visitor)->interval.intersects(interval)) {
-                        (*visitor)->replaceDestroy(tmp, query, counter);
+                        update_time += (*visitor)->replaceDestroy(tmp, query, counter);
                     } else {
                         if ((*visitor)->interval.intersects(interval)) {
                             (*visitor)->interval.expand(interval);
-                            (*visitor)->split(query);
+                            update_time += (*visitor)->split(query);
                         } else {
-                            (*visitor)->splitRight(interval, query);
+                            update_time += (*visitor)->splitRight(interval, query);
                         }
                     }
                     break;
@@ -146,7 +148,7 @@ public:
                 visitor = &(*visitor)->right;
             }
             if (direction == MIDDLE) {
-                (*visitor)->expandDestroy(interval, query);
+                update_time += (*visitor)->expandDestroy(interval, query);
                 break;
             }
         }

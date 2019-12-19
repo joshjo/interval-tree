@@ -13,7 +13,7 @@ public:
     typedef Interval<T> Tinterval;
     typedef typename set <Tinterval *>::iterator it;
     vector <Tnode* > * leafs;
-    set <Tinterval *> * queries;
+    vector <Tinterval *> * queries;
     vector <pair<Tinterval *, Tinterval>> * queries_map;
     bool withLeafs;
     bool withQueries;
@@ -41,20 +41,19 @@ public:
     }
 
     Node(Tinterval interval, Tinterval * query) : Node(interval) {
-        queries = new set <Tinterval *>;
-        queries_map = new vector <pair<Tinterval *, Tinterval>>;
         if (withQueries) {
             if (mapQueries) {
+                queries_map = new vector <pair<Tinterval *, Tinterval>>;
                 queries_map->push_back(make_pair(query, interval.intersection(*query)));
             } else {
-                queries->insert(query);
+                queries = new vector <Tinterval *>;
+                queries->push_back(query);
             }
         }
     }
 
-    void split(Tinterval * query) {
-        // Here problably we will need to store the queries from left or right
-        // cout << "query: " << (*query) << endl;
+    double split(Tinterval * query) {
+        auto start_time = std::chrono::system_clock::now();
         Tinterval left_interval, right_interval;
         interval.split(left_interval, right_interval);
         left = new Tnode(left_interval, query);
@@ -74,16 +73,19 @@ public:
                     }
                 }
             } else {
-                left->queries->insert(queries->begin(), queries->end());
-                right->queries->insert(queries->begin(), queries->end());
-
+                left->queries->insert(left->queries->end(), queries->begin(), queries->end());
+                right->queries->insert(right->queries->end(), queries->begin(), queries->end());
             }
         }
-
         updateWeights();
+        auto end_time = std::chrono::system_clock::now();
+        chrono::duration<double> elapsed_seconds = end_time - start_time;
+
+        return elapsed_seconds.count();
     }
 
-    void splitLeft(Tinterval newInterval, Tinterval * query) {
+    double splitLeft(Tinterval newInterval, Tinterval * query) {
+        auto start_time = std::chrono::system_clock::now();
         Tnode * leftNode = new Tnode(newInterval, query);
         Tnode * rightNode = new Tnode(interval, query);
         interval.expand(newInterval);
@@ -94,17 +96,21 @@ public:
             if (mapQueries) {
                 rightNode->queries_map = queries_map;
             } else {
-                leftNode->queries->insert(queries->begin(), queries->end());
-                rightNode->queries->insert(queries->begin(), queries->end());
+                rightNode->queries = queries;
             }
         }
 
         left = leftNode;
         right = rightNode;
         updateWeights();
+        auto end_time = std::chrono::system_clock::now();
+        chrono::duration<double> elapsed_seconds = end_time - start_time;
+
+        return elapsed_seconds.count();
     }
 
-    void splitRight(Tinterval newInterval, Tinterval * query) {
+    double splitRight(Tinterval newInterval, Tinterval * query) {
+        auto start_time = std::chrono::system_clock::now();
         Tnode * leftNode = new Tnode(interval, query);
         Tnode * rightNode = new Tnode(newInterval, query);
         interval.expand(newInterval);
@@ -115,32 +121,45 @@ public:
             if (mapQueries) {
                 leftNode->queries_map = queries_map;
             } else {
-                leftNode->queries->insert(queries->begin(), queries->end());
-                rightNode->queries->insert(queries->begin(), queries->end());
+                leftNode->queries = queries;
             }
         }
 
         left = leftNode;
         right = rightNode;
         updateWeights();
+        auto end_time = std::chrono::system_clock::now();
+        chrono::duration<double> elapsed_seconds = end_time - start_time;
+
+        return elapsed_seconds.count();
     }
 
-    void replaceDestroy(Tinterval newInterval, Tinterval * query, double & a) {
+    double replaceDestroy(Tinterval newInterval, Tinterval * query, double & a) {
+        auto start_time = std::chrono::system_clock::now();
         interval = newInterval;
         rebuildNodeQueries(query);
 
         left = NULL;
         right = NULL;
         updateWeights();
+        auto end_time = std::chrono::system_clock::now();
+        chrono::duration<double> elapsed_seconds = end_time - start_time;
+
+        return elapsed_seconds.count();
     }
 
-    void expandDestroy(Tinterval newInterval, Tinterval * query) {
+    double expandDestroy(Tinterval newInterval, Tinterval * query) {
+        auto start_time = std::chrono::system_clock::now();
         interval.expand(newInterval);
         rebuildNodeQueries(query);
 
         left = NULL;
         right = NULL;
         updateWeights();
+        auto end_time = std::chrono::system_clock::now();
+        chrono::duration<double> elapsed_seconds = end_time - start_time;
+
+        return elapsed_seconds.count();
     }
 
     void rebuildNodeQueries(Tinterval * query) {
@@ -158,16 +177,24 @@ public:
                         }
                     }
                 }
-
                 for(typename set<Tinterval *>::iterator it = allQueries.begin(); it != allQueries.end(); it++) {
                     queries_map->push_back(make_pair(*it, (*it)->intersection(interval)));
                 }
             } else {
-                queries->insert(query);
+                if (!is_leaf()) {
+                    queries = new vector <Tinterval *>;
+                }
+                queries->push_back(query);
+                set<Tinterval *> allQueries;
                 for(int i = 0; i < leafs->size(); i += 1) {
                     if (leafs->at(i) != this) {
-                        queries->insert(leafs->at(i)->queries->begin(), leafs->at(i)->queries->end());
+                        for(int j = 0; j < leafs->at(i)->queries->size(); j += 1) {
+                            allQueries.insert(leafs->at(i)->queries->at(j));
+                        }
                     }
+                }
+                for(typename set<Tinterval *>::iterator it = allQueries.begin(); it != allQueries.end(); it++) {
+                    queries->push_back(*it);
                 }
             }
         }

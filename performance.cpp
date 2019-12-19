@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
 
         auto start_time = std::chrono::system_clock::now();
 
-        Tree <ConfigEager<T> > tree(leaf_size);
+        Tree <ConfigEager <T> > tree(leaf_size);
         for (int i = 0; i < intervals.size(); i += 1) {
             tree.insert_interval(intervals[i], false);
         }
@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
         } else {
             cout << "-";
         }
-        cout << "/" << leafs.size() << " " << iter_time << endl;
+        cout << "/" << leafs.size() << " " << iter_time << " - " << tree.update_time << endl;
 
         // for (int i = 0; i < tree.root->leafs->size(); i += 1) {
             // cout << tree.root->leafs->at(i)->interval << endl;
