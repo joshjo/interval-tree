@@ -89,7 +89,6 @@ public:
                     break;
                 }
             }
-
             int direction = decide(interval, visitor);
             if (direction == LEFT || direction == LEFT_PARENT) {
                 Tnode * sibling = ((*visitor)->right);

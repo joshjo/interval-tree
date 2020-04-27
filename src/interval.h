@@ -14,6 +14,9 @@ using namespace std;
 
 template <class T>
 class Interval {
+    /*
+    Interval are including in the left and excluding in the right
+    */
 public:
 
     Interval() {
@@ -34,6 +37,11 @@ public:
     }
 
     bool includes(Interval<T> & other) {
+        /*
+            Interval includes completely the other node:
+            this: |-----------------------|
+            other:    |---------------|
+        */
         return (left <= other.left && right >= other.right);
     }
 
@@ -56,12 +64,6 @@ public:
             return RIGHT;
         }
         return MIDDLE;
-        // if (other.left < left && other.right < right) {
-        //     return LEFT;
-        // } else if (right < other.left) {
-        //     return RIGHT;
-        // }
-        // return MIDDLE;
     }
 
     T middle() {
@@ -99,12 +101,13 @@ public:
         if (distance() == 0) {
             return false;
         }
-        if (right <= other.left) {
+        if (right < other.left) {
             return false;
         }
-        if (left >= other.right) {
+        if (left > other.right) {
             return false;
         }
+
         return (((*this) <= other && !((*this) < other)) || ((*this) >= other && !((*this) > other)));
     }
 
@@ -116,7 +119,7 @@ public:
     }
 
     bool operator < (const Interval & other) const {
-        return (right <= other.left);
+        return (right < other.left);
     }
 
     bool operator <= (const Interval & other) {
