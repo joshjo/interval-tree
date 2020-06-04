@@ -1,20 +1,4 @@
 {
-    "workbench.colorCustomizations": {
-        "activityBar.background": "#7295b1",
-        "activityBar.activeBorder": "#e8d6e0",
-        "activityBar.foreground": "#15202b",
-        "activityBar.inactiveForeground": "#15202b99",
-        "activityBarBadge.background": "#e8d6e0",
-        "activityBarBadge.foreground": "#15202b",
-        "titleBar.activeBackground": "#557c9b",
-        "titleBar.inactiveBackground": "#557c9b99",
-        "titleBar.activeForeground": "#e7e7e7",
-        "titleBar.inactiveForeground": "#e7e7e799",
-        "statusBar.background": "#557c9b",
-        "statusBarItem.hoverBackground": "#7295b1",
-        "statusBar.foreground": "#e7e7e7"
-    },
-    "peacock.color": "#557c9b",
     "files.associations": {
         "ostream": "cpp",
         "iostream": "cpp",
@@ -65,5 +49,25 @@
         "typeinfo": "cpp",
         "bit": "cpp",
         "set": "cpp"
-    }
+    },
+    "python.pythonPath": "/Users/josue/.pyenv/versions/tpcw/bin/python",
+    "workbench.colorCustomizations": {
+        "activityBar.foreground": "#e7e7e7",
+        "activityBar.background": "#293208",
+        "titleBar.activeBackground": "#050601",
+        "titleBar.activeForeground": "#e7e7e7",
+        "activityBar.activeBackground": "#293208",
+        "activityBar.activeBorder": "#167189",
+        "activityBar.inactiveForeground": "#e7e7e799",
+        "activityBarBadge.background": "#167189",
+        "activityBarBadge.foreground": "#e7e7e7",
+        "statusBar.background": "#050601",
+        "statusBar.border": "#050601",
+        "statusBar.foreground": "#e7e7e7",
+        "statusBarItem.hoverBackground": "#293208",
+        "titleBar.border": "#050601",
+        "titleBar.inactiveBackground": "#05060199",
+        "titleBar.inactiveForeground": "#e7e7e799"
+    },
+    "peacock.color": "#050601"
 }
