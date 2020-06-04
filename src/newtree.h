@@ -48,12 +48,19 @@ public:
 
     Tinterval intersection(const Interval & other) {
         Tinterval result(0, 0);
-        if ((other.min <= min && min <= other.max) || (other.min <= max && max <= other.max)) {
+
+        if ((other.min <= min && min <= other.max) || (other.min <= max && max <= other.max) || (min <= other.min && other.min <= max) || (min <= other.max && other.max <= max)) {
             result.min = min > other.min ? min : other.min;
             result.max = max < other.max ? max : other.max;
         }
 
         return result;
+    }
+
+    bool intersects(const Interval & other) {
+        Tinterval i = intersection(other);
+
+        return i.length() > 0;
     }
 
     string to_graphviz(string iter = "") {
@@ -123,11 +130,13 @@ public:
 
     Node * left;
     Node * right;
+    Node * parent;
     Tinterval interval;
 
     Node() {
         left = NULL;
         right = NULL;
+        parent = NULL;
     }
 
     Node(Tinterval interval) : Node() {
@@ -138,6 +147,22 @@ public:
         interval = Tinterval(other.interval);
         left = other.left;
         right = other.right;
+        parent = other.parent;
+    }
+
+    void update() {
+        bool hasChange = false;
+        if ((left != NULL) && left->interval.min < interval.min) {
+            hasChange = true;
+            interval.min = left->interval.min;
+        }
+        if ((right != NULL) && interval.max < right->interval.max) {
+            hasChange = true;
+            interval.max = right->interval.max;
+        }
+        if (parent != NULL && hasChange) {
+            parent->update();
+        }
     }
 
     bool isLeaf() {
@@ -160,21 +185,60 @@ public:
         this->M = M;
     }
 
+    void search(Tinterval & interval, vector<Tinterval> & Q, Tnode * & node) {
+        node = root;
+        while(node != NULL && !node->isLeaf())  {
+            Tinterval leftIntersection, rightIntersection;
+            Tnode * sibling;
+            bool isRight = 0;
+
+            if (node->left != NULL) {
+                leftIntersection = interval.intersection(node->left->interval);
+            }
+            if (node->right != NULL) {
+                rightIntersection = interval.intersection(node->right->interval);
+            }
+            // Its important to check first if the child nodes has intersections
+            if (leftIntersection.length() > 0) {
+                node = node->left;
+                sibling = node->right;
+            } else if (rightIntersection.length() > 0) {
+                node = node->right;
+                sibling = node->left;
+                isRight = 1;
+            } else if (interval < node->interval) {
+                node = node->left;
+                sibling = node->right;
+            } else {
+                node = node->right;
+                sibling = node->left;
+                isRight = 1;
+            }
+            if (isRight && leftIntersection.length() > 0) {
+                Q.push_back(Tinterval(interval.min, leftIntersection.max));
+                interval.min = leftIntersection.max;
+            } else if (!isRight && rightIntersection.length() > 0) {
+                Q.push_back(Tinterval(rightIntersection.min, interval.max));
+                interval.max = rightIntersection.min;
+            }
+        }
+    }
+
     void insert(Tinterval & interval) {
         vector <Tinterval> Q;
         get_intervals(interval, Q);
 
         for (int i = 0; i < Q.size(); i += 1) {
             Tnode * S = NULL; // Points to the parent of N.
-            Tnode * P = NULL;
             Tinterval I(Q[i]);
-            search(I, Q, S, P);
+            search(I, Q, S);
             if (S == NULL) {
                 root = new Tnode(I);
             } else {
                 Tinterval J = I + S->interval;
                 Tnode * T = new Tnode(*S);
                 Tnode * N = new Tnode(I);
+                // Todo: If N.interval is greater than S.Interval, just replace the node to avoid the update
                 S->interval = Tinterval(J);
 
                 if (T->interval < N->interval) {
@@ -184,52 +248,38 @@ public:
                     S->left = N;
                     S->right = T;
                 }
+                T->parent = S;
+                N->parent = S;
                 update(S);
-            }
-        }
-    }
 
-    void search(Tinterval & interval, vector<Tinterval> & Q, Tnode * & node, Tnode * & parent) {
-        node = root;
-        parent = node;
-
-        while(node != NULL && !node->isLeaf())  {
-            Tnode * sibling = NULL;
-            parent = node;
-            if (interval < node->interval) {
-                sibling = node->right;
-                node = node->left;
-                if (sibling != NULL) {
-                    Tinterval intersection = interval.intersection(sibling->interval);
-                    if (intersection.length() > 0) {
-                        Q.push_back(intersection);
-                        interval.max = intersection.min;
-                    }
-                }
-            } else {
-                sibling = node->left;
-                node = node->right;
-
-                if (sibling != NULL) {
-                    Tinterval intersection = interval.intersection(sibling->interval);
-                    if (intersection.length() > 0) {
-                        Q.push_back(intersection);
-                        interval.min = intersection.max;
-                    }
+                // Todo: Check if we can pass the parent of S
+                if (S->parent != NULL) {
+                    S->parent->update();
                 }
             }
         }
     }
 
-    void update(Tnode * & parent) {
-        if (!parent->isLeaf() && parent->right->interval.min <= parent->left->interval.max) {
-            if (parent->interval.length() <= M) {
-                parent->left = NULL;
-                parent->right = NULL;
+    void update(Tnode * & node) {
+        // Todo: Change this line to check if intersects
+        if (!node->isLeaf() && node->right->interval.intersects(node->left->interval)) {
+            if (node->interval.length() <= M) {
+                if (node->left->interval.min < node->interval.min) {
+                    node->interval.min = node->left->interval.min;
+                }
+                if (node->right->interval.max > node->interval.max) {
+                    node->interval.max = node->right->interval.max;
+                }
+                node->left = NULL;
+                node->right = NULL;
+                // Todo: Consider this recursive call
+                if (node->parent != NULL) {
+                    update(node->parent);
+                }
             } else {
-                T m = parent->interval.midpoint();
-                parent->left->interval.max = m;
-                parent->right->interval.min = m;
+                T m = node->interval.midpoint();
+                node->left->interval.max = m;
+                node->right->interval.min = m;
             }
         }
     }
