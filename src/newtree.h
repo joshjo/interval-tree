@@ -236,33 +236,35 @@ public:
                 root = new Tnode(I);
             } else {
                 Tinterval J = I + S->interval;
-                Tnode * T = new Tnode(*S);
-                Tnode * N = new Tnode(I);
-                // Todo: If N.interval is greater than S.Interval, just replace the node to avoid the update
-                S->interval = Tinterval(J);
-
-                if (T->interval < N->interval) {
-                    S->left = T;
-                    S->right = N;
+                if (S->interval.min <= J.min && J.max <= S->interval.max) {
+                    // Update new queries
                 } else {
-                    S->left = N;
-                    S->right = T;
-                }
-                T->parent = S;
-                N->parent = S;
-                update(S);
+                    Tnode * T = new Tnode(*S);
+                    Tnode * N = new Tnode(I);
 
-                // Todo: Check if we can pass the parent of S
-                if (S->parent != NULL) {
-                    S->parent->update();
+                    S->interval = Tinterval(J);
+
+                    if (T->interval < N->interval) {
+                        S->left = T;
+                        S->right = N;
+                    } else {
+                        S->left = N;
+                        S->right = T;
+                    }
+                    T->parent = S;
+                    N->parent = S;
+                    update(S);
+
+                    if (S->parent != NULL) {
+                        S->parent->update();
+                    }
                 }
             }
         }
     }
 
     void update(Tnode * & node) {
-        // Todo: Change this line to check if intersects
-        if (!node->isLeaf() && node->right->interval.intersects(node->left->interval)) {
+        if (!node->isLeaf() && (node->left->interval.max == node->right->interval.min || node->right->interval.intersects(node->left->interval))) {
             if (node->interval.length() <= M) {
                 if (node->left->interval.min < node->interval.min) {
                     node->interval.min = node->left->interval.min;

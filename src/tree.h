@@ -232,7 +232,6 @@ public:
         }
     }
 
-
     string graphviz(string iter=""){
         // string str = "digraph G {\n";
         string tree = "";

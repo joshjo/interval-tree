@@ -51,7 +51,7 @@ int main() {
     // intervals.push_back(Tinterval(630, 700));
     // intervals.push_back(Tinterval(800, 900));
     // intervals.push_back(Tinterval(699, 850));
-    // int M = 100;
+    // int M = 1000;
     // Tree <ConfigLazy <T> > t(M);
 
 
@@ -61,16 +61,16 @@ int main() {
     // }
     // cout << t.graphviz()<< endl;
 
-    int M = 1000;
-    int key_domain_size = 10000;
-    int queries = 1000;
-    int range_size = 1000;
-    vector <Tinterval> intervals = create_queries(queries, key_domain_size, range_size);
+    int M = 1000000;
+    int max_key_value = 1000000;
+    int queries = 1000000;
+    int range_size = 10000;
+    vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
 
-    Tree <ConfigLazy <T> > t(M);
-    int top = 1000;
-    // int top = 20;
-    for (int i = 0; i < top; i += 1) {
+    Tree <ConfigExtra <T> > t(M);
+
+
+    for (int i = 0; i < queries; i += 1) {
         t.insert(intervals[i]);
         // if (i == 19) {
         // } else {
@@ -83,14 +83,14 @@ int main() {
         //     // cout << t.graphviz(to_string(i))<< endl;
         // }
     }
-    // t.insert(intervals[top + 1]);
-    // for (int i = 0; i < intervals.size(); i += 1) {
-    //     if (i == 0) {
-    //         t.insert(intervals[i]);
-    //     } else {
-    //         t.insert(intervals[i]);
-    //     }
-    // }
+    // // t.insert(intervals[top + 1]);
+    // // for (int i = 0; i < intervals.size(); i += 1) {
+    // //     if (i == 0) {
+    // //         t.insert(intervals[i]);
+    // //     } else {
+    // //         t.insert(intervals[i]);
+    // //     }
+    // // }
     cout << t.graphviz()<< endl;
 
     return 0;

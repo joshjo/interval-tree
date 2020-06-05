@@ -25,14 +25,14 @@ int main(int argc, char** argv) {
     srand (100);
 
 
-    int key_domain_size = 1000000;
-    int leaf_size = 100000;
+    int M = 1000000;
+    int max_key_value = 1000000;
+    int queries = 1000000;
     int range_size = 10000;
-    int queries = 100000;
 
-    vector<Tinterval > intervals = create_queries(queries, key_domain_size, range_size);
+    vector<Tinterval > intervals = create_queries(queries, max_key_value, range_size);
 
-    Tree <ConfigLazy <T> > tree(leaf_size);
+    Tree <ConfigExtra <T> > tree(M);
     for (int i = 0; i < intervals.size(); i += 1) {
         tree.insert_interval(intervals[i]);
         // bool dbg = false;
@@ -47,11 +47,11 @@ int main(int argc, char** argv) {
         // }
     }
 
-    vector<Tinterval *> leafs;
-    tree.getLeafs(leafs);
+    // vector<Tinterval *> leafs;
+    // tree.getLeafs(leafs);
 
-    cout << leafs.size() << endl;
-    // cout << tree.graphviz() << endl;
+    // cout << leafs.size() << endl;
+    cout << tree.graphviz() << endl;
 
 
     // T max_random = key_domain_size - leaf_size;
@@ -74,30 +74,30 @@ int main(int argc, char** argv) {
 
 //     // cout << iter_time << endl;
 //     // cout << tree.counter << " -- " << tree.insertions << endl;
-    for (int i = 0; i < tree.root->leafs->size(); i += 1) {
-        Tinterval interval = tree.root->leafs->at(i)->interval;
-        cout << tree.root->leafs->at(i)->interval << "[" << tree.root->leafs->at(i)->queries->size() << "]" << endl;
-        // for (vector<Tinterval *>::iterator it = tree.root->leafs->at(i)->queries->begin(); it != tree.root->leafs->at(i)->queries->end(); it++) {
-            // cout << "\tq" << *(*it) << endl;
-// //         //     for (vector<pair<Tinterval *, Tinterval>>::iterator it2 = tree.root->leafs->at(i)->queries_map->begin(); it2 != tree.root->leafs->at(i)->queries_map->end(); it2++) {
-// //         //         if (it != it2 && it->first == it2->first) {
-// //         //             cout << "\tq" << *(it->first) << " <- " << it->second << endl;
-// //         //             cout << "\tq" << *(it2->first) << " <- " << it2->second << endl << endl;
-// //         //         }
-// //         //     }
-// //         //     // if (it->first->right >= 444301) {
-// //         //     //     cout << "\tq" << *(it->first) << " <- " << it->second << endl;
-// //         //     // }
-// //         //     // cout << "\tq" << *(it->first) << " <- " << it->second << endl;
-        // }
-//     //     // for (vector<pair<Tinterval *, Tinterval>>::iterator it = tree.root->leafs->at(i)->queries_map->begin(); it != tree.root->leafs->at(i)->queries_map->end(); it++) {
-//     //     //     cout << "\tq" << *(it->first) << " <- " << it->second << endl;
-//     //     // }
-//     //     // cout << "  -----" << endl;
-//     //     // for (set<Tinterval *>::iterator it = tree.root->leafs->at(i)->queries->begin(); it != tree.root->leafs->at(i)->queries->end(); it++) {
-//     //     //     cout << "\tq" << *(*it) << endl;
-//     //     // }
-    }
+//     for (int i = 0; i < tree.root->leafs->size(); i += 1) {
+//         Tinterval interval = tree.root->leafs->at(i)->interval;
+//         cout << tree.root->leafs->at(i)->interval << "[" << tree.root->leafs->at(i)->queries->size() << "]" << endl;
+//         // for (vector<Tinterval *>::iterator it = tree.root->leafs->at(i)->queries->begin(); it != tree.root->leafs->at(i)->queries->end(); it++) {
+//             // cout << "\tq" << *(*it) << endl;
+// // //         //     for (vector<pair<Tinterval *, Tinterval>>::iterator it2 = tree.root->leafs->at(i)->queries_map->begin(); it2 != tree.root->leafs->at(i)->queries_map->end(); it2++) {
+// // //         //         if (it != it2 && it->first == it2->first) {
+// // //         //             cout << "\tq" << *(it->first) << " <- " << it->second << endl;
+// // //         //             cout << "\tq" << *(it2->first) << " <- " << it2->second << endl << endl;
+// // //         //         }
+// // //         //     }
+// // //         //     // if (it->first->right >= 444301) {
+// // //         //     //     cout << "\tq" << *(it->first) << " <- " << it->second << endl;
+// // //         //     // }
+// // //         //     // cout << "\tq" << *(it->first) << " <- " << it->second << endl;
+//         // }
+// //     //     // for (vector<pair<Tinterval *, Tinterval>>::iterator it = tree.root->leafs->at(i)->queries_map->begin(); it != tree.root->leafs->at(i)->queries_map->end(); it++) {
+// //     //     //     cout << "\tq" << *(it->first) << " <- " << it->second << endl;
+// //     //     // }
+// //     //     // cout << "  -----" << endl;
+// //     //     // for (set<Tinterval *>::iterator it = tree.root->leafs->at(i)->queries->begin(); it != tree.root->leafs->at(i)->queries->end(); it++) {
+// //     //     //     cout << "\tq" << *(*it) << endl;
+// //     //     // }
+//     }
 
     // vector<Tinterval *> leafs;
     // tree.getLeafs(leafs);
