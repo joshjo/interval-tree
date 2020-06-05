@@ -25,14 +25,14 @@ int main(int argc, char** argv) {
     srand (100);
 
 
-    int M = 1000000;
+    int M = 100000;
     int max_key_value = 1000000;
-    int queries = 1000000;
-    int range_size = 10000;
+    int queries = 100000;
+    int range_size = 100000;
 
     vector<Tinterval > intervals = create_queries(queries, max_key_value, range_size);
 
-    Tree <ConfigExtra <T> > tree(M);
+    Tree <ConfigLazy <T> > tree(M);
     for (int i = 0; i < intervals.size(); i += 1) {
         tree.insert_interval(intervals[i]);
         // bool dbg = false;

@@ -133,21 +133,41 @@ public:
     Node * parent;
     Tinterval interval;
 
+    vector <Tnode* > * leafs = NULL;
+    bool withLeafs = false;
+    bool withLazy = false;
+    vector <Tinterval *> * lazy;
+
     Node() {
         left = NULL;
         right = NULL;
         parent = NULL;
+
+        withLeafs = Tr::withLeafs;
+        withLazy = withLeafs && Tr::withQueries;
+
+        if (withLeafs) {
+            leafs = new vector <Tnode *>;
+            leafs->push_back(this);
+        }
+    }
+
+    Node(const Tnode & other) : Node() {
+        interval = Tinterval(other.interval);
+        left = other.left;
+        right = other.right;
+        parent = other.parent;
     }
 
     Node(Tinterval interval) : Node() {
         this->interval = interval;
     }
 
-    Node(const Tnode & other) {
-        interval = Tinterval(other.interval);
-        left = other.left;
-        right = other.right;
-        parent = other.parent;
+    Node(Tinterval interval, Tinterval * query) : Node(interval) {
+        if (withLazy) {
+            lazy = new vector<Tinterval *>;
+            lazy->push_back(query);
+        }
     }
 
     void update() {
@@ -278,7 +298,7 @@ public:
                 if (node->parent != NULL) {
                     update(node->parent);
                 }
-            } else {
+            } else if(node->left->isLeaf() && node->right->isLeaf()) {
                 T m = node->interval.midpoint();
                 node->left->interval.max = m;
                 node->right->interval.min = m;

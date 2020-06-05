@@ -61,26 +61,27 @@ int main() {
     // }
     // cout << t.graphviz()<< endl;
 
-    int M = 1000000;
+    int M = 100000;
     int max_key_value = 1000000;
-    int queries = 1000000;
-    int range_size = 10000;
+    int queries = 100000;
+    int range_size = 100000;
+
     vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
 
-    Tree <ConfigExtra <T> > t(M);
+    Tree <ConfigLazy <T> > t(M);
 
 
     for (int i = 0; i < queries; i += 1) {
         t.insert(intervals[i]);
-        // if (i == 19) {
+        // if (i == 13) {
+        //     t.insert(intervals[i]);
         // } else {
-
         //     t.insert(intervals[i]);
         // }
 
-        // if (i >= 18) {
-        //     // cout << "i" << intervals[i] << endl;
-        //     // cout << t.graphviz(to_string(i))<< endl;
+        // if (i >= 12) {
+        //     cout << "i" << intervals[i] << endl;
+        //     cout << t.graphviz(to_string(i))<< endl;
         // }
     }
     // // t.insert(intervals[top + 1]);
