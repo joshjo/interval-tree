@@ -61,9 +61,9 @@ int main() {
     // }
     // cout << t.graphviz()<< endl;
 
-    int M = 100000;
+    int M = 1000000;
     int max_key_value = 1000000;
-    int queries = 100000;
+    int queries = 3;
     int range_size = 100000;
 
     vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
@@ -72,6 +72,7 @@ int main() {
 
 
     for (int i = 0; i < queries; i += 1) {
+        cout << "i: " << i << endl;
         t.insert(intervals[i]);
         // if (i == 13) {
         //     t.insert(intervals[i]);
@@ -84,6 +85,10 @@ int main() {
         //     cout << t.graphviz(to_string(i))<< endl;
         // }
     }
+
+    cout << t.root->lazyQueries->size() << endl;
+    // cout << t.count_merges << endl;
+
     // // t.insert(intervals[top + 1]);
     // // for (int i = 0; i < intervals.size(); i += 1) {
     // //     if (i == 0) {
@@ -92,7 +97,7 @@ int main() {
     // //         t.insert(intervals[i]);
     // //     }
     // // }
-    cout << t.graphviz()<< endl;
+    // cout << t.graphviz()<< endl;
 
     return 0;
 }

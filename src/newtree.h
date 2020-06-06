@@ -136,7 +136,7 @@ public:
     vector <Tnode* > * leafs = NULL;
     bool withLeafs = false;
     bool withLazy = false;
-    vector <Tinterval *> * lazy;
+    vector <Tinterval *> * lazyQueries;
 
     Node() {
         left = NULL;
@@ -145,11 +145,6 @@ public:
 
         withLeafs = Tr::withLeafs;
         withLazy = withLeafs && Tr::withQueries;
-
-        if (withLeafs) {
-            leafs = new vector <Tnode *>;
-            leafs->push_back(this);
-        }
     }
 
     Node(const Tnode & other) : Node() {
@@ -157,6 +152,9 @@ public:
         left = other.left;
         right = other.right;
         parent = other.parent;
+
+        lazyQueries = other.lazyQueries;
+        leafs = other.leafs;
     }
 
     Node(Tinterval interval) : Node() {
@@ -165,8 +163,8 @@ public:
 
     Node(Tinterval interval, Tinterval * query) : Node(interval) {
         if (withLazy) {
-            lazy = new vector<Tinterval *>;
-            lazy->push_back(query);
+            lazyQueries = new vector<Tinterval *>;
+            lazyQueries->push_back(query);
         }
     }
 
@@ -185,6 +183,41 @@ public:
         }
     }
 
+    bool addQuery(Tinterval * I, bool hasVerify=false) {
+        if (hasVerify) {
+            cout << "heree" << (*I) << endl;
+            for (int i = 0; i < lazyQueries->size(); i++) {
+                if (lazyQueries->at(i) == I) {
+                    return false;
+                }
+            }
+        }
+        lazyQueries->push_back(I);
+
+        return true;
+    }
+
+    void makeLeafNode() {
+        if (withLazy) {
+            if (left != NULL) {
+                // for (int i = 0; i < left->lazyQueries->size(); i += 1) {
+                //     addQuery(left->lazyQueries->at(i), true);
+                // }
+                lazyQueries->insert(lazyQueries->end(), left->lazyQueries->begin(), left->lazyQueries->end());
+            }
+            if (right != NULL) {
+                // for (int i = 0; i < right->lazyQueries->size(); i += 1) {
+                //     addQuery(right->lazyQueries->at(i), true);
+                // }
+                lazyQueries->insert(lazyQueries->end(), right->lazyQueries->begin(), right->lazyQueries->end());
+            }
+        }
+
+        // Todo: Destroy nodes;
+        left = NULL;
+        right = NULL;
+    }
+
     bool isLeaf() {
         return (left == NULL && right == NULL);
     }
@@ -197,6 +230,7 @@ public:
     typedef typename Tr::T T;
     typedef Node<Tr> Tnode;
     typedef Interval<T> Tinterval;
+    int count_merges = 0;
     Tnode * root;
     T M;
 
@@ -253,14 +287,15 @@ public:
             Tinterval I(Q[i]);
             search(I, Q, S);
             if (S == NULL) {
-                root = new Tnode(I);
+                root = new Tnode(I, &Q[i]);
             } else {
                 Tinterval J = I + S->interval;
                 if (S->interval.min <= J.min && J.max <= S->interval.max) {
-                    // Update new queries
+                    // Update new queries. Review. I think is done.
+                    S->addQuery(&Q[i]);
                 } else {
                     Tnode * T = new Tnode(*S);
-                    Tnode * N = new Tnode(I);
+                    Tnode * N = new Tnode(I, &Q[i]);
 
                     S->interval = Tinterval(J);
 
@@ -273,7 +308,7 @@ public:
                     }
                     T->parent = S;
                     N->parent = S;
-                    update(S);
+                    update(S, &Q[i]);
 
                     if (S->parent != NULL) {
                         S->parent->update();
@@ -283,30 +318,37 @@ public:
         }
     }
 
-    void update(Tnode * & node) {
+    void update(Tnode * & node, Tinterval * I) {
         if (!node->isLeaf() && (node->left->interval.max == node->right->interval.min || node->right->interval.intersects(node->left->interval))) {
             if (node->interval.length() <= M) {
-                update_merge(node);
+                Tnode * P = update_merge(node);
+                P->addQuery(I, true);
+
+                count_merges += 1;
             } else if(node->left->isLeaf() && node->right->isLeaf()) {
                 udate_resize(node);
+                node->left->addQuery(I, true);
+                node->right->addQuery(I, true);
             }
         }
     }
 
-    void update_merge(Tnode * & node) {
-        if (node != NULL && node->interval.length() <= M) {
+    Tnode * update_merge(Tnode * & node) {
+        if (node->interval.length() <= M) {
             if (node->left->interval.min < node->interval.min) {
                 node->interval.min = node->left->interval.min;
             }
             if (node->right->interval.max > node->interval.max) {
                 node->interval.max = node->right->interval.max;
             }
-            node->left = NULL;
-            node->right = NULL;
+            node->makeLeafNode();
 
             // Todo: Consider this recursive call
-            update_merge(node->parent);
+            if (node->parent != NULL) {
+                return update_merge(node->parent);
+            }
         }
+        return node;
     }
 
     void udate_resize(Tnode * & node) {
