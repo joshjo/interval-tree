@@ -286,24 +286,33 @@ public:
     void update(Tnode * & node) {
         if (!node->isLeaf() && (node->left->interval.max == node->right->interval.min || node->right->interval.intersects(node->left->interval))) {
             if (node->interval.length() <= M) {
-                if (node->left->interval.min < node->interval.min) {
-                    node->interval.min = node->left->interval.min;
-                }
-                if (node->right->interval.max > node->interval.max) {
-                    node->interval.max = node->right->interval.max;
-                }
-                node->left = NULL;
-                node->right = NULL;
-                // Todo: Consider this recursive call
-                if (node->parent != NULL) {
-                    update(node->parent);
-                }
+                update_merge(node);
             } else if(node->left->isLeaf() && node->right->isLeaf()) {
-                T m = node->interval.midpoint();
-                node->left->interval.max = m;
-                node->right->interval.min = m;
+                udate_resize(node);
             }
         }
+    }
+
+    void update_merge(Tnode * & node) {
+        if (node != NULL && node->interval.length() <= M) {
+            if (node->left->interval.min < node->interval.min) {
+                node->interval.min = node->left->interval.min;
+            }
+            if (node->right->interval.max > node->interval.max) {
+                node->interval.max = node->right->interval.max;
+            }
+            node->left = NULL;
+            node->right = NULL;
+
+            // Todo: Consider this recursive call
+            update_merge(node->parent);
+        }
+    }
+
+    void udate_resize(Tnode * & node) {
+        T m = node->interval.midpoint();
+        node->left->interval.max = m;
+        node->right->interval.min = m;
     }
 
     string graphviz(string iter=""){
