@@ -136,7 +136,7 @@ public:
     vector <Tnode* > * leafs = NULL;
     bool withLeafs = false;
     bool withLazy = false;
-    vector <Tinterval *> * lazyQueries;
+    set <Tinterval *> * lazyQueries;
 
     Node() {
         left = NULL;
@@ -162,10 +162,9 @@ public:
     }
 
     Node(Tinterval interval, Tinterval * query) : Node(interval) {
-        if (withLazy) {
-            lazyQueries = new vector<Tinterval *>;
-            lazyQueries->push_back(query);
-        }
+        // if (withLazy) {
+        lazyQueries = new set<Tinterval *>;
+        lazyQueries->insert(query);
     }
 
     void update() {
@@ -183,33 +182,35 @@ public:
         }
     }
 
-    bool addQuery(Tinterval * I, bool hasVerify=false) {
-        if (hasVerify) {
-            cout << "heree" << (*I) << endl;
-            for (int i = 0; i < lazyQueries->size(); i++) {
-                if (lazyQueries->at(i) == I) {
-                    return false;
-                }
-            }
-        }
-        lazyQueries->push_back(I);
+    void addQuery(Tinterval * I, bool hasVerify=false) {
+        lazyQueries->insert(I);
+    }
 
-        return true;
+    void printLazyQueries() {
+        for(typename set<Tinterval *>::iterator it = lazyQueries->begin(); it != lazyQueries->end(); it++) {
+            cout << "- " << (*(*it)) << "; ";
+        }
+        cout << endl;
     }
 
     void makeLeafNode() {
+        pair<set<int>::iterator, bool> ret;
+
+        cout << "node lazyQueries: " << lazyQueries->size() << endl;
+        printLazyQueries();
         if (withLazy) {
             if (left != NULL) {
-                // for (int i = 0; i < left->lazyQueries->size(); i += 1) {
-                //     addQuery(left->lazyQueries->at(i), true);
-                // }
-                lazyQueries->insert(lazyQueries->end(), left->lazyQueries->begin(), left->lazyQueries->end());
+                cout << "Left lazyQueries: " << left->interval << endl;
+                left->printLazyQueries();
+                lazyQueries->insert(left->lazyQueries->begin(), left->lazyQueries->end());
+                cout << "0 lazyQueries: " << lazyQueries->size() << endl;
+                // cout << "Inserted: " << ret.second << endl;
             }
             if (right != NULL) {
-                // for (int i = 0; i < right->lazyQueries->size(); i += 1) {
-                //     addQuery(right->lazyQueries->at(i), true);
-                // }
-                lazyQueries->insert(lazyQueries->end(), right->lazyQueries->begin(), right->lazyQueries->end());
+                cout << "Right lazyQueries: " << right->interval << endl;
+                right->printLazyQueries();
+                // cout << "Right lazyQueries: " << right->lazyQueries->size() << endl;
+                lazyQueries->insert(right->lazyQueries->begin(), right->lazyQueries->end());
             }
         }
 

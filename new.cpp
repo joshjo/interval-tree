@@ -72,8 +72,9 @@ int main() {
 
 
     for (int i = 0; i < queries; i += 1) {
-        cout << "i: " << i << endl;
+        cout << i << " : " << intervals[i] << endl;
         t.insert(intervals[i]);
+        cout << endl;
         // if (i == 13) {
         //     t.insert(intervals[i]);
         // } else {
