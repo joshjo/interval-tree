@@ -51,7 +51,9 @@ int main(int argc, char** argv) {
     // tree.getLeafs(leafs);
 
     // cout << leafs.size() << endl;
-    cout << tree.graphviz() << endl;
+    T * data = tree.getLeafsData();
+    cout << data[0] << " " << data[1] << " " << data[2] << endl;
+    // cout << tree.graphviz() << endl;
 
 
     // T max_random = key_domain_size - leaf_size;

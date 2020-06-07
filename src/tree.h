@@ -2,6 +2,7 @@
 #define TREE_H
 #include <iostream>
 #include <utility>
+#include <limits>
 
 #include "node.h"
 
@@ -200,6 +201,30 @@ public:
             getLeafs(visitor->left, leafs);
             getLeafs(visitor->right, leafs);
         }
+    }
+
+    T * getLeafsData() {
+        vector<Tinterval *> leafs;
+        T inf = numeric_limits<T>::max();
+        static T res[3] = {0, inf, -inf};
+
+        getLeafs(leafs);
+        size_t size = leafs.size();
+
+        for (int i = 0; i < size; i += 1) {
+            T width = leafs[i]->right - leafs[i]->left;
+            res[0] += width;
+            if (width < res[1]) {
+                res[1] = width;
+            }
+            if (width > res[2]) {
+                res[2] = width;
+            }
+        }
+
+        res[0] = res[0] / size;
+
+        return res;
     }
 
     void print(Tnode * visitor) {

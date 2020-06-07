@@ -11,4 +11,6 @@
 #include <queue>
 #include <time.h>
 
+#define INF (unsigned)!((int)0)
+
 #endif // INCLUDES_H
