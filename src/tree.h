@@ -206,23 +206,23 @@ public:
     T * getLeafsData() {
         vector<Tinterval *> leafs;
         T inf = numeric_limits<T>::max();
-        static T res[3] = {0, inf, -inf};
-
         getLeafs(leafs);
         size_t size = leafs.size();
+        static T res[4] = {size, 0, inf, -inf};
+
 
         for (int i = 0; i < size; i += 1) {
             T width = leafs[i]->right - leafs[i]->left;
-            res[0] += width;
-            if (width < res[1]) {
-                res[1] = width;
-            }
-            if (width > res[2]) {
+            res[1] += width;
+            if (width < res[2]) {
                 res[2] = width;
+            }
+            if (width > res[3]) {
+                res[3] = width;
             }
         }
 
-        res[0] = res[0] / size;
+        res[1] = res[1] / size;
 
         return res;
     }
