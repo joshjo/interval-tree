@@ -121,11 +121,10 @@ public:
     }
 };
 
-template <class Tr>
+template <class T>
 class Node {
 public:
-    typedef typename Tr::T T;
-    typedef Node<Tr> Tnode;
+    typedef Node<T> Tnode;
     typedef Interval<T> Tinterval;
 
     Node * left;
@@ -133,23 +132,12 @@ public:
     Node * parent;
     Tinterval interval;
 
-    vector <Tnode* > * leafs = NULL;
-    bool withLeafs = false;
-    bool withLazy = false;
     vector <Tinterval *> * lazy;
 
     Node() {
         left = NULL;
         right = NULL;
         parent = NULL;
-
-        withLeafs = Tr::withLeafs;
-        withLazy = withLeafs && Tr::withQueries;
-
-        if (withLeafs) {
-            leafs = new vector <Tnode *>;
-            leafs->push_back(this);
-        }
     }
 
     Node(const Tnode & other) : Node() {
@@ -164,13 +152,9 @@ public:
     }
 
     Node(Tinterval interval, Tinterval * query) : Node(interval) {
-        if (withLazy) {
-            lazy = new vector<Tinterval *>;
-            lazy->push_back(query);
-        }
     }
 
-    void update() {
+    void updateLimits() {
         bool hasChange = false;
         if ((left != NULL) && left->interval.min < interval.min) {
             hasChange = true;
@@ -181,24 +165,124 @@ public:
             interval.max = right->interval.max;
         }
         if (parent != NULL && hasChange) {
-            parent->update();
+            parent->updateLimits();
         }
     }
 
     bool isLeaf() {
         return (left == NULL && right == NULL);
     }
+
+    void getLeafs(Tnode * visitor, vector<Tnode *> & leafs) {
+        if(visitor != NULL) {
+            if (visitor->isLeaf()) {
+                leafs.push_back(visitor);
+            }
+            getLeafs(visitor->left, leafs);
+            getLeafs(visitor->right, leafs);
+        }
+    }
+
+    void getLeafs(vector<Tnode *> & leafs) {
+        getLeafs(this, leafs);
+    }
 };
 
+template <class Tr>
+class QMap {
+public:
+    typedef typename Tr::T T;
+    typedef Node<T> Tnode;
+    typedef Interval<T> Tinterval;
+    // typedef pair<Tnode *, Tinterval *> qnPairType;
+    typedef map<Tnode *, set <Tinterval *> *> qnMapType;
+    qnMapType qnMap;
+
+    QMap(){}
+
+    void insert(Tnode * & node, Tinterval * interval) {
+        if (qnMap[node] == NULL) {
+            qnMap[node] = new set<Tinterval *>;
+        }
+        qnMap[node]->insert(interval);
+        // qnMap.insert(qnPairType(node, interval));
+    }
+
+    void transfer(Tnode * & from, Tnode * & to) {
+        qnMap[to] = qnMap[from];
+        qnMap.erase(from);
+    }
+
+    void share(Tnode * & a, Tnode * & b) {
+        // Copy all the elements from A
+        // set<Tinterval *> * temp = new;
+        // Copy all the elements from B
+        // if (qnMap[a] != NULL && a->isLeaf()) {
+        //     for (typename set<Tinterval *>::iterator it = qnMap[a]->begin(); it != qnMap[a]->end(); it++) {
+        //         insert(temp, *it);
+        //     }
+        // }
+
+        // if (qnMap[b] != NULL && b->isLeaf()) {
+        //     for (typename set<Tinterval *>::iterator it = qnMap[b]->begin(); it != qnMap[b]->end(); it++) {
+        //         insert(temp, *it);
+        //     }
+
+        // }
+        // qnMap.erase(b);
+        // qnMap.erase(a);
+        // qnMap[b] = temp;
+        // qnMap[a] = temp;
+    }
+
+    void merge(Tnode * & node) {
+        set<Tinterval *> * temp = new set<Tinterval *>;
+
+        Tnode * a = node->left;
+        Tnode * b = node->right;
+
+        vector<Tnode *> leafs;
+
+        if (a != NULL) {
+            a->getLeafs(leafs);
+        }
+        if (b != NULL) {
+            b->getLeafs(leafs);
+        }
+
+        for (size_t i = 0; i < leafs.size(); i+= 1) {
+            Tnode * n = leafs[i];
+            if (qnMap[n] != NULL) {
+                for (typename set<Tinterval *>::iterator it = qnMap[n]->begin(); it != qnMap[n]->end(); it++) {
+                    temp->insert((*it));
+                }
+                qnMap.erase(n);
+            }
+        }
+
+        if (temp->size() > 0) {
+            qnMap[node] = temp;
+        }
+    }
+
+    void summary() {
+        // cout << "size: " << qnMap.size() << endl;
+        for (typename qnMapType::iterator it = qnMap.begin(); it != qnMap.end(); it++) {
+            cout << it->first->interval << " " << it->second->size() << endl;
+        }
+    }
+};
 
 template <class Tr>
 class Tree {
 public:
     typedef typename Tr::T T;
-    typedef Node<Tr> Tnode;
+    typedef Node<T> Tnode;
     typedef Interval<T> Tinterval;
+
     Tnode * root;
     T M;
+    QMap<Tr> qnMap;
 
     Tree(T M) {
         root = NULL;
@@ -254,15 +338,19 @@ public:
             search(I, Q, S);
             if (S == NULL) {
                 root = new Tnode(I);
+                qnMap.insert(root, &interval);
             } else {
                 Tinterval J = I + S->interval;
                 if (S->interval.min <= J.min && J.max <= S->interval.max) {
                     // Update new queries
+                    qnMap.insert(S, &interval);
                 } else {
                     Tnode * T = new Tnode(*S);
                     Tnode * N = new Tnode(I);
-
                     S->interval = Tinterval(J);
+
+                    qnMap.transfer(S, T);
+                    qnMap.insert(N, &interval);
 
                     if (T->interval < N->interval) {
                         S->left = T;
@@ -276,7 +364,7 @@ public:
                     update(S);
 
                     if (S->parent != NULL) {
-                        S->parent->update();
+                        S->parent->updateLimits();
                     }
                 }
             }
@@ -301,6 +389,7 @@ public:
             if (node->right->interval.max > node->interval.max) {
                 node->interval.max = node->right->interval.max;
             }
+            qnMap.merge(node);
             node->left = NULL;
             node->right = NULL;
 
@@ -313,6 +402,7 @@ public:
         T m = node->interval.midpoint();
         node->left->interval.max = m;
         node->right->interval.min = m;
+        qnMap.share(node->left, node->right);
     }
 
     string graphviz(string iter=""){
