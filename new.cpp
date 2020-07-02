@@ -64,7 +64,7 @@ int main() {
     // cout << t.graphviz()<< endl;
     // t.qnMap.summary();
 
-
+    auto start_time = std::chrono::system_clock::now();
     int M = 100000;
     int max_key_value = 1000000;
     int range_size = 100000;
@@ -90,6 +90,10 @@ int main() {
     cout << t.graphviz() << endl;
 
     t.qnMap.summary();
+    auto end_time = std::chrono::system_clock::now();
+    chrono::duration<double> elapsed_seconds = end_time - start_time;
+    double iter_time = elapsed_seconds.count();
+    cout << "iter time: " << iter_time << endl;
 
     return 0;
 }

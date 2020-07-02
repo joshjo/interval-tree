@@ -205,7 +205,6 @@ public:
             qnMap[node] = new set<Tinterval *>;
         }
         qnMap[node]->insert(interval);
-        // qnMap.insert(qnPairType(node, interval));
     }
 
     void transfer(Tnode * & from, Tnode * & to) {
