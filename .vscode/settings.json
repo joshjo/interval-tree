@@ -51,5 +51,23 @@
         "set": "cpp"
     },
     "python.pythonPath": "/Users/josue/.pyenv/versions/tpcw/bin/python",
-    "peacock.color": "#050601"
+    "peacock.color": "#050601",
+    "workbench.colorCustomizations": {
+        "activityBar.activeBackground": "#293208",
+        "activityBar.activeBorder": "#167189",
+        "activityBar.background": "#293208",
+        "activityBar.foreground": "#e7e7e7",
+        "activityBar.inactiveForeground": "#e7e7e799",
+        "activityBarBadge.background": "#167189",
+        "activityBarBadge.foreground": "#e7e7e7",
+        "statusBar.background": "#050601",
+        "statusBar.border": "#050601",
+        "statusBar.foreground": "#e7e7e7",
+        "statusBarItem.hoverBackground": "#293208",
+        "titleBar.activeBackground": "#050601",
+        "titleBar.activeForeground": "#e7e7e7",
+        "titleBar.border": "#050601",
+        "titleBar.inactiveBackground": "#05060199",
+        "titleBar.inactiveForeground": "#e7e7e799"
+    }
 }

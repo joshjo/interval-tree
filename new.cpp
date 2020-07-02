@@ -61,9 +61,10 @@ int main() {
     // }
     // cout << t.graphviz()<< endl;
 
+    auto start_time = std::chrono::system_clock::now();
     int M = 100000;
     int max_key_value = 1000000;
-    int queries = 100000;
+    int queries = 1000000;
     int range_size = 100000;
 
     vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
@@ -93,6 +94,10 @@ int main() {
     // //     }
     // // }
     cout << t.graphviz()<< endl;
+    auto end_time = std::chrono::system_clock::now();
+    chrono::duration<double> elapsed_seconds = end_time - start_time;
+    double iter_time = elapsed_seconds.count();
 
+    cout << "iter_time: " << iter_time << endl;
     return 0;
 }
