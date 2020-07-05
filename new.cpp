@@ -49,7 +49,7 @@ bool checksum_validate(vector <Tinterval> & queries, Tree <Tr> & t) {
     }
 
     cout << "checksum: " << checksum << endl;
-    cout << "checksum: " << t.qnMap.checksum() << endl;
+    cout << "checksum: " << t.qMap->checksum() << endl;
 
     return true;
 }
@@ -80,16 +80,16 @@ int main() {
 
     auto start_time = std::chrono::system_clock::now();
 
-    int M = 125000;
+    int M = 100000;
     int max_key_value = 1000000;
     int range_size = 100000;
-    int queries = 100000;
+    int queries = 1000000;
 
     vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
 
-
-
-    Tree <ConfigLazy <T> > t(M);
+    QMapLazy <Traits <T>> * qLazy = new QMapLazy <Traits <T>>();
+    QMapExtra <Traits <T>> * qExtra = new QMapExtra <Traits <T>>();
+    Tree <Traits <T> > t(M, qLazy);
 
     for (int i = 0; i < queries; i += 1) {
         // if (i == 13) {
@@ -109,7 +109,7 @@ int main() {
 
     // cout << t.graphviz() << endl;
 
-    t.qnMap.summary();
+    // t.qMap->summary();
     checksum_validate(intervals, t);
     cout << "iter time: " << iter_time << endl;
 
