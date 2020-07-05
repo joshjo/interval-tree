@@ -36,6 +36,12 @@ public:
         return max - min;
     }
 
+    T checksum() {
+        T greater = (max * (max - 1)) / 2;
+        T lower = (min * (min - 1)) / 2;
+
+        return greater - lower;
+    }
 
     T midpoint() const {
         /**
@@ -194,48 +200,84 @@ public:
     typedef typename Tr::T T;
     typedef Node<T> Tnode;
     typedef Interval<T> Tinterval;
-    // typedef pair<Tnode *, Tinterval *> qnPairType;
-    typedef map<Tnode *, set <Tinterval *> *> qnMapType;
+    typedef pair<Tnode *, Tinterval *> qnPairType;
+    // typedef map<Tnode *, set <Tinterval *> *> qnMapType;
+    typedef map<Tnode *, vector <Tinterval *> *> qnMapType;
     qnMapType qnMap;
+    int mergeOps;
+    int transferOps;
+    int insertOps;
+    int maxSizeSet;
+    int shareOps;
 
-    QMap(){}
+    QMap(){
+        mergeOps = 0;
+        shareOps = 0;
+        transferOps = 0;
+        insertOps = 0;
+        maxSizeSet = 0;
+    }
 
     void insert(Tnode * & node, Tinterval * interval) {
+        insertOps += 1;
+
         if (qnMap[node] == NULL) {
-            qnMap[node] = new set<Tinterval *>;
+            // qnMap[node] = new set<Tinterval *>;
+            qnMap[node] = new vector<Tinterval *>;
         }
-        qnMap[node]->insert(interval);
+
+        // size_t x = qnMap[node]->size();
+        // qnMap[node]->insert(interval);
+        qnMap[node]->emplace_back(interval);
+
+        // if (x > maxSizeSet) {
+        //     maxSizeSet = x;
+        // }
     }
 
     void transfer(Tnode * & from, Tnode * & to) {
+        transferOps += 1;
+
         qnMap[to] = qnMap[from];
         qnMap.erase(from);
     }
 
     void share(Tnode * & a, Tnode * & b) {
+        shareOps += 1;
         // Copy all the elements from A
-        // set<Tinterval *> * temp = new;
+        set<Tinterval *> tempSet;
+        typename vector<Tinterval *>::iterator it;
         // Copy all the elements from B
-        // if (qnMap[a] != NULL && a->isLeaf()) {
-        //     for (typename set<Tinterval *>::iterator it = qnMap[a]->begin(); it != qnMap[a]->end(); it++) {
-        //         insert(temp, *it);
-        //     }
-        // }
+        if (qnMap[a] != NULL) {
+            for (it = qnMap[a]->begin(); it != qnMap[a]->end(); it++) {
+                tempSet.insert(*it);
+            }
+        }
+        if (qnMap[b] != NULL) {
+            for (it = qnMap[b]->begin(); it != qnMap[b]->end(); it++) {
+                tempSet.insert(*it);
+            }
+        }
 
-        // if (qnMap[b] != NULL && b->isLeaf()) {
-        //     for (typename set<Tinterval *>::iterator it = qnMap[b]->begin(); it != qnMap[b]->end(); it++) {
-        //         insert(temp, *it);
-        //     }
+        vector<Tinterval *> * tempA = new vector<Tinterval *>;
+        tempA->reserve(tempSet.size());
 
-        // }
-        // qnMap.erase(b);
-        // qnMap.erase(a);
-        // qnMap[b] = temp;
-        // qnMap[a] = temp;
+        for (typename set<Tinterval *>::iterator it = tempSet.begin(); it != tempSet.end(); it++) {
+            tempA->emplace_back(*it);
+        }
+        vector<Tinterval *> * tempB = new vector<Tinterval *>(tempA->begin(), tempA->end());
+
+        qnMap.erase(a);
+        qnMap.erase(b);
+        qnMap[a] = tempA;
+        qnMap[b] = tempB;
     }
 
     void merge(Tnode * & node) {
-        set<Tinterval *> * temp = new set<Tinterval *>;
+        mergeOps += 1;
+
+        // set<Tinterval *> * temp = new set<Tinterval *>;
+        vector<Tinterval *> * temp = new vector<Tinterval *>;
 
         Tnode * a = node->left;
         Tnode * b = node->right;
@@ -252,8 +294,11 @@ public:
         for (size_t i = 0; i < leafs.size(); i+= 1) {
             Tnode * n = leafs[i];
             if (qnMap[n] != NULL) {
-                for (typename set<Tinterval *>::iterator it = qnMap[n]->begin(); it != qnMap[n]->end(); it++) {
-                    temp->insert((*it));
+                // for (typename set<Tinterval *>::iterator it = qnMap[n]->begin(); it != qnMap[n]->end(); it++) {
+                //     temp->insert((*it));
+                // }
+                for (typename vector<Tinterval *>::iterator it = qnMap[n]->begin(); it != qnMap[n]->end(); it++) {
+                    temp->push_back((*it));
                 }
                 qnMap.erase(n);
             }
@@ -264,11 +309,35 @@ public:
         }
     }
 
-    void summary() {
-        // cout << "size: " << qnMap.size() << endl;
+    long long checksum() {
+        long long val = 0;
         for (typename qnMapType::iterator it = qnMap.begin(); it != qnMap.end(); it++) {
-            cout << it->first->interval << " " << it->second->size() << endl;
+            for (size_t i = 0; i < it->second->size(); i++) {
+                Tinterval intersection = it->first->interval.intersection(*(it->second->at(i)));
+                val += intersection.checksum();
+            }
         }
+
+        return val;
+    }
+
+    void summary() {
+        long indexed = 0;
+        cout << "size: " << qnMap.size() << endl;
+        for (typename qnMapType::iterator it = qnMap.begin(); it != qnMap.end(); it++) {
+            indexed += it->second->size();
+            // cout << it->first->interval << " " << it->second->size() << endl;
+            // for (size_t i = 0; i < it->second->size(); i++) {
+            //     cout << "\t" << *(it->second->at(i)) << endl;
+            // }
+        }
+
+        cout << "indexed     : " << indexed << endl;
+        cout << "insert ops  : " << insertOps << endl;
+        cout << "max size zet: " << maxSizeSet << endl;
+        cout << "transfer ops: " << transferOps << endl;
+        cout << "share ops   : " << shareOps << endl;
+        cout << "merge ops   : " << mergeOps << endl;
     }
 };
 

@@ -24,13 +24,14 @@ vector<Tinterval> create_queries(int queries, int key_domain_size, int range_siz
 int main(int argc, char** argv) {
     srand (100);
 
-
     int M = 100000;
     int max_key_value = 1000000;
-    int queries = 100000;
     int range_size = 100000;
+    int queries = 1000000;
 
     vector<Tinterval > intervals = create_queries(queries, max_key_value, range_size);
+
+    auto start_time = std::chrono::system_clock::now();
 
     Tree <ConfigLazy <T> > tree(M);
     for (int i = 0; i < intervals.size(); i += 1) {
@@ -46,13 +47,17 @@ int main(int argc, char** argv) {
         //     cout << tree.graphviz(to_string(i)) << endl;
         // }
     }
+    auto end_time = std::chrono::system_clock::now();
+    chrono::duration<double> elapsed_seconds = end_time - start_time;
+    double iter_time = elapsed_seconds.count();
 
     // vector<Tinterval *> leafs;
     // tree.getLeafs(leafs);
 
     // cout << leafs.size() << endl;
-    T * data = tree.getLeafsData();
-    cout << data[0] << " " << data[1] << " " << data[2] << endl;
+    // T * data = tree.getLeafsData();
+    // cout << data[0] << " " << data[1] << " " << data[2] << endl;
+    cout << "iter time: " << iter_time << endl;
     // cout << tree.graphviz() << endl;
 
 

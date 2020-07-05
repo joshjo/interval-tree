@@ -40,6 +40,20 @@ vector<Tinterval> thesis_intervals() {
     return intervals;
 }
 
+template <class Tr>
+bool checksum_validate(vector <Tinterval> & queries, Tree <Tr> & t) {
+    long long checksum = 0;
+
+    for (size_t i = 0; i < queries.size(); i++) {
+        checksum += queries[i].checksum();
+    }
+
+    cout << "checksum: " << checksum << endl;
+    cout << "checksum: " << t.qnMap.checksum() << endl;
+
+    return true;
+}
+
 
 int main() {
     srand (100);
@@ -65,12 +79,15 @@ int main() {
     // t.qnMap.summary();
 
     auto start_time = std::chrono::system_clock::now();
-    int M = 100000;
+
+    int M = 125000;
     int max_key_value = 1000000;
     int range_size = 100000;
-    int queries = 1000000;
+    int queries = 100000;
 
     vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
+
+
 
     Tree <ConfigLazy <T> > t(M);
 
@@ -81,19 +98,21 @@ int main() {
         //     t.insert(intervals[i]);
         // }
         t.insert(intervals[i]);
-        // if (i >= 12) {
+        // if (i >= 5) {
         //     // cout << "i" << intervals[i] << endl;
-        //     cout << t.graphviz(to_string(i))<< endl;
+            // cout << t.graphviz(to_string(i))<< endl;
         // }
     }
-
-    cout << t.graphviz() << endl;
-
-    t.qnMap.summary();
     auto end_time = std::chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds = end_time - start_time;
     double iter_time = elapsed_seconds.count();
+
+    // cout << t.graphviz() << endl;
+
+    t.qnMap.summary();
+    checksum_validate(intervals, t);
     cout << "iter time: " << iter_time << endl;
+
 
     return 0;
 }
