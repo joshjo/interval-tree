@@ -194,6 +194,43 @@ public:
     }
 };
 
+
+template <class Tr>
+class QMapBase {
+public:
+    typedef typename Tr::Tinterval Tinterval;
+    typedef typename Tr::Tnode Tnode;
+
+    int mergeOps;
+    int transferOps;
+    int insertOps;
+    int maxSizeSet;
+    int shareOps;
+
+    QMapBase() {
+        mergeOps = 0;
+        shareOps = 0;
+        transferOps = 0;
+        insertOps = 0;
+        maxSizeSet = 0;
+    }
+
+    virtual void insert(Tnode * & node, Tinterval * interval) {}
+
+    virtual void transfer(Tnode * & from, Tnode * & to) {}
+
+    virtual void share(Tnode * & a, Tnode * & b) {}
+
+    virtual void merge(Tnode * & node) {}
+
+    virtual long long checksum() {
+        return 0;
+    }
+
+    virtual void summary() {}
+};
+
+
 template <class Tr>
 class QMap {
 public:
@@ -222,17 +259,9 @@ public:
         insertOps += 1;
 
         if (qnMap[node] == NULL) {
-            // qnMap[node] = new set<Tinterval *>;
             qnMap[node] = new vector<Tinterval *>;
         }
-
-        // size_t x = qnMap[node]->size();
-        // qnMap[node]->insert(interval);
         qnMap[node]->emplace_back(interval);
-
-        // if (x > maxSizeSet) {
-        //     maxSizeSet = x;
-        // }
     }
 
     void transfer(Tnode * & from, Tnode * & to) {
@@ -343,41 +372,6 @@ public:
 
 
 template <class Tr>
-class QMapBase {
-public:
-    typedef typename Tr::Tinterval Tinterval;
-    typedef typename Tr::Tnode Tnode;
-
-    int mergeOps;
-    int transferOps;
-    int insertOps;
-    int maxSizeSet;
-    int shareOps;
-
-    QMapBase() {
-        mergeOps = 0;
-        shareOps = 0;
-        transferOps = 0;
-        insertOps = 0;
-        maxSizeSet = 0;
-    }
-
-    virtual void insert(Tnode * & node, Tinterval * interval) {}
-
-    virtual void transfer(Tnode * & from, Tnode * & to) {}
-
-    virtual void share(Tnode * & a, Tnode * & b) {}
-
-    virtual void merge(Tnode * & node) {}
-
-    virtual long long checksum() {
-        return 0;
-    }
-
-    virtual void summary() {}
-};
-
-template <class Tr>
 class QMapExtra: public QMapBase <Tr> {
 public:
     typedef typename Tr::Tinterval Tinterval;
@@ -407,24 +401,15 @@ public:
 
     typedef pair<Tnode *, Tinterval *> qnPairType;
     typedef map<Tnode *, vector <Tinterval *> *> qnMapType;
-
     qnMapType qnMap;
 
     void insert(Tnode * & node, Tinterval * interval) {
         this->insertOps += 1;
 
         if (qnMap[node] == NULL) {
-            // qnMap[node] = new set<Tinterval *>;
             qnMap[node] = new vector<Tinterval *>;
         }
-
-        // size_t x = qnMap[node]->size();
-        // qnMap[node]->insert(interval);
         qnMap[node]->emplace_back(interval);
-
-        // if (x > maxSizeSet) {
-        //     maxSizeSet = x;
-        // }
     }
 
     void transfer(Tnode * & from, Tnode * & to) {
@@ -467,8 +452,6 @@ public:
 
     void merge(Tnode * & node) {
         this->mergeOps += 1;
-
-        // set<Tinterval *> * temp = new set<Tinterval *>;
         vector<Tinterval *> * temp = new vector<Tinterval *>;
 
         Tnode * a = node->left;
@@ -486,9 +469,6 @@ public:
         for (size_t i = 0; i < leafs.size(); i+= 1) {
             Tnode * n = leafs[i];
             if (qnMap[n] != NULL) {
-                // for (typename set<Tinterval *>::iterator it = qnMap[n]->begin(); it != qnMap[n]->end(); it++) {
-                //     temp->insert((*it));
-                // }
                 for (typename vector<Tinterval *>::iterator it = qnMap[n]->begin(); it != qnMap[n]->end(); it++) {
                     temp->push_back((*it));
                 }
@@ -533,6 +513,131 @@ public:
     }
 };
 
+template <class Tr>
+class QMapEager : public QMapBase <Tr> {
+public:
+    typedef typename Tr::Tinterval Tinterval;
+    typedef typename Tr::Tnode Tnode;
+
+    typedef pair<Tinterval *, Tinterval> qPair;
+    typedef map<Tnode *, vector <qPair> *> qMapType;
+
+    qMapType qMap;
+
+    void updateIntersections (Tnode * & node) {
+        if (qMap[node] != NULL) {
+            for (typename vector <qPair>::iterator it = qMap[node]->begin(); it != qMap[node]->end();) {
+                Tinterval intersection = it->first->intersection(node->interval);
+                if (intersection.length()) {
+                    it->second = intersection;
+                    it++;
+                } else {
+                    qMap[node]->erase(it);
+                }
+            }
+        }
+    }
+
+    void insert(Tnode * & node, Tinterval * interval) {
+        this->insertOps += 1;
+
+        if (qMap[node] == NULL) {
+            qMap[node] = new vector<qPair>;
+        }
+        Tinterval intersection = interval->intersection(node->interval);
+        qMap[node]->emplace_back(make_pair(interval, intersection));
+    }
+
+    void transfer(Tnode * & from, Tnode * & to) {
+        this->transferOps += 1;
+
+        qMap[to] = qMap[from];
+        this->updateIntersections(to);
+        qMap.erase(from);
+    }
+
+    void share(Tnode * & a, Tnode * & b) {
+        this->shareOps += 1;
+        // Copy all the elements from A
+        set<qPair> tempSet;
+        typename vector<qPair>::iterator it;
+        // Copy all the elements from B
+        if (qMap[a] != NULL) {
+            for (it = qMap[a]->begin(); it != qMap[a]->end(); it++) {
+                tempSet.insert(*it);
+            }
+        }
+        if (qMap[b] != NULL) {
+            for (it = qMap[b]->begin(); it != qMap[b]->end(); it++) {
+                tempSet.insert(*it);
+            }
+        }
+
+        vector<qPair> * tempA = new vector<qPair>;
+        tempA->reserve(tempSet.size());
+
+        for (typename set<qPair>::iterator it = tempSet.begin(); it != tempSet.end(); it++) {
+            tempA->emplace_back(*it);
+        }
+        vector<qPair> * tempB = new vector<qPair>(tempA->begin(), tempA->end());
+
+        qMap.erase(a);
+        qMap.erase(b);
+        qMap[a] = tempA;
+        qMap[b] = tempB;
+
+        updateIntersections(a);
+        updateIntersections(b);
+    }
+
+    void merge(Tnode * & node) {
+        this->mergeOps += 1;
+        vector<qPair> * temp = new vector<qPair>;
+
+        Tnode * a = node->left;
+        Tnode * b = node->right;
+
+        vector<Tnode *> leafs;
+
+        if (a != NULL) {
+            a->getLeafs(leafs);
+        }
+        if (b != NULL) {
+            b->getLeafs(leafs);
+        }
+
+        for (size_t i = 0; i < leafs.size(); i+= 1) {
+            Tnode * n = leafs[i];
+            if (qMap[n] != NULL) {
+                for (typename vector<qPair>::iterator it = qMap[n]->begin(); it != qMap[n]->end(); it++) {
+                    temp->push_back((*it));
+                }
+                qMap.erase(n);
+            }
+        }
+
+        if (temp->size() > 0) {
+            qMap[node] = temp;
+            updateIntersections(node);
+        }
+    }
+
+    long long checksum() {
+        long long val = 0;
+        for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
+            for (size_t i = 0; i < it->second->size(); i++) {
+                // Tinterval intersection = it->first->interval.intersection(*(it->second->at(i)));
+                // val += intersection.checksum(it->second->at(i)->second.checksum());
+                val += it->second->at(i).second.checksum();
+            }
+        }
+
+        return val;
+    }
+
+    void summary() {}
+};
+
 
 template <class C>
 class Traits {
@@ -554,12 +659,6 @@ public:
     T M;
 
     QMapBase<Tr> * qMap;
-
-    // Tree(T M, QMapBase<Tr> & qMap) {
-    //     root = NULL;
-    //     this->M = M;
-    //     this->qnMap = qMap;
-    // }
 
     Tree(T M, QMapBase<Tr> * qMap) {
         root = NULL;

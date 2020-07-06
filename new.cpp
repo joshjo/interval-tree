@@ -83,13 +83,14 @@ int main() {
     int M = 100000;
     int max_key_value = 1000000;
     int range_size = 100000;
-    int queries = 1000000;
+    int queries = 100000;
 
     vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
 
+    QMapEager <Traits <T>> * qEager = new QMapEager <Traits <T>>();
     QMapLazy <Traits <T>> * qLazy = new QMapLazy <Traits <T>>();
     QMapExtra <Traits <T>> * qExtra = new QMapExtra <Traits <T>>();
-    Tree <Traits <T> > t(M, qLazy);
+    Tree <Traits <T> > t(M, qExtra);
 
     for (int i = 0; i < queries; i += 1) {
         // if (i == 13) {
@@ -112,6 +113,11 @@ int main() {
     // t.qMap->summary();
     checksum_validate(intervals, t);
     cout << "iter time: " << iter_time << endl;
+
+    Tinterval a (10, 15);
+    Tinterval b (20, 25);
+
+    // cout << a.intersection(b).length() << endl;
 
 
     return 0;
