@@ -121,6 +121,14 @@ public:
         return (min > other.max);
     }
 
+    bool operator == (const Interval & other) {
+        /**
+         * Override operator '=='
+         * @return a boolean with the comparison between two intervals.
+         */
+        return (this->min == other.min) && (this->max == other.max);
+    }
+
     friend ostream & operator << (ostream &out, const Interval & i) {
         out << '[' << i.min << ';' << i.max << ')';
         return out;
@@ -228,146 +236,8 @@ public:
     }
 
     virtual void summary() {}
-};
 
-
-template <class Tr>
-class QMap {
-public:
-    typedef typename Tr::T T;
-    typedef Node<T> Tnode;
-    typedef Interval<T> Tinterval;
-    // typedef map<Tnode *, set <Tinterval *> *> qnMapType;
-    typedef pair<Tnode *, Tinterval *> qnPairType;
-    typedef map<Tnode *, vector <Tinterval *> *> qnMapType;
-    qnMapType qnMap;
-    int mergeOps;
-    int transferOps;
-    int insertOps;
-    int maxSizeSet;
-    int shareOps;
-
-    QMap(){
-        mergeOps = 0;
-        shareOps = 0;
-        transferOps = 0;
-        insertOps = 0;
-        maxSizeSet = 0;
-    }
-
-    void insert(Tnode * & node, Tinterval * interval) {
-        insertOps += 1;
-
-        if (qnMap[node] == NULL) {
-            qnMap[node] = new vector<Tinterval *>;
-        }
-        qnMap[node]->emplace_back(interval);
-    }
-
-    void transfer(Tnode * & from, Tnode * & to) {
-        transferOps += 1;
-
-        qnMap[to] = qnMap[from];
-        qnMap.erase(from);
-    }
-
-    void share(Tnode * & a, Tnode * & b) {
-        shareOps += 1;
-        // Copy all the elements from A
-        set<Tinterval *> tempSet;
-        typename vector<Tinterval *>::iterator it;
-        // Copy all the elements from B
-        if (qnMap[a] != NULL) {
-            for (it = qnMap[a]->begin(); it != qnMap[a]->end(); it++) {
-                tempSet.insert(*it);
-            }
-        }
-        if (qnMap[b] != NULL) {
-            for (it = qnMap[b]->begin(); it != qnMap[b]->end(); it++) {
-                tempSet.insert(*it);
-            }
-        }
-
-        vector<Tinterval *> * tempA = new vector<Tinterval *>;
-        tempA->reserve(tempSet.size());
-
-        for (typename set<Tinterval *>::iterator it = tempSet.begin(); it != tempSet.end(); it++) {
-            tempA->emplace_back(*it);
-        }
-        vector<Tinterval *> * tempB = new vector<Tinterval *>(tempA->begin(), tempA->end());
-
-        qnMap.erase(a);
-        qnMap.erase(b);
-        qnMap[a] = tempA;
-        qnMap[b] = tempB;
-    }
-
-    void merge(Tnode * & node) {
-        mergeOps += 1;
-
-        // set<Tinterval *> * temp = new set<Tinterval *>;
-        vector<Tinterval *> * temp = new vector<Tinterval *>;
-
-        Tnode * a = node->left;
-        Tnode * b = node->right;
-
-        vector<Tnode *> leafs;
-
-        if (a != NULL) {
-            a->getLeafs(leafs);
-        }
-        if (b != NULL) {
-            b->getLeafs(leafs);
-        }
-
-        for (size_t i = 0; i < leafs.size(); i+= 1) {
-            Tnode * n = leafs[i];
-            if (qnMap[n] != NULL) {
-                // for (typename set<Tinterval *>::iterator it = qnMap[n]->begin(); it != qnMap[n]->end(); it++) {
-                //     temp->insert((*it));
-                // }
-                for (typename vector<Tinterval *>::iterator it = qnMap[n]->begin(); it != qnMap[n]->end(); it++) {
-                    temp->push_back((*it));
-                }
-                qnMap.erase(n);
-            }
-        }
-
-        if (temp->size() > 0) {
-            qnMap[node] = temp;
-        }
-    }
-
-    long long checksum() {
-        long long val = 0;
-        for (typename qnMapType::iterator it = qnMap.begin(); it != qnMap.end(); it++) {
-            for (size_t i = 0; i < it->second->size(); i++) {
-                Tinterval intersection = it->first->interval.intersection(*(it->second->at(i)));
-                val += intersection.checksum();
-            }
-        }
-
-        return val;
-    }
-
-    void summary() {
-        long indexed = 0;
-        cout << "size: " << qnMap.size() << endl;
-        for (typename qnMapType::iterator it = qnMap.begin(); it != qnMap.end(); it++) {
-            indexed += it->second->size();
-            // cout << it->first->interval << " " << it->second->size() << endl;
-            // for (size_t i = 0; i < it->second->size(); i++) {
-            //     cout << "\t" << *(it->second->at(i)) << endl;
-            // }
-        }
-
-        cout << "indexed     : " << indexed << endl;
-        cout << "insert ops  : " << insertOps << endl;
-        cout << "max size zet: " << maxSizeSet << endl;
-        cout << "transfer ops: " << transferOps << endl;
-        cout << "share ops   : " << shareOps << endl;
-        cout << "merge ops   : " << mergeOps << endl;
-    }
+    virtual void postInsert() {}
 };
 
 
@@ -390,6 +260,8 @@ public:
     }
 
     void summary() {}
+
+    void postInsert() {}
 };
 
 
@@ -511,6 +383,8 @@ public:
         cout << "share ops   : " << this->shareOps << endl;
         cout << "merge ops   : " << this->mergeOps << endl;
     }
+
+    void postInsert() {}
 };
 
 template <class Tr>
@@ -635,7 +509,26 @@ public:
         return val;
     }
 
-    void summary() {}
+    void summary() {
+        long indexed = 0;
+        cout << "size: " << qMap.size() << endl;
+        for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
+            indexed += it->second->size();
+            // cout << it->first->interval << " " << it->second->size() << endl;
+            // for (size_t i = 0; i < it->second->size(); i++) {
+            //     cout << "\t" << *(it->second->at(i)) << endl;
+            // }
+        }
+
+        cout << "indexed     : " << indexed << endl;
+        cout << "insert ops  : " << this->insertOps << endl;
+        cout << "max size zet: " << this->maxSizeSet << endl;
+        cout << "transfer ops: " << this->transferOps << endl;
+        cout << "share ops   : " << this->shareOps << endl;
+        cout << "merge ops   : " << this->mergeOps << endl;
+    }
+
+    void postInsert() {}
 };
 
 

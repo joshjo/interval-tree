@@ -51,7 +51,8 @@
         "set": "cpp",
         "hash_map": "cpp",
         "list": "cpp",
-        "unordered_set": "cpp"
+        "unordered_set": "cpp",
+        "queue": "cpp"
     },
     "python.pythonPath": "/Users/josue/.pyenv/versions/tpcw/bin/python",
     "peacock.color": "#050601",

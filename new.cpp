@@ -1,4 +1,5 @@
 #include "src/newtree.h"
+#include "src/ltree.h"
 #include "src/config.h"
 
 
@@ -104,6 +105,20 @@ int main() {
             // cout << t.graphviz(to_string(i))<< endl;
         // }
     }
+
+    LeafTree<T> leaftree;
+    vector<Node<T> *> leafs;
+    t.root->getLeafs(leafs);
+    random_shuffle(leafs.begin(), leafs.end());
+
+    for (int i = 0; i < leafs.size(); i++) {
+        leaftree.insert(leafs[i]->interval);
+    }
+
+    for (int i = 0; i < queries; i += 1) {
+        leaftree.assign(&intervals[i]);
+    }
+
     auto end_time = std::chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds = end_time - start_time;
     double iter_time = elapsed_seconds.count();
@@ -112,12 +127,11 @@ int main() {
 
     // t.qMap->summary();
     checksum_validate(intervals, t);
+    cout << leaftree.checksum() << endl;
     cout << "iter time: " << iter_time << endl;
 
-    Tinterval a (10, 15);
-    Tinterval b (20, 25);
+    // cout << leaftree.graphviz() << endl;
 
-    // cout << a.intersection(b).length() << endl;
 
 
     return 0;
