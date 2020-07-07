@@ -203,17 +203,251 @@ public:
 };
 
 
+
+
+template <class T>
+class LeafNode {
+
+public:
+    typedef Interval<T> Tinterval;
+    typedef LeafNode<T> Tnode;
+    Tnode * left;
+    Tnode * right;
+    Tnode * parent;
+    T max;
+
+    Tinterval interval;
+    /*
+        Intervals has to works as queries and range of leaf node
+    */
+    // The pair is composed by a pointer to the query and the current range
+    // that belongs to the query.
+    vector <pair<Tinterval *, Tinterval> > hashmap;
+
+    LeafNode(Tinterval interval) {
+        this->interval = interval;
+        T size = interval.max - interval.min;
+        left = NULL;
+        right = NULL;
+        parent = NULL;
+    }
+
+    void update_weights() {
+        if (this->parent != NULL && this->max > parent->max) {
+            parent->max = this->max;
+            parent->update_weights();
+        }
+    }
+
+    void printHashMap() {
+        for (int i = 0; i < hashmap.size(); i += 1) {
+            cout << *(hashmap[i].first) << "*" << hashmap[i].second << "*" << ", ";
+        }
+    }
+
+    long long checksum() {
+        long long value = 0;
+        for (int i = 0; i < hashmap.size(); i += 1) {
+            value += hashmap[i].second.checksum();
+        }
+
+        return value;
+    }
+
+    void print() {
+        printf("[%d, %d](%d)", interval.min, interval.max, max);
+    }
+};
+
+
+template <class Tr>
+class LeafTree {
+
+public:
+    typedef typename Tr::T T;
+    typedef typename Tr::Tinterval Tinterval;
+    typedef LeafNode<T> Tnode;
+    Tnode * root;
+
+    LeafTree() {
+        root = NULL;
+    }
+
+    void assign(Tinterval * query) {
+        queue<Tinterval> pending;
+        pending.push(*query);
+        while (!pending.empty()) {
+            Tnode ** visitor = &(this->root);
+            Tinterval interval = pending.front();
+            pending.pop();
+            while ((*visitor) != NULL) {
+                if (interval.min >= (*visitor)->interval.max) {
+                    visitor = &((*visitor)->right);
+                } else if (interval.max <= (*visitor)->interval.min) {
+                    visitor = &((*visitor)->left);
+                } else {
+                    T left, right;
+                    if (interval.min < (*visitor)->interval.min) {
+                        left = (*visitor)->interval.min;
+                        Tinterval tempInterval = Tinterval(interval.min, (*visitor)->interval.min);
+                        pending.push(tempInterval);
+                    } else {
+                        left = interval.min;
+                    }
+                    if (interval.max > (*visitor)->interval.max) {
+                        right = (*visitor)->interval.max;
+                        Tinterval tempInterval = Tinterval((*visitor)->interval.max, interval.max);
+                        pending.push(tempInterval);
+                    } else {
+                        right = interval.max;
+                    }
+                    (*visitor)->hashmap.push_back(make_pair(query, Tinterval(left, right)));
+                    break;
+                }
+            }
+        }
+
+
+        // cout << endl;
+    }
+
+    Tnode ** search(Tinterval interval, Tnode * & parent = NULL) {
+        Tnode ** visitor = &(this->root);
+        while ((*visitor) != NULL) {
+            parent = *visitor;
+
+            if (interval == (*visitor)->interval) {
+                break;
+            } else if (interval < (*visitor)->interval) {
+                visitor = &((*visitor)->left);
+            } else {
+                visitor = &((*visitor)->right);
+            }
+        }
+
+        return visitor;
+    }
+
+    bool insert(Tinterval & key) {
+        Tnode * parent = NULL;
+        Tnode ** searchNode = this->search(key, parent);
+        if ((*searchNode) != NULL) {
+            return false;
+        }
+        (*searchNode) = new Tnode(key);
+        (*searchNode)->parent = parent;
+        (*searchNode)->update_weights();
+
+        return true;
+    }
+
+    void print() {
+        print(this->root);
+        printf("\n");
+    }
+
+    void print(Tnode * visitor) {
+        if (visitor != NULL) {
+            visitor->print();
+            printf(" -> ");
+            print(visitor->left);
+            print(visitor->right);
+        } else {
+            printf("nil | ");
+        }
+    }
+
+    void graphviz(Tnode *node, string & tree, string iter="") {
+        if (node != NULL) {
+            if (node->parent == NULL && node->left == NULL && node->right == NULL) {
+                tree += node->interval.to_graphviz(iter);
+                for (int i = 0; i < node->hashmap.size(); i += 1) {
+                    tree += node->interval.to_graphviz(iter); + " -> " + node->hashmap[i].first->to_graphviz(iter) + " ";
+                }
+            }
+            if (node->left != NULL) {
+                tree += node->interval.to_graphviz(iter) + " -> " + node->left->interval.to_graphviz(iter) + " ";
+            }
+            if (node->right != NULL) {
+                tree += node->interval.to_graphviz(iter) + " -> " + node->right->interval.to_graphviz(iter) + " ";
+            }
+
+            graphviz(node->left, tree, iter);
+            graphviz(node->right, tree, iter);
+        }
+    }
+
+    string graphviz(string iter=""){
+        // string str = "digraph G {\n";
+        string tree = "";
+        graphviz(root, tree, iter);
+        // str += tree + "}";
+        return tree;
+    }
+
+    void get_nodes(Tnode * visitor, vector<Tnode *> & nodes) {
+        if (visitor != NULL) {
+            nodes.push_back(visitor);
+            get_nodes(visitor->left, nodes);
+            get_nodes(visitor->right, nodes);
+        }
+    }
+
+    void getNodeCheckSum(Tnode * visitor, long long & val) {
+        if (visitor != NULL) {
+            long long chk = visitor->checksum();
+            val += chk;
+            getNodeCheckSum(visitor->left, val);
+            getNodeCheckSum(visitor->right, val);
+        }
+    }
+
+    long long checksum() {
+        long long value = 0;
+        getNodeCheckSum(root, value);
+
+        return value;
+    }
+
+    void getLeafHash(Tnode * visitor) {
+        if (visitor != NULL) {
+            cout << "==>" << visitor->interval << " - ";
+            visitor->printHashMap();
+            cout << endl;
+            getLeafHash(visitor->left);
+            getLeafHash(visitor->right);
+        }
+    }
+
+    void getLeafHash() {
+        getLeafHash(root);
+    }
+
+    vector<Tnode *> nodes () {
+        vector<Tnode *> result;
+        get_nodes(root, result);
+        return result;
+    }
+
+};
+
+
 template <class Tr>
 class QMapBase {
 public:
     typedef typename Tr::Tinterval Tinterval;
     typedef typename Tr::Tnode Tnode;
 
+    int insertOps;
     int mergeOps;
     int transferOps;
-    int insertOps;
-    int maxSizeSet;
     int shareOps;
+    int maxSizeSet;
+
+    double insertTime;
+    double mergeTime;
+    double transferTime;
+    double shareTime;
 
     QMapBase() {
         mergeOps = 0;
@@ -221,15 +455,64 @@ public:
         transferOps = 0;
         insertOps = 0;
         maxSizeSet = 0;
+
+        insertTime = 0;
+        mergeTime = 0;
+        transferTime = 0;
+        shareTime = 0;
     }
 
-    virtual void insert(Tnode * & node, Tinterval * interval) {}
+    virtual void _insert(Tnode * & node, Tinterval * interval) {}
 
-    virtual void transfer(Tnode * & from, Tnode * & to) {}
+    virtual void _transfer(Tnode * & from, Tnode * & to) {}
 
-    virtual void share(Tnode * & a, Tnode * & b) {}
+    virtual void _share(Tnode * & a, Tnode * & b) {}
 
-    virtual void merge(Tnode * & node) {}
+    virtual void _merge(Tnode * & node) {}
+
+    void insert(Tnode * & node, Tinterval * interval) {
+        this->insertOps += 1;
+        auto begin = std::chrono::system_clock::now();
+
+        _insert(node, interval);
+
+        auto end = std::chrono::system_clock::now();
+        chrono::duration<double> elapsed_seconds = end - begin;
+        this->insertTime += elapsed_seconds.count();
+    }
+
+    void transfer(Tnode * & from, Tnode * & to) {
+        this->transferOps += 1;
+        auto begin = std::chrono::system_clock::now();
+
+        _transfer(from, to);
+
+        auto end = std::chrono::system_clock::now();
+        chrono::duration<double> elapsed_seconds = end - begin;
+        this->transferTime += elapsed_seconds.count();
+    }
+
+    void share(Tnode * & a, Tnode * & b) {
+        this->shareOps += 1;
+        auto begin = std::chrono::system_clock::now();
+
+        _share(a, b);
+
+        auto end = std::chrono::system_clock::now();
+        chrono::duration<double> elapsed_seconds = end - begin;
+        this->shareTime += elapsed_seconds.count();
+    }
+
+    void merge(Tnode * & node) {
+        this->mergeOps += 1;
+        auto begin = std::chrono::system_clock::now();
+
+        _merge(node);
+
+        auto end = std::chrono::system_clock::now();
+        chrono::duration<double> elapsed_seconds = end - begin;
+        this->mergeTime += elapsed_seconds.count();
+    }
 
     virtual long long checksum() {
         return 0;
@@ -237,7 +520,13 @@ public:
 
     virtual void summary() {}
 
-    virtual void postInsert() {}
+    virtual void postInsert() {
+        // Used for LeafTree
+    }
+
+    double elapsedTime() {
+        return insertTime + mergeTime + transferTime + shareTime;
+    }
 };
 
 
@@ -247,13 +536,13 @@ public:
     typedef typename Tr::Tinterval Tinterval;
     typedef typename Tr::Tnode Tnode;
 
-    void insert(Tnode * & node, Tinterval * interval) {}
+    void _insert(Tnode * & node, Tinterval * interval) {}
 
-    void transfer(Tnode * & from, Tnode * & to) {}
+    void _transfer(Tnode * & from, Tnode * & to) {}
 
-    void share(Tnode * & a, Tnode * & b) {}
+    void _share(Tnode * & a, Tnode * & b) {}
 
-    void merge(Tnode * & node) {}
+    void _merge(Tnode * & node) {}
 
     long long checksum() {
         return 0;
@@ -271,39 +560,33 @@ public:
     typedef typename Tr::Tinterval Tinterval;
     typedef typename Tr::Tnode Tnode;
 
-    typedef pair<Tnode *, Tinterval *> qnPairType;
-    typedef map<Tnode *, vector <Tinterval *> *> qnMapType;
-    qnMapType qnMap;
+    typedef map<Tnode *, vector <Tinterval *> *> qMapType;
+    qMapType qMap;
 
-    void insert(Tnode * & node, Tinterval * interval) {
-        this->insertOps += 1;
-
-        if (qnMap[node] == NULL) {
-            qnMap[node] = new vector<Tinterval *>;
+    void _insert(Tnode * & node, Tinterval * interval) {
+        if (qMap[node] == NULL) {
+            qMap[node] = new vector<Tinterval *>;
         }
-        qnMap[node]->emplace_back(interval);
+        qMap[node]->emplace_back(interval);
     }
 
-    void transfer(Tnode * & from, Tnode * & to) {
-        this->transferOps += 1;
-
-        qnMap[to] = qnMap[from];
-        qnMap.erase(from);
+    void _transfer(Tnode * & from, Tnode * & to) {
+        qMap[to] = qMap[from];
+        qMap.erase(from);
     }
 
-    void share(Tnode * & a, Tnode * & b) {
-        this->shareOps += 1;
+    void _share(Tnode * & a, Tnode * & b) {
         // Copy all the elements from A
         set<Tinterval *> tempSet;
         typename vector<Tinterval *>::iterator it;
         // Copy all the elements from B
-        if (qnMap[a] != NULL) {
-            for (it = qnMap[a]->begin(); it != qnMap[a]->end(); it++) {
+        if (qMap[a] != NULL) {
+            for (it = qMap[a]->begin(); it != qMap[a]->end(); it++) {
                 tempSet.insert(*it);
             }
         }
-        if (qnMap[b] != NULL) {
-            for (it = qnMap[b]->begin(); it != qnMap[b]->end(); it++) {
+        if (qMap[b] != NULL) {
+            for (it = qMap[b]->begin(); it != qMap[b]->end(); it++) {
                 tempSet.insert(*it);
             }
         }
@@ -316,14 +599,14 @@ public:
         }
         vector<Tinterval *> * tempB = new vector<Tinterval *>(tempA->begin(), tempA->end());
 
-        qnMap.erase(a);
-        qnMap.erase(b);
-        qnMap[a] = tempA;
-        qnMap[b] = tempB;
+        qMap.erase(a);
+        qMap.erase(b);
+        qMap[a] = tempA;
+        qMap[b] = tempB;
+
     }
 
-    void merge(Tnode * & node) {
-        this->mergeOps += 1;
+    void _merge(Tnode * & node) {
         vector<Tinterval *> * temp = new vector<Tinterval *>;
 
         Tnode * a = node->left;
@@ -340,22 +623,22 @@ public:
 
         for (size_t i = 0; i < leafs.size(); i+= 1) {
             Tnode * n = leafs[i];
-            if (qnMap[n] != NULL) {
-                for (typename vector<Tinterval *>::iterator it = qnMap[n]->begin(); it != qnMap[n]->end(); it++) {
+            if (qMap[n] != NULL) {
+                for (typename vector<Tinterval *>::iterator it = qMap[n]->begin(); it != qMap[n]->end(); it++) {
                     temp->push_back((*it));
                 }
-                qnMap.erase(n);
+                qMap.erase(n);
             }
         }
 
         if (temp->size() > 0) {
-            qnMap[node] = temp;
+            qMap[node] = temp;
         }
     }
 
     long long checksum() {
         long long val = 0;
-        for (typename qnMapType::iterator it = qnMap.begin(); it != qnMap.end(); it++) {
+        for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
             for (size_t i = 0; i < it->second->size(); i++) {
                 Tinterval intersection = it->first->interval.intersection(*(it->second->at(i)));
                 val += intersection.checksum();
@@ -367,8 +650,8 @@ public:
 
     void summary() {
         long indexed = 0;
-        cout << "size: " << qnMap.size() << endl;
-        for (typename qnMapType::iterator it = qnMap.begin(); it != qnMap.end(); it++) {
+        cout << "size: " << qMap.size() << endl;
+        for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
             indexed += it->second->size();
             // cout << it->first->interval << " " << it->second->size() << endl;
             // for (size_t i = 0; i < it->second->size(); i++) {
@@ -386,6 +669,7 @@ public:
 
     void postInsert() {}
 };
+
 
 template <class Tr>
 class QMapEager : public QMapBase <Tr> {
@@ -412,7 +696,7 @@ public:
         }
     }
 
-    void insert(Tnode * & node, Tinterval * interval) {
+    void _insert(Tnode * & node, Tinterval * interval) {
         this->insertOps += 1;
 
         if (qMap[node] == NULL) {
@@ -422,7 +706,7 @@ public:
         qMap[node]->emplace_back(make_pair(interval, intersection));
     }
 
-    void transfer(Tnode * & from, Tnode * & to) {
+    void _transfer(Tnode * & from, Tnode * & to) {
         this->transferOps += 1;
 
         qMap[to] = qMap[from];
@@ -430,7 +714,7 @@ public:
         qMap.erase(from);
     }
 
-    void share(Tnode * & a, Tnode * & b) {
+    void _share(Tnode * & a, Tnode * & b) {
         this->shareOps += 1;
         // Copy all the elements from A
         set<qPair> tempSet;
@@ -464,7 +748,7 @@ public:
         updateIntersections(b);
     }
 
-    void merge(Tnode * & node) {
+    void _merge(Tnode * & node) {
         this->mergeOps += 1;
         vector<qPair> * temp = new vector<qPair>;
 
@@ -530,6 +814,7 @@ public:
 
     void postInsert() {}
 };
+
 
 
 template <class C>

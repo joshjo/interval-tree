@@ -91,7 +91,7 @@ int main() {
     QMapEager <Traits <T>> * qEager = new QMapEager <Traits <T>>();
     QMapLazy <Traits <T>> * qLazy = new QMapLazy <Traits <T>>();
     QMapExtra <Traits <T>> * qExtra = new QMapExtra <Traits <T>>();
-    Tree <Traits <T> > t(M, qExtra);
+    Tree <Traits <T> > t(M, qEager);
 
     for (int i = 0; i < queries; i += 1) {
         // if (i == 13) {
@@ -106,18 +106,18 @@ int main() {
         // }
     }
 
-    LeafTree<T> leaftree;
-    vector<Node<T> *> leafs;
-    t.root->getLeafs(leafs);
-    random_shuffle(leafs.begin(), leafs.end());
+    // LeafTree<Traits <T>> leaftree;
+    // vector<Node<T> *> leafs;
+    // t.root->getLeafs(leafs);
+    // random_shuffle(leafs.begin(), leafs.end());
 
-    for (int i = 0; i < leafs.size(); i++) {
-        leaftree.insert(leafs[i]->interval);
-    }
+    // for (int i = 0; i < leafs.size(); i++) {
+    //     leaftree.insert(leafs[i]->interval);
+    // }
 
-    for (int i = 0; i < queries; i += 1) {
-        leaftree.assign(&intervals[i]);
-    }
+    // for (int i = 0; i < queries; i += 1) {
+    //     leaftree.assign(&intervals[i]);
+    // }
 
     auto end_time = std::chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds = end_time - start_time;
@@ -127,8 +127,14 @@ int main() {
 
     // t.qMap->summary();
     checksum_validate(intervals, t);
-    cout << leaftree.checksum() << endl;
+
+    // cout << leaftree.checksum() << endl;
     cout << "iter time: " << iter_time << endl;
+    cout << "insert time: " << t.qMap->insertTime << endl;
+    cout << "merge time: " << t.qMap->mergeTime << endl;
+    cout << "transfer time: " << t.qMap->transferTime << endl;
+    cout << "share time: " << t.qMap->shareTime << endl;
+    cout << "total time: " << t.qMap->elapsedTime() << endl;
 
     // cout << leaftree.graphviz() << endl;
 
