@@ -122,9 +122,8 @@ int main() {
     auto end_time = std::chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds = end_time - start_time;
     double iter_time = elapsed_seconds.count();
-
+    qEager->qMap.begin();
     // cout << t.graphviz() << endl;
-
     // t.qMap->summary();
     checksum_validate(intervals, t);
 

@@ -556,11 +556,11 @@ public:
 
 template <class Tr>
 class QMapLazy : public QMapBase <Tr> {
-public:
     typedef typename Tr::Tinterval Tinterval;
     typedef typename Tr::Tnode Tnode;
-
     typedef map<Tnode *, vector <Tinterval *> *> qMapType;
+
+public:
     qMapType qMap;
 
     void _insert(Tnode * & node, Tinterval * interval) {
@@ -673,13 +673,13 @@ public:
 
 template <class Tr>
 class QMapEager : public QMapBase <Tr> {
-public:
+
     typedef typename Tr::Tinterval Tinterval;
     typedef typename Tr::Tnode Tnode;
-
     typedef pair<Tinterval *, Tinterval> qPair;
     typedef map<Tnode *, vector <qPair> *> qMapType;
 
+public:
     qMapType qMap;
 
     void updateIntersections (Tnode * & node) {
@@ -968,10 +968,35 @@ public:
         return tree;
     }
 
-private:
-    void insert_interval(Tinterval & I) {
+    T * getLeafsData() {
+        vector<Tnode *> leafs;
+        T inf = numeric_limits<T>::max();
+        root->getLeafs(leafs);
+        T size = leafs.size();
+        // T res[4] = {size, 0, inf, -inf};
+        T * res = new T[4];
+        res[0] = size;
+        res[1] = 0;
+        res[2] = inf;
+        res[3] = -inf;
+
+        for (int i = 0; i < size; i += 1) {
+            T width = leafs[i]->interval.length();
+            res[1] += width;
+            if (width < res[2]) {
+                res[2] = width;
+            }
+            if (width > res[3]) {
+                res[3] = width;
+            }
+        }
+
+        res[1] = res[1] / size;
+
+        return res;
     }
 
+private:
     void get_intervals(const Tinterval interval, vector<Tinterval> & arr) {
         if (interval.length() <= M) {
             Tinterval tmp(interval.min, interval.max);
