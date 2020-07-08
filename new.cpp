@@ -81,8 +81,13 @@ int main() {
 
     auto start_time = std::chrono::system_clock::now();
 
+    auto start_time = std::chrono::system_clock::now();
     int M = 100000;
     int max_key_value = 1000000;
+<<<<<<< HEAD
+=======
+    int queries = 1000000;
+>>>>>>> d5eb1e57b4485180bea20b0be6bfe247e506924b
     int range_size = 100000;
     int queries = 100000;
 
@@ -139,5 +144,6 @@ int main() {
 
 
 
+    cout << "iter_time: " << iter_time << endl;
     return 0;
 }
