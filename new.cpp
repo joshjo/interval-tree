@@ -1,4 +1,5 @@
 #include "src/newtree.h"
+#include "src/ltree.h"
 #include "src/config.h"
 
 
@@ -6,7 +7,6 @@ using namespace std;
 
 typedef long T;
 typedef Interval<T> Tinterval;
-
 
 
 vector<Tinterval> create_queries(int queries, int key_domain_size, int range_size) {
@@ -41,6 +41,20 @@ vector<Tinterval> thesis_intervals() {
     return intervals;
 }
 
+template <class Tr>
+bool checksum_validate(vector <Tinterval> & queries, Tree <Tr> & t) {
+    long long checksum = 0;
+
+    for (size_t i = 0; i < queries.size(); i++) {
+        checksum += queries[i].checksum();
+    }
+
+    cout << "checksum: " << checksum << endl;
+    cout << "checksum: " << t.qMap->checksum() << endl;
+
+    return true;
+}
+
 
 int main() {
     srand (100);
@@ -48,9 +62,11 @@ int main() {
     // // vector <Tinterval> intervals = thesis_intervals();
     // vector <Tinterval> intervals;
 
-    // intervals.push_back(Tinterval(630, 700));
-    // intervals.push_back(Tinterval(800, 900));
-    // intervals.push_back(Tinterval(699, 850));
+    // intervals.push_back(Tinterval(150, 170));
+    // intervals.push_back(Tinterval(620, 630));
+    // intervals.push_back(Tinterval(100, 110));
+    // intervals.push_back(Tinterval(680, 690));
+    // intervals.push_back(Tinterval(100, 850));
     // int M = 1000;
     // Tree <ConfigLazy <T> > t(M);
 
@@ -59,44 +75,74 @@ int main() {
     //     t.insert(intervals[i]);
     //     // cout << t.graphviz(to_string(i))<< endl;
     // }
+    // // t.getQN();
     // cout << t.graphviz()<< endl;
+    // t.qnMap.summary();
+
+    auto start_time = std::chrono::system_clock::now();
 
     auto start_time = std::chrono::system_clock::now();
     int M = 100000;
     int max_key_value = 1000000;
+<<<<<<< HEAD
+=======
     int queries = 1000000;
+>>>>>>> d5eb1e57b4485180bea20b0be6bfe247e506924b
     int range_size = 100000;
+    int queries = 100000;
 
     vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
 
-    Tree <ConfigLazy <T> > t(M);
-
+    QMapEager <Traits <T>> * qEager = new QMapEager <Traits <T>>();
+    QMapLazy <Traits <T>> * qLazy = new QMapLazy <Traits <T>>();
+    QMapExtra <Traits <T>> * qExtra = new QMapExtra <Traits <T>>();
+    Tree <Traits <T> > t(M, qEager);
 
     for (int i = 0; i < queries; i += 1) {
-        t.insert(intervals[i]);
         // if (i == 13) {
         //     t.insert(intervals[i]);
         // } else {
         //     t.insert(intervals[i]);
         // }
-
-        // if (i >= 12) {
-        //     cout << "i" << intervals[i] << endl;
-        //     cout << t.graphviz(to_string(i))<< endl;
+        t.insert(intervals[i]);
+        // if (i >= 5) {
+        //     // cout << "i" << intervals[i] << endl;
+            // cout << t.graphviz(to_string(i))<< endl;
         // }
     }
-    // // t.insert(intervals[top + 1]);
-    // // for (int i = 0; i < intervals.size(); i += 1) {
-    // //     if (i == 0) {
-    // //         t.insert(intervals[i]);
-    // //     } else {
-    // //         t.insert(intervals[i]);
-    // //     }
-    // // }
-    cout << t.graphviz()<< endl;
+
+    // LeafTree<Traits <T>> leaftree;
+    // vector<Node<T> *> leafs;
+    // t.root->getLeafs(leafs);
+    // random_shuffle(leafs.begin(), leafs.end());
+
+    // for (int i = 0; i < leafs.size(); i++) {
+    //     leaftree.insert(leafs[i]->interval);
+    // }
+
+    // for (int i = 0; i < queries; i += 1) {
+    //     leaftree.assign(&intervals[i]);
+    // }
+
     auto end_time = std::chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds = end_time - start_time;
     double iter_time = elapsed_seconds.count();
+    qEager->qMap.begin();
+    // cout << t.graphviz() << endl;
+    // t.qMap->summary();
+    checksum_validate(intervals, t);
+
+    // cout << leaftree.checksum() << endl;
+    cout << "iter time: " << iter_time << endl;
+    cout << "insert time: " << t.qMap->insertTime << endl;
+    cout << "merge time: " << t.qMap->mergeTime << endl;
+    cout << "transfer time: " << t.qMap->transferTime << endl;
+    cout << "share time: " << t.qMap->shareTime << endl;
+    cout << "total time: " << t.qMap->elapsedTime() << endl;
+
+    // cout << leaftree.graphviz() << endl;
+
+
 
     cout << "iter_time: " << iter_time << endl;
     return 0;

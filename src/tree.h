@@ -207,8 +207,8 @@ public:
         vector<Tinterval *> leafs;
         T inf = numeric_limits<T>::max();
         getLeafs(leafs);
-        size_t size = leafs.size();
-        static T res[4] = {size, 0, inf, -inf};
+        T size = leafs.size();
+        T res[4] = {size, 0, inf, -inf};
 
 
         for (int i = 0; i < size; i += 1) {

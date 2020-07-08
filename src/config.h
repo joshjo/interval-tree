@@ -3,6 +3,17 @@
 
 
 template <class C>
+class QNMapLazy {
+public:
+    typedef C T;
+    int mergeOps = 0;
+    void insert() {
+
+    }
+};
+
+
+template <class C>
 class ConfigExtra {
     public:
         typedef C T;
