@@ -81,15 +81,10 @@ int main() {
 
     auto start_time = std::chrono::system_clock::now();
 
-    auto start_time = std::chrono::system_clock::now();
     int M = 100000;
     int max_key_value = 1000000;
-<<<<<<< HEAD
-=======
-    int queries = 1000000;
->>>>>>> d5eb1e57b4485180bea20b0be6bfe247e506924b
-    int range_size = 100000;
     int queries = 100000;
+    int range_size = 100000;
 
     vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
 
@@ -134,15 +129,7 @@ int main() {
 
     // cout << leaftree.checksum() << endl;
     cout << "iter time: " << iter_time << endl;
-    cout << "insert time: " << t.qMap->insertTime << endl;
-    cout << "merge time: " << t.qMap->mergeTime << endl;
-    cout << "transfer time: " << t.qMap->transferTime << endl;
-    cout << "share time: " << t.qMap->shareTime << endl;
-    cout << "total time: " << t.qMap->elapsedTime() << endl;
-
-    // cout << leaftree.graphviz() << endl;
-
-
+    cout << "height: " << t.root->maxDepth() << endl;
 
     cout << "iter_time: " << iter_time << endl;
     return 0;

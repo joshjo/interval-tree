@@ -168,6 +168,25 @@ public:
     Node(Tinterval interval, Tinterval * query) : Node(interval) {
     }
 
+    int maxDepth() {
+        if (isLeaf()) {
+            return 0;
+        }
+        int lDepth = 0;
+        int rDepth = 0;
+        if (left != NULL) {
+            lDepth = left->maxDepth();
+        }
+        if (right != NULL) {
+            rDepth = right->maxDepth();
+        }
+
+        if (lDepth > rDepth) {
+            return(lDepth + 1);
+        }
+        return(rDepth + 1);
+    }
+
     void updateLimits() {
         bool hasChange = false;
         if ((left != NULL) && left->interval.min < interval.min) {
