@@ -41,6 +41,17 @@ vector<Tinterval> thesis_intervals() {
     return intervals;
 }
 
+vector<Tinterval> paper_intervals() {
+    vector<Tinterval> intervals;
+
+    intervals.push_back(Tinterval(100, 670));
+    intervals.push_back(Tinterval(230, 450));
+    intervals.push_back(Tinterval(120, 340));
+    intervals.push_back(Tinterval(430, 760));
+    intervals.push_back(Tinterval(800, 920));
+    return intervals;
+}
+
 template <class Tr>
 bool checksum_validate(vector <Tinterval> & queries, Tree <Tr> & t) {
     long long checksum = 0;
@@ -59,16 +70,17 @@ bool checksum_validate(vector <Tinterval> & queries, Tree <Tr> & t) {
 int main() {
     srand (100);
 
-    // // vector <Tinterval> intervals = thesis_intervals();
-    // vector <Tinterval> intervals;
+    // // // vector <Tinterval> intervals = thesis_intervals();
+    // vector <Tinterval> intervals = paper_intervals();
 
-    // intervals.push_back(Tinterval(150, 170));
-    // intervals.push_back(Tinterval(620, 630));
-    // intervals.push_back(Tinterval(100, 110));
-    // intervals.push_back(Tinterval(680, 690));
-    // intervals.push_back(Tinterval(100, 850));
+    // // intervals.push_back(Tinterval(150, 170));
+    // // intervals.push_back(Tinterval(620, 630));
+    // // intervals.push_back(Tinterval(100, 110));
+    // // intervals.push_back(Tinterval(680, 690));
+    // // intervals.push_back(Tinterval(100, 850));
     // int M = 1000;
-    // Tree <ConfigLazy <T> > t(M);
+    // QMapExtra <Traits <T>> * qExtra = new QMapExtra <Traits <T>>();
+    // Tree <ConfigLazy <T> > t(M, qExtra);
 
 
     // for (int i = 0; i < intervals.size(); i += 1) {
@@ -84,14 +96,14 @@ int main() {
     int M = 100000;
     int max_key_value = 1000000;
     int range_size = 100000;
-    int queries = 100000;
+    int queries = 1000000;
 
     vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
 
     QMapEager <Traits <T>> * qEager = new QMapEager <Traits <T>>();
     QMapLazy <Traits <T>> * qLazy = new QMapLazy <Traits <T>>();
     QMapExtra <Traits <T>> * qExtra = new QMapExtra <Traits <T>>();
-    Tree <Traits <T> > t(M, qEager);
+    Tree <Traits <T> > t(M, qExtra);
 
     for (int i = 0; i < queries; i += 1) {
         // if (i == 13) {
@@ -106,30 +118,28 @@ int main() {
         // }
     }
 
-    // LeafTree<Traits <T>> leaftree;
-    // vector<Node<T> *> leafs;
-    // t.root->getLeafs(leafs);
-    // random_shuffle(leafs.begin(), leafs.end());
+    LeafTree<Traits <T>> leaftree;
+    vector<Node<T> *> leafs;
+    t.root->getLeafs(leafs);
+    random_shuffle(leafs.begin(), leafs.end());
 
-    // for (int i = 0; i < leafs.size(); i++) {
-    //     leaftree.insert(leafs[i]->interval);
-    // }
+    for (int i = 0; i < leafs.size(); i++) {
+        leaftree.insert(leafs[i]->interval);
+    }
 
-    // for (int i = 0; i < queries; i += 1) {
-    //     leaftree.assign(&intervals[i]);
-    // }
+    for (int i = 0; i < queries; i += 1) {
+        leaftree.assign(&intervals[i]);
+    }
 
     auto end_time = std::chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds = end_time - start_time;
     double iter_time = elapsed_seconds.count();
-    qEager->qMap.begin();
+    // qEager->qMap.begin();
     // cout << t.graphviz() << endl;
-    // t.qMap->summary();
-    checksum_validate(intervals, t);
+    t.qMap->summary();
+    // checksum_validate(intervals, t);
 
     // cout << leaftree.checksum() << endl;
-    cout << "iter time: " << iter_time << endl;
-    cout << "height: " << t.root->maxDepth() << endl;
 
     cout << "iter_time: " << iter_time << endl;
     return 0;

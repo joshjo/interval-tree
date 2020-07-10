@@ -5,7 +5,7 @@
 //Tipo de los puntos
 #define Point int
 //Representa +infinito
-#define FLT_MAX 10000
+#define FLT_MAX 100000
 
 using namespace std;
 
@@ -22,18 +22,12 @@ struct Segment
 
 
 Segment ss[] = {
-    Segment(750, 830),
-    Segment(830, 860),
-    Segment(520, 600),
-    Segment(540, 550),
-    Segment(530, 620),
-    Segment(310, 360),
-    Segment(300, 330),
-    Segment(50, 120),
-    Segment(90, 140),
-    Segment(970, 980),
-    Segment(950, 970),
-    Segment(630, 1000),
+    Segment(100, 670),
+    Segment(230, 450),
+    Segment(120, 340),
+    Segment(430, 760),
+    Segment(800, 920),
+    // Segment(790, 1060),
 };
 
 //Nodos del árbol de segmento

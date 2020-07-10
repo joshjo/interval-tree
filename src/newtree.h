@@ -567,7 +567,17 @@ public:
         return 0;
     }
 
-    void summary() {}
+    void summary() {
+        cout << "insert ops  : " << this->insertOps << endl;
+        cout << "transfer ops: " << this->transferOps << endl;
+        cout << "share ops   : " << this->shareOps << endl;
+        cout << "merge ops   : " << this->mergeOps << endl;
+
+        cout << "insert time  : " << this->insertTime << endl;
+        cout << "transfer time: " << this->transferTime << endl;
+        cout << "share time   : " << this->shareTime << endl;
+        cout << "merge time   : " << this->mergeTime << endl;
+    }
 
     void postInsert() {}
 };
@@ -825,10 +835,15 @@ public:
 
         cout << "indexed     : " << indexed << endl;
         cout << "insert ops  : " << this->insertOps << endl;
-        cout << "max size zet: " << this->maxSizeSet << endl;
         cout << "transfer ops: " << this->transferOps << endl;
         cout << "share ops   : " << this->shareOps << endl;
         cout << "merge ops   : " << this->mergeOps << endl;
+
+        cout << "indexed     : " << indexed << endl;
+        cout << "insert time  : " << this->insertTime << endl;
+        cout << "transfer time: " << this->transferTime << endl;
+        cout << "share time   : " << this->shareTime << endl;
+        cout << "merge time   : " << this->mergeTime << endl;
     }
 
     void postInsert() {}
