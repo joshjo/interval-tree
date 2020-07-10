@@ -127,10 +127,12 @@ int main() {
     // t.qMap->summary();
     checksum_validate(intervals, t);
 
+    T * leafsData = t.getLeafsData();
+
     // cout << leaftree.checksum() << endl;
     cout << "iter time: " << iter_time << endl;
-    cout << "height: " << t.root->maxDepth() << endl;
 
     cout << "iter_time: " << iter_time << endl;
+    cout << "depth: " << leafsData[4] << endl;
     return 0;
 }
