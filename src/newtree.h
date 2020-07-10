@@ -1011,25 +1011,31 @@ public:
         T inf = numeric_limits<T>::max();
         root->getLeafs(leafs);
         T size = leafs.size();
-        // T res[4] = {size, 0, inf, -inf};
-        T * res = new T[4];
-        res[0] = size;
-        res[1] = 0;
-        res[2] = inf;
-        res[3] = -inf;
+        int depth = root->maxDepth();
+        T * res = new T[5];
+        // Average node length
+        res[0] = 0;
+        // Min node length
+        res[1] = inf;
+        // Max node length
+        res[2] = -inf;
+        // Total number of nodes
+        res[3] = size;
+        // Max depth
+        res[4] = depth;
 
         for (int i = 0; i < size; i += 1) {
             T width = leafs[i]->interval.length();
-            res[1] += width;
-            if (width < res[2]) {
-                res[2] = width;
+            res[0] += width;
+            if (width < res[1]) {
+                res[1] = width;
             }
-            if (width > res[3]) {
-                res[3] = width;
+            if (width > res[2]) {
+                res[2] = width;
             }
         }
 
-        res[1] = res[1] / size;
+        res[0] = res[0] / size;
 
         return res;
     }
