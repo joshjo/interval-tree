@@ -83,6 +83,10 @@ int main() {
         tExtra.insert(intervals[i]);
     }
 
+    auto end_time = std::chrono::system_clock::now();
+    chrono::duration<double> elapsed_seconds = end_time - start_time;
+    double total_time = elapsed_seconds.count() - tExtra.qMap->elapsedTime();
+
     LeafTree<Traits <T>> leaftree;
     vector<Node<T> *> leafs;
     tExtra.root->getLeafs(leafs);
@@ -95,14 +99,7 @@ int main() {
     for (int i = 0; i < queries; i += 1) {
         leaftree.assign(&intervals[i]);
     }
-
-    auto end_time = std::chrono::system_clock::now();
-    chrono::duration<double> elapsed_seconds = end_time - start_time;
-    double total_time = elapsed_seconds.count();
     tExtra.qMap->summary();
-
-    // QMapLazy <Traits <T>> * qLazy = new QMapLazy <Traits <T>>();
-
     cout << "total time: " << total_time << endl << endl;
 
     cout << "*** EAGER STRATEGY ***" << endl;
@@ -119,7 +116,7 @@ int main() {
     tEager.qMap->summary();
     cout << "total time: " << total_time << endl << endl;
 
-    cout << "*** EAGER STRATEGY ***" << endl;
+    cout << "*** LAZY STRATEGY ***" << endl;
     start_time = std::chrono::system_clock::now();
     QMapLazy <Traits <T>> * qLazy = new QMapLazy <Traits <T>>();
     Tree <Traits <T> > tLazy(M, qLazy);

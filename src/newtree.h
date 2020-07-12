@@ -540,6 +540,13 @@ public:
 
     virtual void summary() {}
 
+    virtual string csv() {
+        string s = to_string(this->insertOps) + "," + to_string(this->transferOps) + "," + to_string(this->shareOps) + "," + to_string(this->mergeOps) + ",";
+        s += to_string(this->insertTime) + "," + to_string(this->transferTime) + "," + to_string(this->shareTime) + "," + to_string(this->mergeTime);
+
+        return s;
+    }
+
     virtual void postInsert() {
         // Used for LeafTree
     }
@@ -569,15 +576,22 @@ public:
     }
 
     void summary() {
-        cout << "insert ops   : " << this->insertOps << endl;
-        cout << "transfer ops : " << this->transferOps << endl;
-        cout << "share ops    : " << this->shareOps << endl;
-        cout << "merge ops    : " << this->mergeOps << endl;
+        cout << "insert ops   : " << 0 << endl;
+        cout << "transfer ops : " << 0 << endl;
+        cout << "share ops    : " << 0 << endl;
+        cout << "merge ops    : " << 0 << endl;
 
-        cout << "insert time  : " << this->insertTime << endl;
-        cout << "transfer time: " << this->transferTime << endl;
-        cout << "share time   : " << this->shareTime << endl;
-        cout << "merge time   : " << this->mergeTime << endl;
+        cout << "insert time  : " << 0 << endl;
+        cout << "transfer time: " << 0 << endl;
+        cout << "share time   : " << 0 << endl;
+        cout << "merge time   : " << 0 << endl;
+    }
+
+    string csv() {
+        string s = "0,0,0,0,";
+        s += "0,0,0,0";
+
+        return s;
     }
 
     void postInsert() {}
@@ -699,6 +713,13 @@ public:
         cout << "transfer time: " << this->transferTime << endl;
         cout << "share time   : " << this->shareTime << endl;
         cout << "merge time   : " << this->mergeTime << endl;
+    }
+
+    string csv() {
+        string s = to_string(this->insertOps) + "," + to_string(this->transferOps) + "," + to_string(this->shareOps) + "," + to_string(this->mergeOps) + ",";
+        s += to_string(this->insertTime) + "," + to_string(this->transferTime) + "," + to_string(this->shareTime) + "," + to_string(this->mergeTime);
+
+        return s;
     }
 
     void postInsert() {}
@@ -848,6 +869,13 @@ public:
         cout << "transfer time: " << this->transferTime << endl;
         cout << "share time   : " << this->shareTime << endl;
         cout << "merge time   : " << this->mergeTime << endl;
+    }
+
+    string csv() {
+        string s = to_string(this->insertOps) + "," + to_string(this->transferOps) + "," + to_string(this->shareOps) + "," + to_string(this->mergeOps) + ",";
+        s += to_string(this->insertTime) + "," + to_string(this->transferTime) + "," + to_string(this->shareTime) + "," + to_string(this->mergeTime);
+
+        return s;
     }
 
     void postInsert() {}
