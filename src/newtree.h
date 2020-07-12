@@ -446,7 +446,19 @@ public:
     vector<Tnode *> nodes () {
         vector<Tnode *> result;
         get_nodes(root, result);
+
         return result;
+    }
+
+    long numIndexedQueries() {
+        vector<Tnode *> nodes = this->nodes();
+        long indexed = 0;
+
+        for (int i = 0; i < nodes.size(); i += 1) {
+            indexed += nodes[i]->hashmap.size();
+        }
+
+        return indexed;
     }
 
 };
@@ -463,6 +475,7 @@ public:
     int transferOps;
     int shareOps;
     int maxSizeSet;
+    int indexed;
 
     double insertTime;
     double mergeTime;
@@ -470,6 +483,8 @@ public:
     double shareTime;
 
     QMapBase() {
+
+        indexed = 0;
         mergeOps = 0;
         shareOps = 0;
         transferOps = 0;
@@ -541,7 +556,7 @@ public:
     virtual void summary() {}
 
     virtual string csv() {
-        string s = to_string(this->insertOps) + "," + to_string(this->transferOps) + "," + to_string(this->shareOps) + "," + to_string(this->mergeOps) + ",";
+        string s = to_string(this->numIndexedQueries()) + "," + to_string(this->insertOps) + "," + to_string(this->transferOps) + "," + to_string(this->shareOps) + "," + to_string(this->mergeOps) + ",";
         s += to_string(this->insertTime) + "," + to_string(this->transferTime) + "," + to_string(this->shareTime) + "," + to_string(this->mergeTime);
 
         return s;
@@ -553,6 +568,10 @@ public:
 
     double elapsedTime() {
         return insertTime + mergeTime + transferTime + shareTime;
+    }
+
+    virtual long numIndexedQueries () {
+        return 0;
     }
 };
 
@@ -576,6 +595,7 @@ public:
     }
 
     void summary() {
+        cout << "indexed      : " << this->indexed << endl;
         cout << "insert ops   : " << 0 << endl;
         cout << "transfer ops : " << 0 << endl;
         cout << "share ops    : " << 0 << endl;
@@ -588,7 +608,7 @@ public:
     }
 
     string csv() {
-        string s = "0,0,0,0,";
+        string s = to_string(this->indexed) + ",0,0,0,0,";
         s += "0,0,0,0";
 
         return s;
@@ -692,18 +712,18 @@ public:
         return val;
     }
 
-    void summary() {
+    long numIndexedQueries () {
         long indexed = 0;
-        cout << "size: " << qMap.size() << endl;
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
             indexed += it->second->size();
-            // cout << it->first->interval << " " << it->second->size() << endl;
-            // for (size_t i = 0; i < it->second->size(); i++) {
-            //     cout << "\t" << *(it->second->at(i)) << endl;
-            // }
         }
+        return indexed;
+    }
 
-        cout << "indexed      : " << indexed << endl;
+    void summary() {
+        cout << "size: " << qMap.size() << endl;
+
+        cout << "indexed      : " << this->numIndexedQueries() << endl;
         cout << "insert ops   : " << this->insertOps << endl;
         cout << "transfer ops : " << this->transferOps << endl;
         cout << "share ops    : " << this->shareOps << endl;
@@ -713,13 +733,6 @@ public:
         cout << "transfer time: " << this->transferTime << endl;
         cout << "share time   : " << this->shareTime << endl;
         cout << "merge time   : " << this->mergeTime << endl;
-    }
-
-    string csv() {
-        string s = to_string(this->insertOps) + "," + to_string(this->transferOps) + "," + to_string(this->shareOps) + "," + to_string(this->mergeOps) + ",";
-        s += to_string(this->insertTime) + "," + to_string(this->transferTime) + "," + to_string(this->shareTime) + "," + to_string(this->mergeTime);
-
-        return s;
     }
 
     void postInsert() {}
@@ -752,8 +765,6 @@ public:
     }
 
     void _insert(Tnode * & node, Tinterval * interval) {
-        this->insertOps += 1;
-
         if (qMap[node] == NULL) {
             qMap[node] = new vector<qPair>;
         }
@@ -762,15 +773,12 @@ public:
     }
 
     void _transfer(Tnode * & from, Tnode * & to) {
-        this->transferOps += 1;
-
         qMap[to] = qMap[from];
         this->updateIntersections(to);
         qMap.erase(from);
     }
 
     void _share(Tnode * & a, Tnode * & b) {
-        this->shareOps += 1;
         // Copy all the elements from A
         set<qPair> tempSet;
         typename vector<qPair>::iterator it;
@@ -804,7 +812,6 @@ public:
     }
 
     void _merge(Tnode * & node) {
-        this->mergeOps += 1;
         vector<qPair> * temp = new vector<qPair>;
 
         Tnode * a = node->left;
@@ -848,18 +855,19 @@ public:
         return val;
     }
 
-    void summary() {
+    long numIndexedQueries () {
         long indexed = 0;
-        cout << "size: " << qMap.size() << endl;
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
             indexed += it->second->size();
-            // cout << it->first->interval << " " << it->second->size() << endl;
-            // for (size_t i = 0; i < it->second->size(); i++) {
-            //     cout << "\t" << *(it->second->at(i)) << endl;
-            // }
         }
 
-        cout << "indexed      : " << indexed << endl;
+        return indexed;
+    }
+
+    void summary() {
+        cout << "size: " << qMap.size() << endl;
+
+        cout << "indexed      : " << this->numIndexedQueries() << endl;
         cout << "insert ops   : " << this->insertOps << endl;
         cout << "transfer ops : " << this->transferOps << endl;
         cout << "share ops    : " << this->shareOps << endl;
@@ -869,13 +877,6 @@ public:
         cout << "transfer time: " << this->transferTime << endl;
         cout << "share time   : " << this->shareTime << endl;
         cout << "merge time   : " << this->mergeTime << endl;
-    }
-
-    string csv() {
-        string s = to_string(this->insertOps) + "," + to_string(this->transferOps) + "," + to_string(this->shareOps) + "," + to_string(this->mergeOps) + ",";
-        s += to_string(this->insertTime) + "," + to_string(this->transferTime) + "," + to_string(this->shareTime) + "," + to_string(this->mergeTime);
-
-        return s;
     }
 
     void postInsert() {}

@@ -70,7 +70,7 @@ int main() {
     int M = 100000;
     int max_key_value = 1000000;
     int range_size = 100000;
-    int queries = 10000;
+    int queries = 1000;
 
     vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
 
@@ -95,10 +95,10 @@ int main() {
     for (int i = 0; i < leafs.size(); i++) {
         leaftree.insert(leafs[i]->interval);
     }
-
     for (int i = 0; i < queries; i += 1) {
         leaftree.assign(&intervals[i]);
     }
+    tExtra.qMap->indexed = leaftree.numIndexedQueries();
     tExtra.qMap->summary();
     cout << "total time: " << total_time << endl << endl;
 
