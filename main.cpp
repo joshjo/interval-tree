@@ -57,8 +57,8 @@ bool checksum_validate(vector <Tinterval> & queries, Tree <Tr> & t) {
         checksum += queries[i].checksum();
     }
 
-    cout << "checksum: " << checksum << endl;
-    cout << "checksum: " << t.qMap->checksum() << endl;
+    cout << "orginal checksum: " << checksum << endl;
+    cout << "tree    checksum: " << t.qMap->checksum() << endl;
 
     return true;
 }
@@ -70,7 +70,7 @@ int main() {
     int M = 100000;
     int max_key_value = 1000000;
     int range_size = 100000;
-    int queries = 1000;
+    int queries = 100000;
 
     vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
 
@@ -114,6 +114,7 @@ int main() {
     elapsed_seconds = end_time - start_time;
     total_time = elapsed_seconds.count();
     tEager.qMap->summary();
+    checksum_validate(intervals, tEager);
     cout << "total time: " << total_time << endl << endl;
 
     cout << "*** LAZY STRATEGY ***" << endl;
@@ -127,6 +128,7 @@ int main() {
     elapsed_seconds = end_time - start_time;
     total_time = elapsed_seconds.count();
     tLazy.qMap->summary();
+    checksum_validate(intervals, tLazy);
     cout << "total time: " << total_time << endl << endl;
 
     return 0;

@@ -622,16 +622,16 @@ template <class Tr>
 class QMapLazy : public QMapBase <Tr> {
     typedef typename Tr::Tinterval Tinterval;
     typedef typename Tr::Tnode Tnode;
-    typedef map<Tnode *, vector <Tinterval *> *> qMapType;
+    typedef unordered_map<Tnode *, vector <Tinterval *>> qMapType;
 
 public:
     qMapType qMap;
 
     void _insert(Tnode * & node, Tinterval * interval) {
-        if (qMap[node] == NULL) {
-            qMap[node] = new vector<Tinterval *>;
-        }
-        qMap[node]->emplace_back(interval);
+        // if (qMap[node] == NULL) {
+        //     qMap[node] = new vector<Tinterval *>;
+        // }
+        qMap[node].emplace_back(interval);
     }
 
     void _transfer(Tnode * & from, Tnode * & to) {
@@ -644,24 +644,26 @@ public:
         set<Tinterval *> tempSet;
         typename vector<Tinterval *>::iterator it;
         // Copy all the elements from B
-        if (qMap[a] != NULL) {
-            for (it = qMap[a]->begin(); it != qMap[a]->end(); it++) {
+        // if (qMap[a] != NULL) {
+            for (it = qMap[a].begin(); it != qMap[a].end(); it++) {
                 tempSet.insert(*it);
             }
-        }
-        if (qMap[b] != NULL) {
-            for (it = qMap[b]->begin(); it != qMap[b]->end(); it++) {
+        // }
+        // if (qMap[b] != NULL) {
+            for (it = qMap[b].begin(); it != qMap[b].end(); it++) {
                 tempSet.insert(*it);
             }
-        }
+        // }
 
-        vector<Tinterval *> * tempA = new vector<Tinterval *>;
-        tempA->reserve(tempSet.size());
+        // vector<Tinterval *> * tempA = new vector<Tinterval *>;
+        vector<Tinterval *> tempA;
+        tempA.reserve(tempSet.size());
 
         for (typename set<Tinterval *>::iterator it = tempSet.begin(); it != tempSet.end(); it++) {
-            tempA->emplace_back(*it);
+            tempA.emplace_back(*it);
         }
-        vector<Tinterval *> * tempB = new vector<Tinterval *>(tempA->begin(), tempA->end());
+        // vector<Tinterval *> * tempB = new vector<Tinterval *>(tempA->begin(), tempA->end());
+        vector<Tinterval *> tempB(tempA.begin(), tempA.end());
 
         qMap.erase(a);
         qMap.erase(b);
@@ -671,7 +673,7 @@ public:
     }
 
     void _merge(Tnode * & node) {
-        vector<Tinterval *> * temp = new vector<Tinterval *>;
+        vector<Tinterval *> temp;
 
         Tnode * a = node->left;
         Tnode * b = node->right;
@@ -687,15 +689,15 @@ public:
 
         for (size_t i = 0; i < leafs.size(); i+= 1) {
             Tnode * n = leafs[i];
-            if (qMap[n] != NULL) {
-                for (typename vector<Tinterval *>::iterator it = qMap[n]->begin(); it != qMap[n]->end(); it++) {
-                    temp->push_back((*it));
-                }
-                qMap.erase(n);
+            // if (qMap[n] != NULL) {
+            for (typename vector<Tinterval *>::iterator it = qMap[n].begin(); it != qMap[n].end(); it++) {
+                temp.push_back((*it));
             }
+            qMap.erase(n);
+            // }
         }
 
-        if (temp->size() > 0) {
+        if (temp.size() > 0) {
             qMap[node] = temp;
         }
     }
@@ -703,8 +705,8 @@ public:
     long long checksum() {
         long long val = 0;
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
-            for (size_t i = 0; i < it->second->size(); i++) {
-                Tinterval intersection = it->first->interval.intersection(*(it->second->at(i)));
+            for (size_t i = 0; i < it->second.size(); i++) {
+                Tinterval intersection = it->first->interval.intersection(*(it->second.at(i)));
                 val += intersection.checksum();
             }
         }
@@ -715,7 +717,7 @@ public:
     long numIndexedQueries () {
         long indexed = 0;
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
-            indexed += it->second->size();
+            indexed += it->second.size();
         }
         return indexed;
     }
