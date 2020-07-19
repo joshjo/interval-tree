@@ -67,69 +67,82 @@ bool checksum_validate(vector <Tinterval> & queries, Tree <Tr> & t) {
 int main() {
     srand (100);
 
-    int M = 100000;
-    int max_key_value = 1000000;
-    int range_size = 100000;
-    int queries = 100000;
+    // int M = 100000;
+    // int max_key_value = 1000000;
+    // int range_size = 10000;
+    // int queries = 100000;
+
+    int M = 3;
+    int max_key_value = 1000;
+    int range_size = 5;
+    int queries = 1;
 
     vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
 
-    cout << "*** ADDITIONAL STRATEGY ***" << endl;
-    auto start_time = std::chrono::system_clock::now();
-    QMapExtra <Traits <T>> * qExtra = new QMapExtra <Traits <T>>();
-    Tree <Traits <T> > tExtra(M, qExtra);
+    // cout << "*** ADDITIONAL STRATEGY ***" << endl;
+    // auto start_time = std::chrono::system_clock::now();
+    // QMapExtra <Traits <T>> * qExtra = new QMapExtra <Traits <T>>();
+    // Tree <Traits <T> > tExtra(M, qExtra);
 
-    for (int i = 0; i < queries; i += 1) {
-        tExtra.insert(intervals[i]);
-    }
+    // for (int i = 0; i < queries; i += 1) {
+    //     tExtra.insert(intervals[i]);
+    // }
 
-    auto end_time = std::chrono::system_clock::now();
-    chrono::duration<double> elapsed_seconds = end_time - start_time;
-    double total_time = elapsed_seconds.count() - tExtra.qMap->elapsedTime();
+    // auto end_time = std::chrono::system_clock::now();
+    // chrono::duration<double> elapsed_seconds = end_time - start_time;
+    // double total_time = elapsed_seconds.count() - tExtra.qMap->elapsedTime();
 
-    LeafTree<Traits <T>> leaftree;
-    vector<Node<T> *> leafs;
-    tExtra.root->getLeafs(leafs);
-    random_shuffle(leafs.begin(), leafs.end());
+    // LeafTree<Traits <T>> leaftree;
+    // vector<Node<T> *> leafs;
+    // tExtra.root->getLeafs(leafs);
+    // random_shuffle(leafs.begin(), leafs.end());
 
-    for (int i = 0; i < leafs.size(); i++) {
-        leaftree.insert(leafs[i]->interval);
-    }
-    for (int i = 0; i < queries; i += 1) {
-        leaftree.assign(&intervals[i]);
-    }
-    tExtra.qMap->indexed = leaftree.numIndexedQueries();
-    tExtra.qMap->summary();
-    cout << "total time: " << total_time << endl << endl;
-
+    // for (int i = 0; i < leafs.size(); i++) {
+    //     leaftree.insert(leafs[i]->interval);
+    // }
+    // for (int i = 0; i < queries; i += 1) {
+    //     leaftree.assign(&intervals[i]);
+    // }
+    // tExtra.qMap->indexed = leaftree.numIndexedQueries();
+    // tExtra.qMap->summary();
+    // cout << "total time: " << total_time << endl << endl;
+    //
     cout << "*** EAGER STRATEGY ***" << endl;
-    start_time = std::chrono::system_clock::now();
+    auto start_time_eager = std::chrono::system_clock::now();
     QMapEager <Traits <T>> * qEager = new QMapEager <Traits <T>>();
     Tree <Traits <T> > tEager(M, qEager);
     for (int i = 0; i < queries; i += 1) {
         tEager.insert(intervals[i]);
+        // cout << "intervals[i] " << intervals[i] << endl;
     }
+    tEager.qMap->printAllQueries();
 
-    end_time = std::chrono::system_clock::now();
-    elapsed_seconds = end_time - start_time;
-    total_time = elapsed_seconds.count();
+    cout << tEager.graphviz() << endl;
+
+    auto end_time_eager = std::chrono::system_clock::now();
+    chrono::duration<double> elapsed_seconds_eager = end_time_eager - start_time_eager;
+    double total_time_eager = elapsed_seconds_eager.count();
     tEager.qMap->summary();
     checksum_validate(intervals, tEager);
-    cout << "total time: " << total_time << endl << endl;
+    cout << "eager total time: " << total_time_eager << endl << endl;
 
-    cout << "*** LAZY STRATEGY ***" << endl;
-    start_time = std::chrono::system_clock::now();
-    QMapLazy <Traits <T>> * qLazy = new QMapLazy <Traits <T>>();
-    Tree <Traits <T> > tLazy(M, qLazy);
-    for (int i = 0; i < queries; i += 1) {
-        tLazy.insert(intervals[i]);
-    }
-    end_time = std::chrono::system_clock::now();
-    elapsed_seconds = end_time - start_time;
-    total_time = elapsed_seconds.count();
-    tLazy.qMap->summary();
-    checksum_validate(intervals, tLazy);
-    cout << "total time: " << total_time << endl << endl;
+    // cout << "*** LAZY STRATEGY ***" << endl;
+    // auto start_time_lazy = std::chrono::system_clock::now();
+    // QMapLazy <Traits <T>> * qLazy = new QMapLazy <Traits <T>>();
+    // Tree <Traits <T> > tLazy(M, qLazy);
+    // for (int i = 0; i < queries; i += 1) {
+    //     tLazy.insert(intervals[i]);
+    //     if (i > 15) {
+    //         // cout << "--> " << intervals[i] << endl;
+    //         // cout << tLazy.graphviz(to_string(i)) << endl;
+    //     }
+    // }
+    // auto end_time_lazy = std::chrono::system_clock::now();
+    // chrono::duration<double> elapsed_seconds = end_time_lazy - start_time_lazy;
+    // double total_time_lazy = elapsed_seconds.count();
+    // tLazy.qMap->summary();
+    // checksum_validate(intervals, tLazy);
+    // cout << "lazy total time: " << total_time_lazy << endl << endl;
 
     return 0;
 }

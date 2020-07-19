@@ -566,6 +566,8 @@ public:
         // Used for LeafTree
     }
 
+    virtual void printAllQueries() {}
+
     double elapsedTime() {
         return insertTime + mergeTime + transferTime + shareTime;
     }
@@ -834,6 +836,15 @@ public:
         return val;
     }
 
+    void printAllQueries() {
+        for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
+            cout << it->first->interval << endl;
+            for (size_t i = 0; i < it->second.size(); i++) {
+                cout << "\t" << "( " << it->second[i].first << " )" << it->second[i].second << endl;
+            }
+        }
+    }
+
     long numIndexedQueries () {
         long indexed = 0;
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
@@ -1014,20 +1025,20 @@ public:
         return tree;
     }
 
-    T * getLeafsData() {
+    long * getLeafsData() {
         vector<Tnode *> leafs;
-        T inf = numeric_limits<T>::max();
+        long inf = numeric_limits<T>::max();
         root->getLeafs(leafs);
-        T size = leafs.size();
+        long size = leafs.size();
         int depth = root->maxDepth();
-        T * res = new T[5];
+        long * res = new T[5];
         // Average node length
         res[0] = 0;
         // Min node length
         res[1] = inf;
         // Max node length
         res[2] = -inf;
-        // Total number of nodes
+        // Number of leaf nodes
         res[3] = size;
         // Max depth
         res[4] = depth;
