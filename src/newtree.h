@@ -741,6 +741,11 @@ class QMapEager : public QMapBase <Tr> {
     typedef pair<Tinterval *, Tinterval> qPair;
     typedef unordered_map<Tnode *, vector <qPair>> qMapType;
 
+    struct classcomp {
+        bool operator() (const qPair& lhs, const qPair& rhs) const
+        {return lhs<rhs;}
+    };
+
 public:
     qMapType qMap;
 
@@ -771,25 +776,25 @@ public:
         // Copy all the elements from A
         set<qPair> tempSet;
         typename vector<qPair>::iterator it;
-        // Copy all the elements from B
-        for (it = qMap[a].begin(); it != qMap[a].end(); it++) {
-            tempSet.insert(*it);
-        }
-        for (it = qMap[b].begin(); it != qMap[b].end(); it++) {
-            tempSet.insert(*it);
-        }
+        vector<qPair> tempVectorA(qMap[a].begin(), qMap[a].end());
 
-        vector<qPair> tempA;
-        tempA.reserve(tempSet.size());
-
-        for (typename set<qPair>::iterator it = tempSet.begin(); it != tempSet.end(); it++) {
-            tempA.emplace_back(*it);
+        for(size_t i = 0; i < qMap[b].size(); i++) {
+            bool query_exists = false;
+            for (size_t j = 0; j < tempVectorA.size(); j++) {
+                if (qMap[b][i].first == tempVectorA[j].first) {
+                    query_exists = true;
+                    break;
+                }
+            }
+            if (!query_exists) {
+                tempVectorA.emplace_back(qMap[b][i]);
+            }
         }
-        vector<qPair> tempB(tempA.begin(), tempA.end());
+        vector<qPair> tempB(tempVectorA.begin(), tempVectorA.end());
 
         qMap.erase(a);
         qMap.erase(b);
-        qMap[a] = tempA;
+        qMap[a] = tempVectorA;
         qMap[b] = tempB;
 
         updateIntersections(a);
@@ -943,6 +948,11 @@ public:
     void insert(Tinterval & interval) {
         vector <Tinterval> Q;
         get_intervals(interval, Q);
+        // unordered_map<Tnode *, bool> mInserts;
+        vector<Tnode *> mInserts;
+        typename vector<Tnode *>::iterator itm;
+        bool controlInserts = Q.size() > 1;
+        // bool controlInserts = true;
 
         for (int i = 0; i < Q.size(); i += 1) {
             Tnode * S = NULL; // Points to the parent of N.
@@ -955,7 +965,17 @@ public:
                 Tinterval J = I + S->interval;
                 if (S->interval.min <= J.min && J.max <= S->interval.max) {
                     // Update new queries
-                    qMap->insert(S, &interval);
+                    // Todo: Check this if under different parameters
+                    if (controlInserts) {
+                        itm = find(mInserts.begin(), mInserts.end(), S);
+                        if (itm != mInserts.end()) {
+                        } else {
+                            qMap->insert(S, &interval);
+                            mInserts.emplace_back(S);
+                        }
+                    } else {
+                        qMap->insert(S, &interval);
+                    }
                 } else {
                     Tnode * T = new Tnode(*S);
                     Tnode * N = new Tnode(I);

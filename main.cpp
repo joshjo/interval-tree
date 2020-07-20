@@ -72,12 +72,21 @@ int main() {
     // int range_size = 10000;
     // int queries = 100000;
 
-    int M = 3;
-    int max_key_value = 1000;
-    int range_size = 5;
-    int queries = 1;
+    int M = 100000;
+    int max_key_value = 1000000;
+    int range_size = 1;
+    int queries = 100000;
+
+    // int M = 3;
+    // int max_key_value = 1000;
+    // int range_size = 5;
+    // int queries = 5;
 
     vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
+    // vector <Tinterval> intervals;
+    // intervals.push_back(Tinterval(700, 740));
+    // intervals.push_back(Tinterval(369, 409));
+    // intervals.push_back(Tinterval(370, 375));
 
     // cout << "*** ADDITIONAL STRATEGY ***" << endl;
     // auto start_time = std::chrono::system_clock::now();
@@ -107,42 +116,40 @@ int main() {
     // tExtra.qMap->summary();
     // cout << "total time: " << total_time << endl << endl;
     //
-    cout << "*** EAGER STRATEGY ***" << endl;
-    auto start_time_eager = std::chrono::system_clock::now();
-    QMapEager <Traits <T>> * qEager = new QMapEager <Traits <T>>();
-    Tree <Traits <T> > tEager(M, qEager);
-    for (int i = 0; i < queries; i += 1) {
-        tEager.insert(intervals[i]);
-        // cout << "intervals[i] " << intervals[i] << endl;
-    }
-    tEager.qMap->printAllQueries();
-
-    cout << tEager.graphviz() << endl;
-
-    auto end_time_eager = std::chrono::system_clock::now();
-    chrono::duration<double> elapsed_seconds_eager = end_time_eager - start_time_eager;
-    double total_time_eager = elapsed_seconds_eager.count();
-    tEager.qMap->summary();
-    checksum_validate(intervals, tEager);
-    cout << "eager total time: " << total_time_eager << endl << endl;
-
-    // cout << "*** LAZY STRATEGY ***" << endl;
-    // auto start_time_lazy = std::chrono::system_clock::now();
-    // QMapLazy <Traits <T>> * qLazy = new QMapLazy <Traits <T>>();
-    // Tree <Traits <T> > tLazy(M, qLazy);
-    // for (int i = 0; i < queries; i += 1) {
-    //     tLazy.insert(intervals[i]);
-    //     if (i > 15) {
-    //         // cout << "--> " << intervals[i] << endl;
-    //         // cout << tLazy.graphviz(to_string(i)) << endl;
-    //     }
+    // cout << "*** EAGER STRATEGY ***" << endl;
+    // auto start_time_eager = std::chrono::system_clock::now();
+    // QMapEager <Traits <T>> * qEager = new QMapEager <Traits <T>>();
+    // Tree <Traits <T> > tEager(M, qEager);
+    // for (int i = 0; i < intervals.size(); i += 1) {
+    //     tEager.insert(intervals[i]);
+    //     // cout << "i: " << intervals[i] << endl;
+    //     // cout << tEager.graphviz(to_string(i)) << endl;
     // }
-    // auto end_time_lazy = std::chrono::system_clock::now();
-    // chrono::duration<double> elapsed_seconds = end_time_lazy - start_time_lazy;
-    // double total_time_lazy = elapsed_seconds.count();
-    // tLazy.qMap->summary();
-    // checksum_validate(intervals, tLazy);
-    // cout << "lazy total time: " << total_time_lazy << endl << endl;
+
+    // auto end_time_eager = std::chrono::system_clock::now();
+    // chrono::duration<double> elapsed_seconds_eager = end_time_eager - start_time_eager;
+    // double total_time_eager = elapsed_seconds_eager.count();
+    // tEager.qMap->summary();
+    // checksum_validate(intervals, tEager);
+
+    // // tEager.qMap->printAllQueries();
+    // cout << "eager total time: " << total_time_eager << endl << endl;
+
+    // cout << tEager.graphviz() << endl;
+
+    cout << "*** LAZY STRATEGY ***" << endl;
+    auto start_time_lazy = std::chrono::system_clock::now();
+    QMapLazy <Traits <T>> * qLazy = new QMapLazy <Traits <T>>();
+    Tree <Traits <T> > tLazy(M, qLazy);
+    for (int i = 0; i < intervals.size(); i += 1) {
+        tLazy.insert(intervals[i]);
+    }
+    auto end_time_lazy = std::chrono::system_clock::now();
+    chrono::duration<double> elapsed_seconds = end_time_lazy - start_time_lazy;
+    double total_time_lazy = elapsed_seconds.count();
+    tLazy.qMap->summary();
+    checksum_validate(intervals, tLazy);
+    cout << "lazy total time: " << total_time_lazy << endl << endl;
 
     return 0;
 }
