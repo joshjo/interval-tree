@@ -80,7 +80,7 @@ int main() {
     int M = 2;
     int max_key_value = 1000;
     int range_size = 15;
-    int queries = 3;
+    int queries = 4;
 
     vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
     // vector <Tinterval> intervals;

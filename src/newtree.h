@@ -897,6 +897,7 @@ public:
 
     Tnode * root;
     T M;
+    vector<Tnode *> mInserts;
 
     QMapBase<Tr> * qMap;
 
@@ -948,11 +949,9 @@ public:
     void insert(Tinterval & interval) {
         vector <Tinterval> Q;
         get_intervals(interval, Q);
-        // unordered_map<Tnode *, bool> mInserts;
-        vector<Tnode *> mInserts;
         typename vector<Tnode *>::iterator itm;
         bool controlInserts = Q.size() > 1;
-        // bool controlInserts = true;
+        mInserts.clear();
 
         for (int i = 0; i < Q.size(); i += 1) {
             Tnode * S = NULL; // Points to the parent of N.
@@ -993,7 +992,13 @@ public:
                     }
                     T->parent = S;
                     N->parent = S;
-                    update(S);
+
+                    if (controlInserts) {
+                        update(S, &interval);
+                    } else {
+                        update(S, NULL);
+                    }
+
 
                     if (S->parent != NULL) {
                         S->parent->updateLimits();
@@ -1003,12 +1008,16 @@ public:
         }
     }
 
-    void update(Tnode * & node) {
+    void update(Tnode * & node, Tinterval * query) {
         if (!node->isLeaf() && (node->left->interval.max == node->right->interval.min || node->right->interval.intersects(node->left->interval))) {
             if (node->interval.length() <= M) {
                 update_merge(node);
             } else if(node->left->isLeaf() && node->right->isLeaf()) {
                 udate_resize(node);
+                if (query != NULL) {
+                    mInserts.push_back(node->left);
+                    mInserts.push_back(node->right);
+                }
             }
         }
     }
@@ -1035,6 +1044,7 @@ public:
         node->left->interval.max = m;
         node->right->interval.min = m;
         qMap->share(node->left, node->right);
+
     }
 
     string graphviz(string iter=""){
