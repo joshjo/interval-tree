@@ -624,7 +624,8 @@ template <class Tr>
 class QMapLazy : public QMapBase <Tr> {
     typedef typename Tr::Tinterval Tinterval;
     typedef typename Tr::Tnode Tnode;
-    typedef unordered_map<Tnode *, vector <Tinterval *>> qMapType;
+    typedef vector <Tinterval *> array;
+    typedef unordered_map<Tnode *, array> qMapType;
 
 public:
     qMapType qMap;
@@ -641,7 +642,7 @@ public:
     void _share(Tnode * & a, Tnode * & b) {
         // Copy all the elements from A
         set<Tinterval *> tempSet;
-        typename vector<Tinterval *>::iterator it;
+        typename array::iterator it;
         // Copy all the elements from B
         for (it = qMap[a].begin(); it != qMap[a].end(); it++) {
             tempSet.insert(*it);
@@ -650,14 +651,14 @@ public:
             tempSet.insert(*it);
         }
 
-        vector<Tinterval *> tempA;
+        array tempA;
         tempA.reserve(tempSet.size());
 
         for (typename set<Tinterval *>::iterator it = tempSet.begin(); it != tempSet.end(); it++) {
             tempA.emplace_back(*it);
         }
 
-        vector<Tinterval *> tempB(tempA.begin(), tempA.end());
+        array tempB(tempA.begin(), tempA.end());
 
         qMap.erase(a);
         qMap.erase(b);
@@ -667,7 +668,7 @@ public:
     }
 
     void _merge(Tnode * & node) {
-        vector<Tinterval *> temp;
+        array temp;
 
         Tnode * a = node->left;
         Tnode * b = node->right;
@@ -683,7 +684,7 @@ public:
 
         for (size_t i = 0; i < leafs.size(); i+= 1) {
             Tnode * n = leafs[i];
-            for (typename vector<Tinterval *>::iterator it = qMap[n].begin(); it != qMap[n].end(); it++) {
+            for (typename array::iterator it = qMap[n].begin(); it != qMap[n].end(); it++) {
                 temp.push_back((*it));
             }
             qMap.erase(n);
@@ -697,8 +698,8 @@ public:
     long long checksum() {
         long long val = 0;
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
-            for (size_t i = 0; i < it->second.size(); i++) {
-                Tinterval intersection = it->first->interval.intersection(*(it->second.at(i)));
+            for (typename array::iterator jt = it->second.begin(); jt != it->second.end(); jt++) {
+                Tinterval intersection = it->first->interval.intersection(**jt);
                 val += intersection.checksum();
             }
         }
