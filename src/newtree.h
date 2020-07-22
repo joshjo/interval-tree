@@ -624,8 +624,8 @@ template <class Tr>
 class QMapLazy : public QMapBase <Tr> {
     typedef typename Tr::Tinterval Tinterval;
     typedef typename Tr::Tnode Tnode;
-    typedef vector <Tinterval *> array;
-    typedef unordered_map<Tnode *, array> qMapType;
+    typedef vector <Tinterval *> qArray;
+    typedef unordered_map<Tnode *, qArray> qMapType;
 
 public:
     qMapType qMap;
@@ -642,7 +642,7 @@ public:
     void _share(Tnode * & a, Tnode * & b) {
         // Copy all the elements from A
         set<Tinterval *> tempSet;
-        typename array::iterator it;
+        typename qArray::iterator it;
         // Copy all the elements from B
         for (it = qMap[a].begin(); it != qMap[a].end(); it++) {
             tempSet.insert(*it);
@@ -651,14 +651,14 @@ public:
             tempSet.insert(*it);
         }
 
-        array tempA;
+        qArray tempA;
         tempA.reserve(tempSet.size());
 
         for (typename set<Tinterval *>::iterator it = tempSet.begin(); it != tempSet.end(); it++) {
             tempA.emplace_back(*it);
         }
 
-        array tempB(tempA.begin(), tempA.end());
+        qArray tempB(tempA.begin(), tempA.end());
 
         qMap.erase(a);
         qMap.erase(b);
@@ -668,7 +668,7 @@ public:
     }
 
     void _merge(Tnode * & node) {
-        array temp;
+        qArray temp;
 
         Tnode * a = node->left;
         Tnode * b = node->right;
@@ -684,7 +684,7 @@ public:
 
         for (size_t i = 0; i < leafs.size(); i+= 1) {
             Tnode * n = leafs[i];
-            for (typename array::iterator it = qMap[n].begin(); it != qMap[n].end(); it++) {
+            for (typename qArray::iterator it = qMap[n].begin(); it != qMap[n].end(); it++) {
                 temp.push_back((*it));
             }
             qMap.erase(n);
@@ -698,7 +698,7 @@ public:
     long long checksum() {
         long long val = 0;
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
-            for (typename array::iterator jt = it->second.begin(); jt != it->second.end(); jt++) {
+            for (typename qArray::iterator jt = it->second.begin(); jt != it->second.end(); jt++) {
                 Tinterval intersection = it->first->interval.intersection(**jt);
                 val += intersection.checksum();
             }
@@ -740,7 +740,8 @@ class QMapEager : public QMapBase <Tr> {
     typedef typename Tr::Tinterval Tinterval;
     typedef typename Tr::Tnode Tnode;
     typedef pair<Tinterval *, Tinterval> qPair;
-    typedef unordered_map<Tnode *, vector <qPair>> qMapType;
+    typedef vector <qPair> qArray;
+    typedef unordered_map<Tnode *, qArray> qMapType;
 
     struct classcomp {
         bool operator() (const qPair& lhs, const qPair& rhs) const
@@ -777,7 +778,7 @@ public:
         // Copy all the elements from A
         set<qPair> tempSet;
         typename vector<qPair>::iterator it;
-        vector<qPair> tempVectorA(qMap[a].begin(), qMap[a].end());
+        qArray tempVectorA(qMap[a].begin(), qMap[a].end());
 
         for(size_t i = 0; i < qMap[b].size(); i++) {
             bool query_exists = false;
@@ -791,7 +792,7 @@ public:
                 tempVectorA.emplace_back(qMap[b][i]);
             }
         }
-        vector<qPair> tempB(tempVectorA.begin(), tempVectorA.end());
+        qArray tempB(tempVectorA.begin(), tempVectorA.end());
 
         qMap.erase(a);
         qMap.erase(b);
@@ -803,7 +804,7 @@ public:
     }
 
     void _merge(Tnode * & node) {
-        vector<qPair> temp;
+        qArray temp;
 
         Tnode * a = node->left;
         Tnode * b = node->right;
@@ -819,7 +820,7 @@ public:
 
         for (size_t i = 0; i < leafs.size(); i+= 1) {
             Tnode * n = leafs[i];
-            for (typename vector<qPair>::iterator it = qMap[n].begin(); it != qMap[n].end(); it++) {
+            for (typename qArray::iterator it = qMap[n].begin(); it != qMap[n].end(); it++) {
                 temp.push_back((*it));
             }
             qMap.erase(n);
@@ -834,8 +835,8 @@ public:
     long long checksum() {
         long long val = 0;
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
-            for (size_t i = 0; i < it->second.size(); i++) {
-                val += it->second.at(i).second.checksum();
+            for (typename qArray::iterator jt = it->second.begin(); jt != it->second.end(); jt++) {
+                val += jt->second.checksum();
             }
         }
 
@@ -845,8 +846,8 @@ public:
     void printAllQueries() {
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
             cout << it->first->interval << endl;
-            for (size_t i = 0; i < it->second.size(); i++) {
-                cout << "\t" << "( " << it->second[i].first << " )" << it->second[i].second << endl;
+            for (typename qArray::iterator jt = it->second.begin(); jt != it->second.end(); jt++) {
+                cout << "\t" << "( " << jt->first << " )" << jt->second << endl;
             }
         }
     }
