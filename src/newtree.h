@@ -894,6 +894,7 @@ public:
     typedef typename Tr::T T;
     typedef typename Tr::Tinterval Tinterval;
     typedef typename Tr::Tnode Tnode;
+    set<Tnode *> insertNodesTemp;
 
     Tnode * root;
     T M;
@@ -953,6 +954,7 @@ public:
         typename vector<Tnode *>::iterator itm;
         bool controlInserts = Q.size() > 1;
         // bool controlInserts = true;
+        insertNodesTemp.clear();
 
         for (int i = 0; i < Q.size(); i += 1) {
             Tnode * S = NULL; // Points to the parent of N.
@@ -967,6 +969,7 @@ public:
                     // Update new queries
                     // Todo: Check this if under different parameters
                     if (controlInserts) {
+                        insertNodesTemp.insert(S);
                         itm = find(mInserts.begin(), mInserts.end(), S);
                         if (itm != mInserts.end()) {
                         } else {
@@ -983,6 +986,10 @@ public:
 
                     qMap->transfer(S, T);
                     qMap->insert(N, &interval);
+                    if (controlInserts) {
+
+                        insertNodesTemp.insert(N);
+                    }
 
                     if (T->interval < N->interval) {
                         S->left = T;
