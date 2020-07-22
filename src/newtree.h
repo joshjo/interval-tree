@@ -948,10 +948,9 @@ public:
     void insert(Tinterval & interval) {
         vector <Tinterval> Q;
         get_intervals(interval, Q);
-        vector<Tnode *> mInserts;
-        typename vector<Tnode *>::iterator itm;
         bool controlInserts = Q.size() > 1;
-        // unordered_set<Tnode *> insertNodesTemp;
+        unordered_set<Tnode *> insertNodesTemp;
+        typename unordered_set<Tnode *>::iterator itm;
 
         for (int i = 0; i < Q.size(); i += 1) {
             Tnode * S = NULL; // Points to the parent of N.
@@ -964,19 +963,16 @@ public:
                 Tinterval J = I + S->interval;
                 if (S->interval.min <= J.min && J.max <= S->interval.max) {
                     // Update new queries
-                    qMap->insert(S, &interval);
                     // Todo: Check this if under different parameters
-                    // insertNodesTemp.insert(S);
-                    // if (controlInserts) {
-                    //     itm = find(mInserts.begin(), mInserts.end(), S);
-                    //     if (itm != mInserts.end()) {
-                    //     } else {
-                    //         qMap->insert(S, &interval);
-                    //         mInserts.emplace_back(S);
-                    //     }
-                    // } else {
-                    //     qMap->insert(S, &interval);
-                    // }
+                    insertNodesTemp.insert(S);
+                    if (controlInserts) {
+                        itm = insertNodesTemp.find(S);
+                        if (itm == insertNodesTemp.end()) {
+                            insertNodesTemp.insert(S);
+                        }
+                    } else {
+                        qMap->insert(S, &interval);
+                    }
                 } else {
                     Tnode * T = new Tnode(*S);
                     Tnode * N = new Tnode(I);
@@ -984,10 +980,10 @@ public:
 
                     qMap->transfer(S, T);
                     qMap->insert(N, &interval);
-                    // if (controlInserts) {
 
-                    // insertNodesTemp.insert(N);
-                    // }
+                    if (controlInserts) {
+                        insertNodesTemp.insert(N);
+                    }
 
                     if (T->interval < N->interval) {
                         S->left = T;

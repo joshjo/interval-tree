@@ -82,10 +82,15 @@ int main() {
     // int range_size = 100000;
     // int queries = 100000;
 
-    int M = 100000;
+    // int M = 250000;
+    // int max_key_value = 1000000;
+    // int range_size = 10000;
+    // int queries = 100000;
+
+    int M = 10000;
     int max_key_value = 1000000;
-    int range_size = 100000;
-    int queries = 100000;
+    int range_size = 10;
+    int queries = 110705;
 
     // int M = 2;
     // int max_key_value = 1000;
