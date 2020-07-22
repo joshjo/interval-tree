@@ -964,10 +964,10 @@ public:
                 if (S->interval.min <= J.min && J.max <= S->interval.max) {
                     // Update new queries
                     // Todo: Check this if under different parameters
-                    insertNodesTemp.insert(S);
                     if (controlInserts) {
                         itm = insertNodesTemp.find(S);
                         if (itm == insertNodesTemp.end()) {
+                            qMap->insert(S, &interval);
                             insertNodesTemp.insert(S);
                         }
                     } else {
