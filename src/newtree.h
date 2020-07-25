@@ -188,7 +188,7 @@ public:
         return(rDepth + 1);
     }
 
-    void updateLimits() {
+    void updateLimits(bool recursive=true) {
         bool hasChange = false;
         if ((left != NULL) && left->interval.min < interval.min) {
             hasChange = true;
@@ -198,7 +198,7 @@ public:
             hasChange = true;
             interval.max = right->interval.max;
         }
-        if (parent != NULL && hasChange) {
+        if (parent != NULL && hasChange && recursive) {
             parent->updateLimits();
         }
     }
@@ -219,6 +219,26 @@ public:
 
     void getLeafs(vector<Tnode *> & leafs) {
         getLeafs(this, leafs);
+    }
+
+    void recursiveValidate(Tnode * node) {
+        if (node->isLeaf()) {
+            return;
+        }
+        if (node->left->interval.min != node->interval.min) {
+            cout << "invalid left " << node->interval << endl;
+            return;
+        }
+        if (node->right->interval.max != node->interval.max) {
+            cout << "invalid right " << node->interval << endl;
+            return;
+        }
+        recursiveValidate(node->left);
+        recursiveValidate(node->right);
+    }
+
+    void recursiveValidate() {
+        recursiveValidate(this);
     }
 };
 
@@ -1017,7 +1037,7 @@ public:
     }
 
     void update_merge(Tnode * & node) {
-        if (node != NULL && node->interval.length() <= M) {
+        if (node != NULL && node->interval.length() <= M && (node->left->interval.max == node->right->interval.min || node->right->interval.intersects(node->left->interval))) {
             if (node->left->interval.min < node->interval.min) {
                 node->interval.min = node->left->interval.min;
             }
@@ -1027,6 +1047,11 @@ public:
             qMap->merge(node);
             node->left = NULL;
             node->right = NULL;
+
+
+            if (node->parent != NULL) {
+                node->parent->updateLimits();
+            }
 
             // Todo: Consider this recursive call
             update_merge(node->parent);
