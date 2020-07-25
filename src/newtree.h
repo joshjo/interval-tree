@@ -1017,7 +1017,7 @@ public:
     }
 
     void update_merge(Tnode * & node) {
-        if (node != NULL && node->interval.length() <= M) {
+        if (node != NULL && node->interval.length() <= M && (node->left->interval.max == node->right->interval.min || node->right->interval.intersects(node->left->interval))) {
             if (node->left->interval.min < node->interval.min) {
                 node->interval.min = node->left->interval.min;
             }
