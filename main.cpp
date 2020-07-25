@@ -72,8 +72,8 @@ vector <Tinterval> error_intervals() {
     intervals.push_back(Tinterval(348913, 411580));
     intervals.push_back(Tinterval(681780, 726753));
     intervals.push_back(Tinterval(253546, 348136));
-    // intervals.push_back(Tinterval(459248, 498236));
-    // intervals.push_back(Tinterval(284677, 355542));
+    intervals.push_back(Tinterval(459248, 498236));
+    intervals.push_back(Tinterval(284677, 355542));
 
     return intervals;
 }
@@ -174,9 +174,9 @@ int main() {
         } else {
             tEager.insert(intervals[i]);
         }
-        if (i > 17) {
-            cout << tEager.graphviz(to_string(i)) << endl;
-        }
+        // if (i > 17) {
+        //     cout << tEager.graphviz(to_string(i)) << endl;
+        // }
     }
 
     auto end_time_eager = std::chrono::system_clock::now();
@@ -186,7 +186,7 @@ int main() {
     checksum_validate(intervals, tEager);
 
     // tEager.qMap->printAllQueries();
-    // cout << tEager.graphviz() << endl;
+    cout << tEager.graphviz() << endl;
     cout << "eager total time: " << total_time_eager << endl << endl;
 
     // cout << "*** LAZY STRATEGY ***" << endl;
