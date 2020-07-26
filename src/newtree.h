@@ -285,8 +285,8 @@ public:
         }
     }
 
-    long long int checksum() {
-        long long int value = 0;
+    unsigned long long int checksum() {
+        unsigned long long int value = 0;
         for (int i = 0; i < hashmap.size(); i += 1) {
             value += hashmap[i].second.checksum();
         }
@@ -433,17 +433,17 @@ public:
         }
     }
 
-    void getNodeCheckSum(Tnode * visitor, long long int & val) {
+    void getNodeCheckSum(Tnode * visitor, unsigned long long int & val) {
         if (visitor != NULL) {
-            long long int chk = visitor->checksum();
+            unsigned long long int chk = visitor->checksum();
             val += chk;
             getNodeCheckSum(visitor->left, val);
             getNodeCheckSum(visitor->right, val);
         }
     }
 
-    long long int checksum() {
-        long long int value = 0;
+    unsigned long long int checksum() {
+        unsigned long long int value = 0;
         getNodeCheckSum(root, value);
 
         return value;
@@ -569,7 +569,7 @@ public:
         this->mergeTime += elapsed_seconds.count();
     }
 
-    virtual long long int checksum() {
+    virtual unsigned long long int checksum() {
         return 0;
     }
 
@@ -612,7 +612,7 @@ public:
 
     void _merge(Tnode * & node) {}
 
-    long long int checksum() {
+    unsigned long long int checksum() {
         return 0;
     }
 
@@ -715,8 +715,8 @@ public:
         }
     }
 
-    long long int checksum() {
-        long long int val = 0;
+    unsigned long long int checksum() {
+        unsigned long long int val = 0;
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
             for (typename qArray::iterator jt = it->second.begin(); jt != it->second.end(); jt++) {
                 Tinterval intersection = it->first->interval.intersection(**jt);
@@ -852,8 +852,8 @@ public:
         }
     }
 
-    long long int checksum() {
-        long long int val = 0;
+    unsigned long long int checksum() {
+        unsigned long long int val = 0;
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
             for (typename qArray::iterator jt = it->second.begin(); jt != it->second.end(); jt++) {
                 val += jt->second.checksum();
@@ -1073,13 +1073,13 @@ public:
         return tree;
     }
 
-    long * getLeafsData() {
+    T * getLeafsData() {
         vector<Tnode *> leafs;
-        long inf = numeric_limits<T>::max();
+        T inf = numeric_limits<T>::max();
         root->getLeafs(leafs);
-        long size = leafs.size();
-        int depth = root->maxDepth();
-        long * res = new T[5];
+        T size = leafs.size();
+        T depth = root->maxDepth();
+        T * res = new T[5];
         // Average node length
         res[0] = 0;
         // Min node length

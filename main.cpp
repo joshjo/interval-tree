@@ -3,7 +3,7 @@
 using namespace std;
 
 typedef long long T;
-typedef long long TT;
+typedef unsigned long long int TT;
 typedef Interval<T> Tinterval;
 
 
@@ -107,9 +107,9 @@ TT checksum_original(vector <Tinterval> & queries) {
 int main() {
     srand (100);
 
-    T M = 100000;
-    T max_key_value = 1000000;
-    T range_size = 100000;
+    T M = 10000;
+    T max_key_value = 1000000000;
+    T range_size = 10000;
     T queries = 100000;
 
     // int M = 250000;
@@ -184,12 +184,17 @@ int main() {
     chrono::duration<double> elapsed_seconds_eager = end_time_eager - start_time_eager;
     double total_time_eager = elapsed_seconds_eager.count();
     tEager.qMap->summary();
+    T * leafsEagerData = tEager.getLeafsData();
+    cout << "# Leafs   : " << leafsEagerData[3] << endl;
+    cout << "Max depth : " << leafsEagerData[4] << endl;
+
     checksum_validate(intervals, tEager);
 
     // tEager.qMap->printAllQueries();
     // cout << tEager.graphviz() << endl;
     cout << "eager total time: " << total_time_eager << endl << endl;
 
+    tEager.root->recursiveValidate();
     // cout << "*** LAZY STRATEGY ***" << endl;
     // auto start_time_lazy = std::chrono::system_clock::now();
     // QMapLazy <Traits <T>> * qLazy = new QMapLazy <Traits <T>>();
