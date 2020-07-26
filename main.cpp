@@ -80,7 +80,7 @@ vector <Tinterval> error_intervals() {
 
 template <class Tr>
 bool checksum_validate(vector <Tinterval> & queries, Tree <Tr> & t) {
-    long long checksum = 0;
+    long long int checksum = 0;
 
     for (size_t i = 0; i < queries.size(); i++) {
         checksum += queries[i].checksum();
@@ -92,8 +92,8 @@ bool checksum_validate(vector <Tinterval> & queries, Tree <Tr> & t) {
     return true;
 }
 
-long long checksum_original(vector <Tinterval> & queries) {
-    long long checksum = 0;
+long long int checksum_original(vector <Tinterval> & queries) {
+    long long int checksum = 0;
 
     for (size_t i = 0; i < queries.size(); i++) {
         checksum += queries[i].checksum();

@@ -285,8 +285,8 @@ public:
         }
     }
 
-    long long checksum() {
-        long long value = 0;
+    long long int checksum() {
+        long long int value = 0;
         for (int i = 0; i < hashmap.size(); i += 1) {
             value += hashmap[i].second.checksum();
         }
@@ -433,17 +433,17 @@ public:
         }
     }
 
-    void getNodeCheckSum(Tnode * visitor, long long & val) {
+    void getNodeCheckSum(Tnode * visitor, long long int & val) {
         if (visitor != NULL) {
-            long long chk = visitor->checksum();
+            long long int chk = visitor->checksum();
             val += chk;
             getNodeCheckSum(visitor->left, val);
             getNodeCheckSum(visitor->right, val);
         }
     }
 
-    long long checksum() {
-        long long value = 0;
+    long long int checksum() {
+        long long int value = 0;
         getNodeCheckSum(root, value);
 
         return value;
@@ -569,7 +569,7 @@ public:
         this->mergeTime += elapsed_seconds.count();
     }
 
-    virtual long long checksum() {
+    virtual long long int checksum() {
         return 0;
     }
 
@@ -612,7 +612,7 @@ public:
 
     void _merge(Tnode * & node) {}
 
-    long long checksum() {
+    long long int checksum() {
         return 0;
     }
 
@@ -715,8 +715,8 @@ public:
         }
     }
 
-    long long checksum() {
-        long long val = 0;
+    long long int checksum() {
+        long long int val = 0;
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
             for (typename qArray::iterator jt = it->second.begin(); jt != it->second.end(); jt++) {
                 Tinterval intersection = it->first->interval.intersection(**jt);
@@ -852,8 +852,8 @@ public:
         }
     }
 
-    long long checksum() {
-        long long val = 0;
+    long long int checksum() {
+        long long int val = 0;
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
             for (typename qArray::iterator jt = it->second.begin(); jt != it->second.end(); jt++) {
                 val += jt->second.checksum();
