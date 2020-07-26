@@ -106,7 +106,7 @@ long long int checksum_original(vector <Tinterval> & queries) {
 int main() {
     srand (100);
 
-    int M = 94590;
+    int M = 100000;
     int max_key_value = 1000000;
     int range_size = 100000;
     int queries = 100000;
@@ -126,8 +126,8 @@ int main() {
     // int range_size = 15;
     // int queries = 15;
 
-    // vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
-    vector <Tinterval> intervals = error_intervals();
+    vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
+    // vector <Tinterval> intervals = error_intervals();
     // intervals.push_back(Tinterval(700, 740));
     // intervals.push_back(Tinterval(369, 409));
     // intervals.push_back(Tinterval(370, 375));
@@ -186,7 +186,7 @@ int main() {
     checksum_validate(intervals, tEager);
 
     // tEager.qMap->printAllQueries();
-    cout << tEager.graphviz() << endl;
+    // cout << tEager.graphviz() << endl;
     cout << "eager total time: " << total_time_eager << endl << endl;
 
     // cout << "*** LAZY STRATEGY ***" << endl;
