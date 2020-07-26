@@ -2,7 +2,8 @@
 
 using namespace std;
 
-typedef long T;
+typedef long long T;
+typedef long long TT;
 typedef Interval<T> Tinterval;
 
 
@@ -80,7 +81,7 @@ vector <Tinterval> error_intervals() {
 
 template <class Tr>
 bool checksum_validate(vector <Tinterval> & queries, Tree <Tr> & t) {
-    long long int checksum = 0;
+    TT checksum = 0;
 
     for (size_t i = 0; i < queries.size(); i++) {
         checksum += queries[i].checksum();
@@ -92,8 +93,8 @@ bool checksum_validate(vector <Tinterval> & queries, Tree <Tr> & t) {
     return true;
 }
 
-long long int checksum_original(vector <Tinterval> & queries) {
-    long long int checksum = 0;
+TT checksum_original(vector <Tinterval> & queries) {
+    TT checksum = 0;
 
     for (size_t i = 0; i < queries.size(); i++) {
         checksum += queries[i].checksum();
@@ -106,10 +107,10 @@ long long int checksum_original(vector <Tinterval> & queries) {
 int main() {
     srand (100);
 
-    int M = 94590;
-    int max_key_value = 1000000;
-    int range_size = 100000;
-    int queries = 100000;
+    T M = 100000;
+    T max_key_value = 1000000;
+    T range_size = 100000;
+    T queries = 100000;
 
     // int M = 250000;
     // int max_key_value = 1000000;
@@ -126,8 +127,8 @@ int main() {
     // int range_size = 15;
     // int queries = 15;
 
-    // vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
-    vector <Tinterval> intervals = error_intervals();
+    vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
+    // vector <Tinterval> intervals = error_intervals();
     // intervals.push_back(Tinterval(700, 740));
     // intervals.push_back(Tinterval(369, 409));
     // intervals.push_back(Tinterval(370, 375));
@@ -168,7 +169,7 @@ int main() {
     auto start_time_eager = std::chrono::system_clock::now();
     QMapEager <Traits <T>> * qEager = new QMapEager <Traits <T>>();
     Tree <Traits <T> > tEager(M, qEager);
-    for (int i = 0; i < intervals.size(); i += 1) {
+    for (size_t i = 0; i < intervals.size(); i += 1) {
         if (i == 19) {
             tEager.insert(intervals[i]);
         } else {
@@ -186,7 +187,7 @@ int main() {
     checksum_validate(intervals, tEager);
 
     // tEager.qMap->printAllQueries();
-    cout << tEager.graphviz() << endl;
+    // cout << tEager.graphviz() << endl;
     cout << "eager total time: " << total_time_eager << endl << endl;
 
     // cout << "*** LAZY STRATEGY ***" << endl;
