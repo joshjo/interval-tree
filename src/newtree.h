@@ -54,6 +54,11 @@ public:
     }
 
     Tinterval intersection(const Interval & other) {
+        /**
+         * @return a new interval with the intersection.
+         * In case there is no intersection return an empty Interval (0, 0)
+         */
+
         Tinterval result(0, 0);
 
         if ((other.min <= min && min <= other.max) || (other.min <= max && max <= other.max) || (min <= other.min && other.min <= max) || (min <= other.max && other.max <= max)) {
@@ -64,7 +69,19 @@ public:
         return result;
     }
 
+    bool intersects(const T & point) {
+        /**
+         * @return a boolean indicating if the interval intersects with a point.
+         */
+
+        return min <= point && point < max;
+    }
+
     bool intersects(const Interval & other) {
+        /**
+         * @return a boolean indicating if the interval intersects with another one
+         */
+
         Tinterval i = intersection(other);
 
         return i.length() > 0;
@@ -188,7 +205,7 @@ public:
         return(rDepth + 1);
     }
 
-    void updateLimits() {
+    void updateLimits(bool recursive=true) {
         bool hasChange = false;
         if ((left != NULL) && left->interval.min < interval.min) {
             hasChange = true;
@@ -198,7 +215,7 @@ public:
             hasChange = true;
             interval.max = right->interval.max;
         }
-        if (parent != NULL && hasChange) {
+        if (parent != NULL && hasChange && recursive) {
             parent->updateLimits();
         }
     }
@@ -219,6 +236,26 @@ public:
 
     void getLeafs(vector<Tnode *> & leafs) {
         getLeafs(this, leafs);
+    }
+
+    void recursiveValidate(Tnode * node) {
+        if (node->isLeaf()) {
+            return;
+        }
+        if (node->left->interval.min != node->interval.min) {
+            cout << "invalid left " << node->interval << endl;
+            return;
+        }
+        if (node->right->interval.max != node->interval.max) {
+            cout << "invalid right " << node->interval << endl;
+            return;
+        }
+        recursiveValidate(node->left);
+        recursiveValidate(node->right);
+    }
+
+    void recursiveValidate() {
+        recursiveValidate(this);
     }
 };
 
@@ -256,6 +293,8 @@ public:
         if (this->parent != NULL && this->max > parent->max) {
             parent->max = this->max;
             parent->update_weights();
+        } else {
+            max = interval.max;
         }
     }
 
@@ -265,8 +304,8 @@ public:
         }
     }
 
-    long long checksum() {
-        long long value = 0;
+    unsigned long long int checksum() {
+        unsigned long long int value = 0;
         for (int i = 0; i < hashmap.size(); i += 1) {
             value += hashmap[i].second.checksum();
         }
@@ -361,6 +400,29 @@ public:
         return true;
     }
 
+    void find(T key, vector <Tinterval *> & results, Tnode * visitor) {
+        if (visitor == NULL) {
+            return;
+        }
+        cout << "interval: " << visitor->interval << endl;
+        if (visitor->right) {
+            cout << "-->" << visitor->right->max << endl;
+        }
+        if (visitor->interval.intersects(key)) {
+            results.push_back(&(visitor->interval));
+        }
+        if (visitor->left && key < visitor->left->max) {
+            find(key, results, visitor->left);
+        }
+        if (visitor->right && key < visitor->right->max) {
+            find(key, results, visitor->left);
+        }
+    }
+
+    void find(T key, vector <Tinterval *> & results) {
+        find(key, results, root);
+    }
+
     void print() {
         print(this->root);
         printf("\n");
@@ -413,17 +475,17 @@ public:
         }
     }
 
-    void getNodeCheckSum(Tnode * visitor, long long & val) {
+    void getNodeCheckSum(Tnode * visitor, unsigned long long int & val) {
         if (visitor != NULL) {
-            long long chk = visitor->checksum();
+            unsigned long long int chk = visitor->checksum();
             val += chk;
             getNodeCheckSum(visitor->left, val);
             getNodeCheckSum(visitor->right, val);
         }
     }
 
-    long long checksum() {
-        long long value = 0;
+    unsigned long long int checksum() {
+        unsigned long long int value = 0;
         getNodeCheckSum(root, value);
 
         return value;
@@ -549,7 +611,7 @@ public:
         this->mergeTime += elapsed_seconds.count();
     }
 
-    virtual long long checksum() {
+    virtual unsigned long long int checksum() {
         return 0;
     }
 
@@ -592,7 +654,7 @@ public:
 
     void _merge(Tnode * & node) {}
 
-    long long checksum() {
+    unsigned long long int checksum() {
         return 0;
     }
 
@@ -624,7 +686,8 @@ template <class Tr>
 class QMapLazy : public QMapBase <Tr> {
     typedef typename Tr::Tinterval Tinterval;
     typedef typename Tr::Tnode Tnode;
-    typedef unordered_map<Tnode *, vector <Tinterval *>> qMapType;
+    typedef vector <Tinterval *> qArray;
+    typedef unordered_map<Tnode *, qArray> qMapType;
 
 public:
     qMapType qMap;
@@ -641,7 +704,7 @@ public:
     void _share(Tnode * & a, Tnode * & b) {
         // Copy all the elements from A
         set<Tinterval *> tempSet;
-        typename vector<Tinterval *>::iterator it;
+        typename qArray::iterator it;
         // Copy all the elements from B
         for (it = qMap[a].begin(); it != qMap[a].end(); it++) {
             tempSet.insert(*it);
@@ -650,14 +713,14 @@ public:
             tempSet.insert(*it);
         }
 
-        vector<Tinterval *> tempA;
+        qArray tempA;
         tempA.reserve(tempSet.size());
 
         for (typename set<Tinterval *>::iterator it = tempSet.begin(); it != tempSet.end(); it++) {
             tempA.emplace_back(*it);
         }
 
-        vector<Tinterval *> tempB(tempA.begin(), tempA.end());
+        qArray tempB(tempA.begin(), tempA.end());
 
         qMap.erase(a);
         qMap.erase(b);
@@ -667,7 +730,7 @@ public:
     }
 
     void _merge(Tnode * & node) {
-        vector<Tinterval *> temp;
+        qArray temp;
 
         Tnode * a = node->left;
         Tnode * b = node->right;
@@ -683,7 +746,7 @@ public:
 
         for (size_t i = 0; i < leafs.size(); i+= 1) {
             Tnode * n = leafs[i];
-            for (typename vector<Tinterval *>::iterator it = qMap[n].begin(); it != qMap[n].end(); it++) {
+            for (typename qArray::iterator it = qMap[n].begin(); it != qMap[n].end(); it++) {
                 temp.push_back((*it));
             }
             qMap.erase(n);
@@ -694,11 +757,11 @@ public:
         }
     }
 
-    long long checksum() {
-        long long val = 0;
+    unsigned long long int checksum() {
+        unsigned long long int val = 0;
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
-            for (size_t i = 0; i < it->second.size(); i++) {
-                Tinterval intersection = it->first->interval.intersection(*(it->second.at(i)));
+            for (typename qArray::iterator jt = it->second.begin(); jt != it->second.end(); jt++) {
+                Tinterval intersection = it->first->interval.intersection(**jt);
                 val += intersection.checksum();
             }
         }
@@ -739,7 +802,13 @@ class QMapEager : public QMapBase <Tr> {
     typedef typename Tr::Tinterval Tinterval;
     typedef typename Tr::Tnode Tnode;
     typedef pair<Tinterval *, Tinterval> qPair;
-    typedef unordered_map<Tnode *, vector <qPair>> qMapType;
+    typedef vector <qPair> qArray;
+    typedef unordered_map<Tnode *, qArray> qMapType;
+
+    struct classcomp {
+        bool operator() (const qPair& lhs, const qPair& rhs) const
+        {return lhs<rhs;}
+    };
 
 public:
     qMapType qMap;
@@ -771,25 +840,25 @@ public:
         // Copy all the elements from A
         set<qPair> tempSet;
         typename vector<qPair>::iterator it;
-        // Copy all the elements from B
-        for (it = qMap[a].begin(); it != qMap[a].end(); it++) {
-            tempSet.insert(*it);
-        }
-        for (it = qMap[b].begin(); it != qMap[b].end(); it++) {
-            tempSet.insert(*it);
-        }
+        qArray tempVectorA(qMap[a].begin(), qMap[a].end());
 
-        vector<qPair> tempA;
-        tempA.reserve(tempSet.size());
-
-        for (typename set<qPair>::iterator it = tempSet.begin(); it != tempSet.end(); it++) {
-            tempA.emplace_back(*it);
+        for(size_t i = 0; i < qMap[b].size(); i++) {
+            bool query_exists = false;
+            for (size_t j = 0; j < tempVectorA.size(); j++) {
+                if (qMap[b][i].first == tempVectorA[j].first) {
+                    query_exists = true;
+                    break;
+                }
+            }
+            if (!query_exists) {
+                tempVectorA.emplace_back(qMap[b][i]);
+            }
         }
-        vector<qPair> tempB(tempA.begin(), tempA.end());
+        qArray tempB(tempVectorA.begin(), tempVectorA.end());
 
         qMap.erase(a);
         qMap.erase(b);
-        qMap[a] = tempA;
+        qMap[a] = tempVectorA;
         qMap[b] = tempB;
 
         updateIntersections(a);
@@ -797,7 +866,7 @@ public:
     }
 
     void _merge(Tnode * & node) {
-        vector<qPair> temp;
+        qArray temp;
 
         Tnode * a = node->left;
         Tnode * b = node->right;
@@ -813,7 +882,7 @@ public:
 
         for (size_t i = 0; i < leafs.size(); i+= 1) {
             Tnode * n = leafs[i];
-            for (typename vector<qPair>::iterator it = qMap[n].begin(); it != qMap[n].end(); it++) {
+            for (typename qArray::iterator it = qMap[n].begin(); it != qMap[n].end(); it++) {
                 temp.push_back((*it));
             }
             qMap.erase(n);
@@ -825,11 +894,11 @@ public:
         }
     }
 
-    long long checksum() {
-        long long val = 0;
+    unsigned long long int checksum() {
+        unsigned long long int val = 0;
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
-            for (size_t i = 0; i < it->second.size(); i++) {
-                val += it->second.at(i).second.checksum();
+            for (typename qArray::iterator jt = it->second.begin(); jt != it->second.end(); jt++) {
+                val += jt->second.checksum();
             }
         }
 
@@ -839,8 +908,8 @@ public:
     void printAllQueries() {
         for (typename qMapType::iterator it = qMap.begin(); it != qMap.end(); it++) {
             cout << it->first->interval << endl;
-            for (size_t i = 0; i < it->second.size(); i++) {
-                cout << "\t" << "( " << it->second[i].first << " )" << it->second[i].second << endl;
+            for (typename qArray::iterator jt = it->second.begin(); jt != it->second.end(); jt++) {
+                cout << "\t" << "( " << jt->first << " )" << jt->second << endl;
             }
         }
     }
@@ -943,6 +1012,9 @@ public:
     void insert(Tinterval & interval) {
         vector <Tinterval> Q;
         get_intervals(interval, Q);
+        bool controlInserts = Q.size() > 1;
+        unordered_set<Tnode *> insertNodesTemp;
+        typename unordered_set<Tnode *>::iterator itm;
 
         for (int i = 0; i < Q.size(); i += 1) {
             Tnode * S = NULL; // Points to the parent of N.
@@ -955,7 +1027,16 @@ public:
                 Tinterval J = I + S->interval;
                 if (S->interval.min <= J.min && J.max <= S->interval.max) {
                     // Update new queries
-                    qMap->insert(S, &interval);
+                    // Todo: Check this if under different parameters
+                    if (controlInserts) {
+                        itm = insertNodesTemp.find(S);
+                        if (itm == insertNodesTemp.end()) {
+                            qMap->insert(S, &interval);
+                            insertNodesTemp.insert(S);
+                        }
+                    } else {
+                        qMap->insert(S, &interval);
+                    }
                 } else {
                     Tnode * T = new Tnode(*S);
                     Tnode * N = new Tnode(I);
@@ -963,6 +1044,10 @@ public:
 
                     qMap->transfer(S, T);
                     qMap->insert(N, &interval);
+
+                    if (controlInserts) {
+                        insertNodesTemp.insert(N);
+                    }
 
                     if (T->interval < N->interval) {
                         S->left = T;
@@ -994,7 +1079,7 @@ public:
     }
 
     void update_merge(Tnode * & node) {
-        if (node != NULL && node->interval.length() <= M) {
+        if (node != NULL && node->interval.length() <= M && (node->left->interval.max == node->right->interval.min || node->right->interval.intersects(node->left->interval))) {
             if (node->left->interval.min < node->interval.min) {
                 node->interval.min = node->left->interval.min;
             }
@@ -1004,6 +1089,11 @@ public:
             qMap->merge(node);
             node->left = NULL;
             node->right = NULL;
+
+
+            if (node->parent != NULL) {
+                node->parent->updateLimits();
+            }
 
             // Todo: Consider this recursive call
             update_merge(node->parent);
@@ -1025,13 +1115,13 @@ public:
         return tree;
     }
 
-    long * getLeafsData() {
+    T * getLeafsData() {
         vector<Tnode *> leafs;
-        long inf = numeric_limits<T>::max();
+        T inf = numeric_limits<T>::max();
         root->getLeafs(leafs);
-        long size = leafs.size();
-        int depth = root->maxDepth();
-        long * res = new T[5];
+        T size = leafs.size();
+        T depth = root->maxDepth();
+        T * res = new T[5];
         // Average node length
         res[0] = 0;
         // Min node length

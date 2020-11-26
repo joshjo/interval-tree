@@ -101,13 +101,13 @@ if __name__ == '__main__':
         (630, 1000),
     ]
 
-    segment_tree = SegmentTree()
-    segment_tree.build(intervals)
+    # segment_tree = SegmentTree()
+    # segment_tree.build(intervals)
     # interval_tree = CenteredIntervalTree()
     # interval_tree.build(intervals)
 
-    for index, i in enumerate(intervals):
-        print(index + 1, i)
-        # print(f'intervals.push_back(Tinterval({i[0]}, {i[1]}));')
-        # print(f'Segment({i[0]}, {i[1]}),')
-    # for a, b in intervals:
+    # for index, i in enumerate(intervals):
+    #     print(index + 1, i)
+    #     # print(f'intervals.push_back(Tinterval({i[0]}, {i[1]}));')
+    #     # print(f'Segment({i[0]}, {i[1]}),')
+    # # for a, b in intervals:
