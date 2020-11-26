@@ -54,6 +54,11 @@ public:
     }
 
     Tinterval intersection(const Interval & other) {
+        /**
+         * @return a new interval with the intersection.
+         * In case there is no intersection return an empty Interval (0, 0)
+         */
+
         Tinterval result(0, 0);
 
         if ((other.min <= min && min <= other.max) || (other.min <= max && max <= other.max) || (min <= other.min && other.min <= max) || (min <= other.max && other.max <= max)) {
@@ -64,7 +69,19 @@ public:
         return result;
     }
 
+    bool intersects(const T & point) {
+        /**
+         * @return a boolean indicating if the interval intersects with a point.
+         */
+
+        return min <= point && point < max;
+    }
+
     bool intersects(const Interval & other) {
+        /**
+         * @return a boolean indicating if the interval intersects with another one
+         */
+
         Tinterval i = intersection(other);
 
         return i.length() > 0;
@@ -276,6 +293,8 @@ public:
         if (this->parent != NULL && this->max > parent->max) {
             parent->max = this->max;
             parent->update_weights();
+        } else {
+            max = interval.max;
         }
     }
 
@@ -379,6 +398,29 @@ public:
         (*searchNode)->update_weights();
 
         return true;
+    }
+
+    void find(T key, vector <Tinterval *> & results, Tnode * visitor) {
+        if (visitor == NULL) {
+            return;
+        }
+        cout << "interval: " << visitor->interval << endl;
+        if (visitor->right) {
+            cout << "-->" << visitor->right->max << endl;
+        }
+        if (visitor->interval.intersects(key)) {
+            results.push_back(&(visitor->interval));
+        }
+        if (visitor->left && key < visitor->left->max) {
+            find(key, results, visitor->left);
+        }
+        if (visitor->right && key < visitor->right->max) {
+            find(key, results, visitor->left);
+        }
+    }
+
+    void find(T key, vector <Tinterval *> & results) {
+        find(key, results, root);
     }
 
     void print() {

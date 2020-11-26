@@ -1,4 +1,5 @@
 #include "src/newtree.h"
+#include "src/aitree.h"
 
 using namespace std;
 
@@ -14,6 +15,16 @@ vector<Tinterval> create_queries(int queries, int key_domain_size, int range_siz
     for (int i = 0; i < queries; i += 1) {
         T rnd = rand() % max_random;
         result.push_back(Tinterval(rnd, rnd + range_size));
+    }
+    return result;
+}
+
+vector<Tinterval> create_seq_queries(int queries, int key_domain_size, int range_size) {
+    vector<Tinterval> result;
+
+    T max_random = key_domain_size - range_size;
+    for (int i = 0; i < queries; i += 1) {
+        result.push_back(Tinterval((i * range_size) % (key_domain_size - range_size), ((i + 1) * range_size) % (key_domain_size)));
     }
     return result;
 }
@@ -105,12 +116,30 @@ TT checksum_original(vector <Tinterval> & queries) {
 
 
 int main() {
-    srand (100);
+    // srand (100);
 
-    T M = 10000;
-    T max_key_value = 1000000000;
-    T range_size = 10000;
-    T queries = 100000;
+    AITree <T> ait;
+
+    Tinterval t1(20, 50);
+    Tinterval t2(21, 100);
+    Tinterval t3(10, 40);
+    Tinterval t4(15, 25);
+    Tinterval t5(5, 17);
+
+    ait.insert(t1);
+    ait.insert(t2);
+    ait.insert(t3);
+    ait.insert(t4);
+    ait.insert(t5);
+
+    cout << ait.graphviz() << endl;
+
+    ait.find(33);
+
+    // T M = 20;
+    // T max_key_value = 100;
+    // T range_size = 20;
+    // T queries = 20;
 
     // int M = 250000;
     // int max_key_value = 1000000;
@@ -127,7 +156,10 @@ int main() {
     // int range_size = 15;
     // int queries = 15;
 
-    vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
+    // vector <Tinterval> intervals = create_queries(queries, max_key_value, range_size);
+    // vector <Tinterval> intervals = create_seq_queries(
+    //     queries, max_key_value, range_size);
+
     // vector <Tinterval> intervals = error_intervals();
     // intervals.push_back(Tinterval(700, 740));
     // intervals.push_back(Tinterval(369, 409));
@@ -165,36 +197,37 @@ int main() {
     // cout << "original checksum: " << checksum_original(intervals) << endl;
     // cout << "additional total time: " << total_time << endl << endl;
 
-    cout << "*** EAGER STRATEGY ***" << endl;
-    auto start_time_eager = std::chrono::system_clock::now();
-    QMapEager <Traits <T>> * qEager = new QMapEager <Traits <T>>();
-    Tree <Traits <T> > tEager(M, qEager);
-    for (size_t i = 0; i < intervals.size(); i += 1) {
-        if (i == 19) {
-            tEager.insert(intervals[i]);
-        } else {
-            tEager.insert(intervals[i]);
-        }
-        // if (i > 17) {
-        //     cout << tEager.graphviz(to_string(i)) << endl;
-        // }
-    }
+    // cout << "*** EAGER STRATEGY ***" << endl;
+    // auto start_time_eager = std::chrono::system_clock::now();
+    // QMapEager <Traits <T>> * qEager = new QMapEager <Traits <T>>();
+    // Tree <Traits <T> > tEager(M, qEager);
+    // for (size_t i = 0; i < intervals.size(); i += 1) {
+    //     if (i == 19) {
+    //         tEager.insert(intervals[i]);
+    //     } else {
+    //         tEager.insert(intervals[i]);
+    //     }
+    //     // if (i > 17) {
+    //     //     cout << tEager.graphviz(to_string(i)) << endl;
+    //     // }
+    // }
 
-    auto end_time_eager = std::chrono::system_clock::now();
-    chrono::duration<double> elapsed_seconds_eager = end_time_eager - start_time_eager;
-    double total_time_eager = elapsed_seconds_eager.count();
-    tEager.qMap->summary();
-    T * leafsEagerData = tEager.getLeafsData();
-    cout << "# Leafs   : " << leafsEagerData[3] << endl;
-    cout << "Max depth : " << leafsEagerData[4] << endl;
-
-    checksum_validate(intervals, tEager);
-
-    // tEager.qMap->printAllQueries();
+    // auto end_time_eager = std::chrono::system_clock::now();
+    // chrono::duration<double> elapsed_seconds_eager = end_time_eager - start_time_eager;
+    // double total_time_eager = elapsed_seconds_eager.count();
+    // tEager.qMap->summary();
+    // T * leafsEagerData = tEager.getLeafsData();
     // cout << tEager.graphviz() << endl;
-    cout << "eager total time: " << total_time_eager << endl << endl;
+    // cout << "# Leafs   : " << leafsEagerData[3] << endl;
+    // cout << "Max depth : " << leafsEagerData[4] << endl;
 
-    tEager.root->recursiveValidate();
+    // checksum_validate(intervals, tEager);
+
+    // // tEager.qMap->printAllQueries();
+    // // cout << tEager.graphviz() << endl;
+    // cout << "eager total time: " << total_time_eager << endl << endl;
+
+    // tEager.root->recursiveValidate();
     // cout << "*** LAZY STRATEGY ***" << endl;
     // auto start_time_lazy = std::chrono::system_clock::now();
     // QMapLazy <Traits <T>> * qLazy = new QMapLazy <Traits <T>>();

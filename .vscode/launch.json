@@ -28,8 +28,8 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/main.out",
-            "args": ["10000"],
-            "stopAtEntry": false,
+            "args": [],
+            "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
@@ -40,7 +40,9 @@
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
-            ]
+            ],
+            // "preLaunchTask": "g++ build active file",
+            "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
 }
