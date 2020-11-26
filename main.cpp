@@ -143,7 +143,7 @@ int main() {
 
     // int M = 250000;
     // int max_key_value = 1000000;
-    // int range_size = 10000;
+    // int range_size = 100000;
     // int queries = 100000;
 
     // int M = 10000;
