@@ -134,7 +134,11 @@ int main() {
 
     cout << ait.graphviz() << endl;
 
-    ait.find(33);
+    AINode<T> * n = ait.root->left->right;
+
+    // cout << "n: " << n->uncle()->interval << endl;
+
+    // vector<Tinterval *> intersectedIntervals = ait.find(33);
 
     // T M = 20;
     // T max_key_value = 100;

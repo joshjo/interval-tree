@@ -14,6 +14,7 @@ public:
     Tnode * right;
     Tnode * parent;
     T max;
+    bool color;
 
     Tinterval interval;
 
@@ -23,6 +24,7 @@ public:
         right = NULL;
         parent = NULL;
         max = interval.max;
+        color = RED;
     }
 
     void update_weights() {
@@ -33,8 +35,26 @@ public:
     }
 
     string to_graphviz(string iter = "") {
-        string str = "\"[" + to_string(max) + "]" + interval.to_string() + "\"";
+        string strColor = color == RED ? "R" : "B";
+        string str = "\"[" + strColor + "]" + interval.to_string() + "\"";
         return str;
+    }
+
+    Tnode * get_grandparent() {
+        if (parent != NULL) {
+            return parent->parent;
+        }
+
+        return NULL;
+    }
+
+    Tnode * get_uncle() {
+        Tnode * grand = get_grandparent();
+        if (grand) {
+            return grand->left == parent ? grand->right : grand->left;
+        }
+
+        return NULL;
     }
 };
 
@@ -66,6 +86,10 @@ public:
     }
 
     bool insert(Tinterval & newInterval) {
+        /*
+            The insertion is based in wikipedia:
+            https://es.wikipedia.org/wiki/%C3%81rbol_rojo-negro
+        */
         Tnode * parent = NULL;
         Tnode ** searchNode = this->search(newInterval, parent);
         if ((*searchNode) != NULL) {
@@ -73,13 +97,118 @@ public:
         }
         (*searchNode) = new Tnode(newInterval);
         (*searchNode)->parent = parent;
-        (*searchNode)->update_weights();
+        insert_case1(*searchNode);
+        // if (parent == NULL) {
+        //     // Case 1: When it is root
+        //     insert_case1()
+        //     // (*searchNode)->color = BLACK;
+        // } else if (parent->color == BLACK)  {
+        //     // Case 2
+        //     return true;
+        // } else  {
+
+        // }
+        // (*searchNode)->update_weights();
 
         return true;
     }
 
-    void find(T key) {
-        // Tnode * visitor = this->root;
+    void insert_case1(Tnode * n) {
+        if (n->parent == NULL ) {
+            n->color = BLACK;
+        } else {
+            insert_case2(n);
+        }
+    }
+
+    void insert_case2(Tnode * n) {
+        if (n->parent->color == BLACK) {
+            return;
+        } else {
+            insert_case3(n);
+        }
+    }
+
+    void insert_case3(Tnode * n) {
+        Tnode * u = n->get_uncle();
+
+        if (u != NULL && u->color == RED) {
+            n->parent->color = BLACK;
+            u->color = BLACK;
+            Tnode * g = n->get_grandparent();
+            g->color = RED;
+            insert_case1(g);
+        } else {
+            insert_case4(n);
+        }
+    }
+
+    void insert_case4(Tnode * n) {
+        Tnode * g = n->get_grandparent();
+
+        if (n == n->parent->right && n->parent == g->left) {
+            left_rotation(n->parent);
+            n = n->left;
+        } else if (n == n->parent->left && n->parent == g->right) {
+            right_rotation(n->parent);
+            n = n->right;
+        }
+        insert_case5(n);
+    }
+
+    void insert_case5(Tnode * n) {
+        Tnode * g = n->get_grandparent();
+
+        n->parent->color = BLACK;
+        g->color = RED;
+        if (n == n->parent->left && n->parent == g->left) {
+            right_rotation(n);
+        } else {
+            left_rotation(n);
+        }
+    }
+
+    void left_rotation(Tnode * p) {
+        Tnode ** aux = &root;
+
+        if (p->parent != NULL && p->parent->right == p) {
+            aux = &(p->parent->right);
+        } else if (p->parent != NULL && p->parent->left == p) {
+            aux = &(p->parent->left);
+        }
+
+        *aux = p->right;
+        (*aux)->parent = p->parent;
+        p->parent = (*aux);
+        p->right = (*aux)->left;
+        (*aux)->left = p;
+
+        if (p->right != NULL) {
+            p->right->parent = p;
+        }
+    }
+
+    void right_rotation(Tnode * p) {
+        Tnode ** aux = &root;
+
+        if (p->parent != NULL && p->parent->right == p) {
+            aux = &(p->parent->right);
+        } else if (p->parent != NULL && p->parent->left == p) {
+            aux = &(p->parent->left);
+        }
+
+        *aux = p->left;
+        (*aux)->parent = p->parent;
+        p->parent = (*aux);
+        p->left = (*aux)->right;
+        (*aux)->right = p;
+
+        if (p->left != NULL) {
+            p->left->parent = p;
+        }
+    }
+
+    vector <Tinterval * > find(T key) {
         vector <Tinterval * > result;
         priority_queue<Tnode *> q;
         q.push(root);
@@ -98,11 +227,7 @@ public:
             }
         }
 
-        cout << "intervals: " << endl;
-        for (int i = 0; i < result.size(); i++) {
-            cout << *(result[i]) << endl;
-        }
-
+        return result;
     }
 
     void graphviz(Tnode *node, string & tree, string iter="") {
