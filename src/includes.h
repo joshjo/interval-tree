@@ -16,4 +16,7 @@
 
 #define INF (unsigned)!((int)0)
 
+#define RED 0
+#define BLACK 1
+
 #endif // INCLUDES_H
