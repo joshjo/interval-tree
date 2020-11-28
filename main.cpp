@@ -120,36 +120,15 @@ int main() {
 
     AITree <T> ait;
 
-
-    // Tinterval t5(5, 17);
-    // Tinterval t3(5, 40);
-    // Tinterval t4(5, 25);
-    // Tinterval t1(20, 50);
-    // Tinterval t2(25, 100);
-    // Tinterval t6(30, 50);
-    // Tinterval t7(35, 40);
-    // Tinterval t8(40, 60);
-    // Tinterval t9(29, 49);
-
-    T top = 5;
+    T top = 120000;
 
     for (int i = 0; i < top; i++) {
-        T value = rand() % 100000;
+        T value = rand() % 10000;
         Tinterval tmp (value, value + 5);
         ait.insert(tmp);
     }
 
-    // ait.insert(t5);
-    // ait.insert(t3);
-    // ait.insert(t4);
-    // ait.insert(t1);
-    // ait.insert(t2);
-    // ait.insert(t6);
-    // ait.insert(t7);
-    // ait.insert(t8);
-    // ait.insert(t9);
-
-    cout << ait.graphviz() << endl;
+    // cout << ait.graphviz() << endl;
 
     // cout << "n: " << n->uncle()->interval << endl;
 

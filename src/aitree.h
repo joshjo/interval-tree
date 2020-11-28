@@ -110,7 +110,9 @@ public:
         (*searchNode)->parent = parent;
         insert_case1(*searchNode);
 
-        (*searchNode)->update_weights();
+        if (*searchNode) {
+            (*searchNode)->update_weights();
+        }
 
         return true;
     }
@@ -170,7 +172,7 @@ public:
         }
 
         Tnode * s = n->get_sibling();
-        if (s) {
+        if (s != NULL) {
             if (s->is_leaf()) {
                 s->max = s->interval.max;
             }
