@@ -27,16 +27,15 @@ public:
         color = RED;
     }
 
-    void update_weights() {
-        if (this->parent != NULL && this->max > parent->max) {
+    void update_weights(bool debug=false) {
+        if (this->parent != NULL && this->max > parent->interval.max) {
             parent->max = this->max;
-            parent->update_weights();
+            parent->update_weights(debug);
         }
     }
 
     string to_graphviz(string iter = "") {
-        string strColor = color == RED ? "R" : "B";
-        string str = "\"[" + strColor + "]" + interval.to_string() + "\"";
+        string str = "\"[" + to_string(max) + "]" + interval.to_string() + "{" + iter + "}" + "\"";
         return str;
     }
 
@@ -56,6 +55,18 @@ public:
 
         return NULL;
     }
+
+    Tnode * get_sibling() {
+        if (parent) {
+            return parent->left == this ? parent->right : parent->left;
+        }
+        return NULL;
+    }
+
+    bool is_leaf() {
+        return left == NULL && right == NULL;
+    }
+
 };
 
 template <class T>
@@ -98,17 +109,8 @@ public:
         (*searchNode) = new Tnode(newInterval);
         (*searchNode)->parent = parent;
         insert_case1(*searchNode);
-        // if (parent == NULL) {
-        //     // Case 1: When it is root
-        //     insert_case1()
-        //     // (*searchNode)->color = BLACK;
-        // } else if (parent->color == BLACK)  {
-        //     // Case 2
-        //     return true;
-        // } else  {
 
-        // }
-        // (*searchNode)->update_weights();
+        (*searchNode)->update_weights();
 
         return true;
     }
@@ -162,10 +164,19 @@ public:
         n->parent->color = BLACK;
         g->color = RED;
         if (n == n->parent->left && n->parent == g->left) {
-            right_rotation(n);
+            right_rotation(g);
         } else {
-            left_rotation(n);
+            left_rotation(g);
         }
+
+        Tnode * s = n->get_sibling();
+        if (s) {
+            if (s->is_leaf()) {
+                s->max = s->interval.max;
+            }
+            s->update_weights();
+        }
+
     }
 
     void left_rotation(Tnode * p) {
@@ -185,6 +196,7 @@ public:
 
         if (p->right != NULL) {
             p->right->parent = p;
+            p->right->update_weights();
         }
     }
 
@@ -205,6 +217,7 @@ public:
 
         if (p->left != NULL) {
             p->left->parent = p;
+            p->left->update_weights();
         }
     }
 
@@ -232,6 +245,7 @@ public:
 
     void graphviz(Tnode *node, string & tree, string iter="") {
         if (node != NULL) {
+            tree += node->to_graphviz(iter) + "[color=" + (node->color ? "red" : "black") + "] " ;
             if (node->parent == NULL && node->left == NULL && node->right == NULL) {
                 tree += node->to_graphviz(iter);
             }
